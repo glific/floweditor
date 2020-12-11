@@ -1159,7 +1159,6 @@ household:
     - plug
     - pump-soap
     - shower
-    - sink
     - snowflake
     - soap
     - toilet-paper
@@ -1190,7 +1189,6 @@ images:
     - portrait
     - sliders-h
     - tint
-    - unsplash
   label: Images
 interfaces:
   icons:
@@ -1554,8 +1552,6 @@ medical:
   icons:
     - allergies
     - ambulance
-    - bacteria
-    - bacterium
     - band-aid
     - biohazard
     - bone
@@ -1923,7 +1919,6 @@ payments-shopping:
     - ethereum
     - gem
     - gift
-    - google-pay
     - google-wallet
     - handshake
     - heart
@@ -2462,7 +2457,6 @@ users-people:
     - user-times
     - users
     - users-cog
-    - users-slash
     - walking
     - wheelchair
   label: Users & People
