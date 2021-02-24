@@ -37,8 +37,10 @@ export interface SendBroadcastFormState extends FormState {
   message: StringEntry;
   recipients: AssetArrayEntry;
   attachments: Attachment[];
-  validAttachment: boolean;
+  validAttachment: any;
   attachmentError: string;
+  attachmentValidityCheck: any;
+  recipientValidate: any;
 }
 
 const MAX_ATTACHMENTS = 1;
@@ -114,31 +116,25 @@ export default class SendBroadcastForm extends React.Component<
       .get(`${this.props.assetStore.validateMedia.endpoint}?url=${body.url}&type=${body.type}`)
       .then(response => {
         if (response.data.is_valid) {
+          this.setState({ validAttachment: false });
           // make sure we validate untouched text fields and contact fields
-          let valid = true;
-          // check if the recipient is added or not
-          // if not, throw required validation
-          if (this.state.recipients.value!.length <= 0 && !this.state.message.value) {
-            valid = this.handleUpdate(
-              {
-                recipients: this.state.recipients.value!
-              },
-              true
-            );
-          } else if (this.state.recipients.value!.length > 0 && !this.state.message.value) {
-            valid = true;
-          }
-
-          if (valid) {
-            // this.setState({ validAttachment: false });
-            this.props.updateAction(stateToAction(this.props.nodeSettings, this.state));
-            // notify our modal we are done
-            this.props.onClose(false);
-          } else {
-            this.setState({ valid });
-          }
         } else {
-          this.setState({ attachmentError: `Not a valid ${type} url` });
+          this.setState({ validAttachment: true, attachmentError: `Not a valid ${type} url` });
+        }
+        let recipientValidate = true;
+        if (this.state.recipients.value!.length <= 0 && !this.state.message.value) {
+          recipientValidate = this.handleUpdate(
+            {
+              recipients: this.state.recipients.value!
+            },
+            true
+          );
+        } else if (this.state.recipients.value!.length > 0 && !this.state.message.value) {
+          recipientValidate = true;
+        }
+        if (recipientValidate) {
+          this.props.updateAction(stateToAction(this.props.nodeSettings, this.state));
+          this.props.onClose(false); // notify our modal we are done
         }
       })
       .catch(error => {
@@ -173,7 +169,11 @@ export default class SendBroadcastForm extends React.Component<
           this.handleAxios(body, 'document');
           break;
       }
-      this.setState({ validAttachment: true, attachmentError: null });
+      this.setState({
+        validAttachment: false,
+        attachmentValidityCheck: true,
+        attachmentError: null
+      });
     } else {
       // validate in case they never updated an empty field
       let valid = this.handleUpdate(
@@ -387,7 +387,9 @@ export default class SendBroadcastForm extends React.Component<
             </>
           ) : null}
         </div>
-        {this.state.validAttachment && !this.state.attachmentError ? (
+        {!this.state.attachmentValidityCheck &&
+        !this.state.attachmentError &&
+        (this.state.attachments.length > 0 ? this.state.attachments[0].url !== '' : null) ? (
           <div className={styles.loading}>
             Checking URL validity
             <Loading size={10} units={6} color="#999999" />
@@ -429,7 +431,7 @@ export default class SendBroadcastForm extends React.Component<
 
   public render(): JSX.Element {
     const typeConfig = this.props.typeConfig;
-
+    console.log('--', this.state);
     const templates: any = {
       name: 'WhatsApp',
       body: this.renderTemplateConfig(),

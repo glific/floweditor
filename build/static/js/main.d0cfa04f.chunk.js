@@ -1622,7 +1622,12 @@
                     (this.tabFocus = window.setTimeout(function() {
                       var e = !1;
                       (t.props.tabs || []).forEach(function(a, n) {
-                        if (a.hasErrors) return t.setState({ activeTab: n }), void (e = !0);
+                        if (a.hasErrors)
+                          return (
+                            console.log('--tab.hasErrors--', a.hasErrors),
+                            t.setState({ activeTab: n }),
+                            void (e = !0)
+                          );
                       }),
                         e || t.setState({ activeTab: -1 });
                     }, 0));
@@ -5584,7 +5589,9 @@
                     valid: !0,
                     attachments: [],
                     validAttachment: !1,
-                    attachmentError: ''
+                    attachmentError: '',
+                    attachmentValidityCheck: !1,
+                    recipientValidate: !0
                   };
                 if (e.originalAction && e.originalAction.type === Ee.send_broadcast) {
                   var i = e.originalAction,
@@ -5669,18 +5676,19 @@
                         .concat(e.type)
                     )
                     .then(function(e) {
-                      if (e.data.is_valid) {
-                        var n = !0;
-                        a.state.recipients.value.length <= 0 && !a.state.message.value
-                          ? (n = a.handleUpdate({ recipients: a.state.recipients.value }, !0))
-                          : a.state.recipients.value.length > 0 &&
-                            !a.state.message.value &&
-                            (n = !0),
-                          n
-                            ? (a.props.updateAction(wn(a.props.nodeSettings, a.state)),
-                              a.props.onClose(!1))
-                            : a.setState({ valid: n });
-                      } else a.setState({ attachmentError: 'Not a valid '.concat(t, ' url') });
+                      e.data.is_valid
+                        ? a.setState({ validAttachment: !1 })
+                        : a.setState({
+                            validAttachment: !0,
+                            attachmentError: 'Not a valid '.concat(t, ' url')
+                          });
+                      var n = !0;
+                      a.state.recipients.value.length <= 0 && !a.state.message.value
+                        ? (n = a.handleUpdate({ recipients: a.state.recipients.value }, !0))
+                        : a.state.recipients.value.length > 0 && !a.state.message.value && (n = !0),
+                        n &&
+                          (a.props.updateAction(wn(a.props.nodeSettings, a.state)),
+                          a.props.onClose(!1));
                     })
                     .catch(function(e) {
                       a.setState({
@@ -5708,7 +5716,11 @@
                       case 'application':
                         this.handleAxios(t, 'document');
                     }
-                    this.setState({ validAttachment: !0, attachmentError: null });
+                    this.setState({
+                      validAttachment: !1,
+                      attachmentValidityCheck: !0,
+                      attachmentError: null
+                    });
                   } else {
                     var a = this.handleUpdate(
                         { text: this.state.message.value, recipients: this.state.recipients.value },
@@ -5935,7 +5947,10 @@
                           )
                         : null
                     ),
-                    this.state.validAttachment && !this.state.attachmentError
+                    !this.state.attachmentValidityCheck &&
+                      !this.state.attachmentError &&
+                      this.state.attachments.length > 0 &&
+                      '' !== this.state.attachments[0].url
                       ? k.createElement(
                           'div',
                           { className: Nn.a.loading },
@@ -5985,8 +6000,9 @@
               {
                 key: 'render',
                 value: function() {
-                  var e = this.props.typeConfig,
-                    t = {
+                  var e = this.props.typeConfig;
+                  console.log('--', this.state);
+                  var t = {
                       name: 'WhatsApp',
                       body: this.renderTemplateConfig(),
                       checked: null != this.state.template.value,
@@ -21479,4 +21495,4 @@
   ],
   [[163, 1, 2]]
 ]);
-//# sourceMappingURL=main.d166aaa4.chunk.js.map
+//# sourceMappingURL=main.d0cfa04f.chunk.js.map

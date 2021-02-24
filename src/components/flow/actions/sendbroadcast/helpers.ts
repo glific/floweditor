@@ -24,7 +24,9 @@ export const initializeForm = (settings: NodeEditorSettings): SendBroadcastFormS
     valid: true,
     attachments: [],
     validAttachment: false,
-    attachmentError: ''
+    attachmentError: '',
+    attachmentValidityCheck: false,
+    recipientValidate: true
   };
 
   if (settings.originalAction && settings.originalAction.type === Types.send_broadcast) {

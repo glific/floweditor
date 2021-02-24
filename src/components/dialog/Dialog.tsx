@@ -77,6 +77,7 @@ export default class Dialog extends React.Component<DialogProps, DialogState> {
       // focus on a tab with errors
       (this.props.tabs || []).forEach((tab: Tab, index: number) => {
         if (tab.hasErrors) {
+          console.log('--tab.hasErrors--', tab.hasErrors);
           this.setState({ activeTab: index });
           foundTab = true;
           return;
