@@ -431,7 +431,6 @@ export default class SendBroadcastForm extends React.Component<
 
   public render(): JSX.Element {
     const typeConfig = this.props.typeConfig;
-    console.log('--', this.state);
     const templates: any = {
       name: 'WhatsApp',
       body: this.renderTemplateConfig(),
