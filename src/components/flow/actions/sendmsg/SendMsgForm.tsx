@@ -35,7 +35,7 @@ import {
   FormEntry
 } from 'store/nodeEditor';
 import { MaxOfTenItems, Required, shouldRequireIf, validate } from 'store/validators';
-import { createUUID, getAuthToken, range } from 'utils';
+import { createUUID, range } from 'utils';
 
 import styles from './SendMsgForm.module.scss';
 import { hasFeature } from 'config/typeConfigs';

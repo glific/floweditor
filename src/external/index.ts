@@ -15,7 +15,6 @@ import {
 import { assetListToMap } from 'store/helpers';
 import { CompletionSchema } from 'utils/completion';
 import { FlowTypes } from 'config/interfaces';
-import { getAuthToken } from 'utils';
 
 // Configure axios to always send JSON requests
 axios.defaults.headers.post['Content-Type'] = 'application/javascript';

@@ -4,8 +4,9 @@ import styles from 'components/flow/actions/action/Action.module.scss';
 import { determineTypeConfig } from 'components/flow/helpers';
 import TextInputElement, { TextInputStyle } from 'components/form/textinput/TextInputElement';
 import { LocalizationFormProps } from 'components/flow/props';
+import { ImCross } from 'react-icons/im';
+import Loading from 'components/loading/Loading';
 import SelectElement, { SelectOption } from 'components/form/select/SelectElement';
-import MultiChoiceInput from 'components/form/multichoice/MultiChoice';
 import Pill from 'components/pill/Pill';
 import UploadButton from 'components/uploadbutton/UploadButton';
 import { fakePropType } from 'config/ConfigProvider';
@@ -15,12 +16,16 @@ import { TembaSelectStyle } from 'temba/TembaSelect';
 import mutate from 'immutability-helper';
 import { FormState, mergeForm, StringArrayEntry, StringEntry } from 'store/nodeEditor';
 import { MaxOfTenItems, validate } from 'store/validators';
+import AppState from 'store/state';
 
 import { initializeLocalizedForm } from './helpers';
 import i18n from 'config/i18n';
 import { Trans } from 'react-i18next';
 import { createUUID, range } from 'utils';
 import { renderIssues } from '../helpers';
+import axios from 'axios';
+
+import { connect } from 'react-redux';
 
 const MAX_ATTACHMENTS = 1;
 
@@ -48,15 +53,13 @@ export interface MsgLocalizationFormState extends FormState {
   templateVariables: StringEntry[];
   templating: MsgTemplating;
   attachments: Attachment[];
+  validAttachment: any;
+  attachmentError: any;
 }
 
-export default class MsgLocalizationForm extends React.Component<
-  LocalizationFormProps,
-  MsgLocalizationFormState
-> {
+class MsgLocalizationForm extends React.Component<LocalizationFormProps, MsgLocalizationFormState> {
   constructor(props: LocalizationFormProps) {
     super(props);
-
     this.state = initializeLocalizedForm(this.props.nodeSettings);
     bindCallbacks(this, {
       include: [/^handle/, /^on/]
@@ -109,7 +112,22 @@ export default class MsgLocalizationForm extends React.Component<
     return updated.valid;
   }
 
-  private handleSave(): void {
+  public handleAxios(body: any) {
+    axios
+      .get(`${this.props.assetStore.validateMedia.endpoint}?url=${body.url}&type=${body.type}`)
+      .then(response => {
+        if (response.data.is_valid) {
+          this.validateState();
+        } else {
+          this.setState({ attachmentError: response.data.message });
+        }
+      })
+      .catch(error => {
+        this.setState({ attachmentError: `The attachment url is invalid!: ${error.toString()}` });
+      });
+  }
+
+  private validateState() {
     const { message: text, quickReplies, audio, templateVariables, attachments } = this.state;
 
     // make sure we are valid for saving, only quick replies can be invalid
@@ -161,6 +179,28 @@ export default class MsgLocalizationForm extends React.Component<
 
       // notify our modal we are done
       this.props.onClose(false);
+    }
+  }
+
+  private handleSave(): void {
+    if (this.state.attachments.length > 0) {
+      const type = this.state.attachments[0].type;
+      const url = this.state.attachments[0].url;
+
+      let body = {
+        type,
+        url
+      };
+
+      if (type === 'application') {
+        body.type = 'document';
+      }
+
+      this.handleAxios(body);
+
+      this.setState({ validAttachment: true, attachmentError: null });
+    } else {
+      this.validateState();
     }
   }
 
@@ -221,66 +261,80 @@ export default class MsgLocalizationForm extends React.Component<
   private renderAttachment(index: number, attachment: Attachment): JSX.Element {
     let attachments: any = this.state.attachments;
     return (
-      <div
-        className={styles.url_attachment}
-        key={index > -1 ? 'url_attachment_' + index : createUUID()}
-      >
-        <div className={styles.type_choice}>
-          <SelectElement
-            key={'attachment_type_' + index}
-            style={TembaSelectStyle.small}
-            name={i18n.t('forms.type_options', 'Type Options')}
-            placeholder="Add Attachment"
-            entry={{
-              value: index > -1 ? getAttachmentTypeOption(attachment.type) : null
-            }}
-            onChange={(option: any) => {
-              if (index === -1) {
-                attachments = mutate(attachments, {
-                  $push: [{ type: option.value, url: '' }]
-                });
-              } else {
-                attachments = mutate(attachments, {
-                  [index]: {
-                    $set: { type: option.value, url: attachment.url }
-                  }
-                });
-              }
-              this.setState({ attachments });
-            }}
-            options={TYPE_OPTIONS}
-          />
-        </div>
-        {index > -1 ? (
-          <>
-            <div className={styles.url}>
-              <TextInputElement
-                placeholder="URL"
-                name={i18n.t('forms.url', 'URL')}
-                style={TextInputStyle.small}
-                onChange={(value: string) => {
+      <>
+        <div
+          className={styles.url_attachment}
+          key={index > -1 ? 'url_attachment_' + index : createUUID()}
+        >
+          <div className={styles.type_choice}>
+            <SelectElement
+              key={'attachment_type_' + index}
+              style={TembaSelectStyle.small}
+              name={i18n.t('forms.type_options', 'Type Options')}
+              placeholder="Add Attachment"
+              entry={{
+                value: index > -1 ? getAttachmentTypeOption(attachment.type) : null
+              }}
+              onChange={(option: any) => {
+                if (index === -1) {
                   attachments = mutate(attachments, {
-                    [index]: { $set: { type: attachment.type, url: value } }
+                    $push: [{ type: option.value, url: '' }]
                   });
-                  this.setState({ attachments });
-                }}
-                entry={{ value: attachment.url }}
-                autocomplete={true}
-              />
-            </div>
-            <div className={styles.remove}>
-              <Pill
-                icon="fe-x"
-                text=" Remove"
-                large={true}
-                onClick={() => {
-                  this.handleAttachmentRemoved(index);
-                }}
-              />
-            </div>
-          </>
+                } else {
+                  attachments = mutate(attachments, {
+                    [index]: {
+                      $set: { type: option.value, url: attachment.url }
+                    }
+                  });
+                }
+                this.setState({ attachments });
+              }}
+              options={TYPE_OPTIONS}
+            />
+          </div>
+          {index > -1 ? (
+            <>
+              <div className={styles.url}>
+                <TextInputElement
+                  placeholder="URL"
+                  name={i18n.t('forms.url', 'URL')}
+                  style={TextInputStyle.small}
+                  onChange={(value: string) => {
+                    attachments = mutate(attachments, {
+                      [index]: { $set: { type: attachment.type, url: value } }
+                    });
+                    this.setState({ attachments });
+                  }}
+                  entry={{ value: attachment.url }}
+                  autocomplete={true}
+                />
+              </div>
+              <div className={styles.remove}>
+                <Pill
+                  icon="fe-x"
+                  text=" Remove"
+                  large={true}
+                  onClick={() => {
+                    this.handleAttachmentRemoved(index);
+                  }}
+                />
+              </div>
+            </>
+          ) : null}
+        </div>
+        {this.state.validAttachment && !this.state.attachmentError ? (
+          <div className={styles.loading}>
+            Checking URL validity
+            <Loading size={10} units={6} color="#999999" />
+          </div>
         ) : null}
-      </div>
+        {this.state.attachmentError ? (
+          <div className={styles.error}>
+            <ImCross className={styles.crossIcon} />
+            {this.state.attachmentError}
+          </div>
+        ) : null}
+      </>
     );
   }
 
@@ -314,7 +368,8 @@ export default class MsgLocalizationForm extends React.Component<
       tabs.push({
         name: 'Attachments',
         body: this.renderAttachments(),
-        checked: this.state.attachments.length > 0
+        checked: this.state.attachments.length > 0,
+        hasErrors: this.state.validAttachment
       });
     }
     if (
@@ -364,30 +419,6 @@ export default class MsgLocalizationForm extends React.Component<
       });
     }
 
-    // if (typeConfig.localizeableKeys!.indexOf('quick_replies') > -1) {
-    //   tabs.push({
-    //     name: 'Quick Replies',
-    //     body: (
-    //       <>
-    //         <MultiChoiceInput
-    //           name={i18n.t('forms.quick_reply', 'Quick Reply')}
-    //           helpText={
-    //             <Trans
-    //               i18nKey="forms.localized_quick_replies"
-    //               values={{ language: this.props.language.name }}
-    //             >
-    //               Add a new [[language]] Quick Reply and press enter.
-    //             </Trans>
-    //           }
-    //           items={this.state.quickReplies}
-    //           onChange={this.handleQuickReplyChanged}
-    //         />
-    //       </>
-    //     ),
-    //     checked: this.state.quickReplies.value.length > 0
-    //   });
-    // }
-
     let audioButton: JSX.Element | null = null;
     if (typeConfig.localizeableKeys!.indexOf('audio_url') > 0) {
       audioButton = (
@@ -434,3 +465,13 @@ export default class MsgLocalizationForm extends React.Component<
     );
   }
 }
+
+const mapStateToProps = ({ flowContext: { assetStore } }: AppState) => {
+  return {
+    assetStore
+  };
+};
+
+export const ConnectMsgLocalizationForm = connect(mapStateToProps)(MsgLocalizationForm);
+
+export default ConnectMsgLocalizationForm;

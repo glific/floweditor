@@ -51,6 +51,7 @@ export interface LocalizationFormProps extends IssueProps {
   updateLocalizations(languageCode: string, localizations: any[]): void;
   onClose(canceled: boolean): void;
   helpArticles: { [key: string]: string };
+  assetStore?: AssetStore;
 }
 
 export const NAME_PROPERTY: Asset = {

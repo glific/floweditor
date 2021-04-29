@@ -1,4 +1,3 @@
-import { Attachment } from 'components/flow/actions/sendmsg/SendMsgForm';
 import { Methods } from 'components/flow/routers/webhook/helpers';
 import { FlowTypes, Operators, Types, ContactStatus } from 'config/interfaces';
 

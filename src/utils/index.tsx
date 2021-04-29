@@ -484,11 +484,3 @@ export const desnake = (text: string): string => {
 export const bool = (prop: boolean) => {
   return prop ? 'true' : null;
 };
-
-export const getAuthToken = () => {
-  const authToken = localStorage.getItem('glific_session')
-    ? JSON.parse(localStorage.getItem('glific_session')).access_token
-    : '';
-
-  return authToken;
-};

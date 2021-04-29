@@ -33,7 +33,9 @@ export const initializeLocalizedForm = (settings: NodeEditorSettings): MsgLocali
     templating: null,
     attachments: [],
     audio: { value: null },
-    valid: true
+    valid: true,
+    validAttachment: false,
+    attachmentError: null
   };
 
   // check if our form should use a localized action
