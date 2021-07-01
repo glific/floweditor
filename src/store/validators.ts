@@ -281,6 +281,7 @@ export const IsValidIntent = (classifier: Asset): ValidatorFunc => (
 };
 
 export const MaxOfTenItems = fromMaxItems(10);
+export const MaxOfThreeItems = fromMaxItems(3);
 export const StartIsNonNumeric = fromRegex(/^(?!\d)/, "can't start with a number");
 export const ValidURL = fromRegex(REGEX_URL, 'is not a valid URL');
 export const Numeric = fromRegex(/^([-+]?((\.\d+)|(\d+)(\.\d+)?)$)/, 'must be a number');

@@ -9,6 +9,7 @@ import {
   stateToAction,
   TOPIC_OPTIONS
 } from 'components/flow/actions/sendmsg/helpers';
+import MultiChoiceInput from 'components/form/multichoice/MultiChoice';
 import { ActionFormProps } from 'components/flow/props';
 import AssetSelector from 'components/form/assetselector/AssetSelector';
 import { hasUseableTranslation } from 'components/form/assetselector/helpers';
@@ -29,7 +30,7 @@ import {
   SelectOptionEntry,
   FormEntry
 } from 'store/nodeEditor';
-import { MaxOfTenItems, Required, shouldRequireIf, validate } from 'store/validators';
+import { MaxOfThreeItems, Required, shouldRequireIf, validate } from 'store/validators';
 import { range } from 'utils';
 
 import styles from './SendMsgForm.module.scss';
@@ -101,7 +102,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
       updates.quickReplies = validate(
         i18n.t('forms.quick_replies', 'Quick Replies'),
         keys.quickReplies,
-        [MaxOfTenItems]
+        [MaxOfThreeItems]
       );
     }
     const updated = mergeForm(this.state, updates) as SendMsgFormState;
@@ -119,6 +120,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
   }
 
   public handleQuickRepliesUpdate(quickReplies: string[]): boolean {
+    console.log(quickReplies);
     return this.handleUpdate({ quickReplies });
   }
 
@@ -341,6 +343,32 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
   public render(): JSX.Element {
     const typeConfig = this.props.typeConfig;
 
+    const quickReplies: Tab = {
+      name: i18n.t('forms.quick_replies', 'Quick Replies'),
+      body: (
+        <>
+          <p>
+            {i18n.t(
+              'forms.quick_replies_summary',
+              'Quick Replies are made into buttons for supported channels. For example, when asking a question, you might add a Quick Reply for "Yes" and one for "No".'
+            )}
+          </p>
+
+          <MultiChoiceInput
+            name={i18n.t('forms.quick_reply', 'quick_reply')}
+            helpText={
+              <Trans i18nKey="forms.add_quick_reply">Add a new Quick Reply and press enter.</Trans>
+            }
+            items={this.state.quickReplies}
+            entry={this.state.quickReplyEntry}
+            onChange={this.handleQuickRepliesUpdate}
+          />
+        </>
+      ),
+      checked: this.state.quickReplies.value.length > 0,
+      hasErrors: hasErrors(this.state.quickReplies)
+    };
+
     const attachments: Tab = {
       name: i18n.t('forms.attachments', 'Attachments'),
       body: renderAttachments(
@@ -355,7 +383,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
       hasErrors: this.state.attachments.length > 0 && this.state.attachments[0].valid
     };
 
-    const tabs = [attachments];
+    const tabs = [quickReplies, attachments];
 
     if (hasFeature(this.context.config, FeatureFilter.HAS_WHATSAPP)) {
       const templates: Tab = {

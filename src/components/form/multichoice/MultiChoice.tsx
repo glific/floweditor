@@ -42,6 +42,10 @@ export default class MultiChoiceInput extends React.Component<
   }
 
   public render(): JSX.Element {
+    const errors =
+      this.props.items &&
+      this.props.items.validationFailures &&
+      this.props.items.validationFailures.map(failure => failure.message);
     const values = this.props.items.value.map((value: string) => {
       return { name: value, value };
     });
@@ -57,6 +61,7 @@ export default class MultiChoiceInput extends React.Component<
           tags={true}
           searchable={true}
           expressions={true}
+          errors={errors}
         />
       </>
     );
