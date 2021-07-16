@@ -20,6 +20,7 @@ import SendEmailComp from 'components/flow/actions/sendemail/SendEmail';
 import SendEmailForm from 'components/flow/actions/sendemail/SendEmailForm';
 import SendMsgComp from 'components/flow/actions/sendmsg/SendMsg';
 import SendMsgForm from 'components/flow/actions/sendmsg/SendMsgForm';
+import SendInteractiveMsgForm from 'components/flow/actions/sendinteractivemsg/SendInteractiveMsgForm';
 import SetRunResultComp from 'components/flow/actions/setrunresult/SetRunResult';
 import SetRunResultForm from 'components/flow/actions/setrunresult/SetRunResultForm';
 import StartFlowComp from 'components/flow/actions/startflow/StartFlow';
@@ -63,6 +64,9 @@ import i18n from 'config/i18n';
 import SchemeRouterForm from 'components/flow/routers/scheme/SchemeRouterForm';
 import TicketRouterForm from 'components/flow/routers/ticket/TicketRouterForm';
 import OpenTicketComp from 'components/flow/actions/openticket/OpenTicket';
+import SequenceForm from 'components/flow/routers/sequence/SequenceForm';
+import Sequence from 'components/flow/routers/sequence/Sequence';
+import SendInteractiveMsgComp from 'components/flow/actions/sendinteractivemsg/SendInteractiveMsg';
 
 const dedupeTypeConfigs = (typeConfigs: Type[]) => {
   const map: any = {};
@@ -228,13 +232,23 @@ export const typeConfigList: Type[] = [
     description: i18n.t('actions.send_msg.description', 'Send the contact a message'),
     form: SendMsgForm,
     localization: MsgLocalizationForm,
-    localizeableKeys: ['text', 'quick_replies', 'templating.variables'],
+    localizeableKeys: ['text', 'quick_replies', 'templating.variables', 'attachments'],
     component: SendMsgComp,
     massageForDisplay: (action: SendMsg) => {
       // quick replies are optional in the definition, make sure we have
       // at least an empty array so the localization has a proper cue
       action.quick_replies = action.quick_replies || [];
     }
+  },
+  {
+    type: Types.send_interactive_msg,
+    name: i18n.t('actions.send_interactive_msg.name', 'Interactive Message'),
+    description: i18n.t(
+      'actions.send_interactive_msg.description',
+      'Send the contact an interactive message'
+    ),
+    form: SendInteractiveMsgForm,
+    component: SendInteractiveMsgComp
   },
   {
     type: Types.wait_for_response,
@@ -248,9 +262,17 @@ export const typeConfigList: Type[] = [
   },
 
   {
+    type: Types.wait_for_time,
+    name: i18n.t('actions.wait_for_time.name', 'Wait for Time'),
+    description: i18n.t('actions.wait_for_time.description', 'Wait for time'),
+    form: SequenceForm,
+    component: Sequence
+  },
+
+  {
     type: Types.send_broadcast,
     name: i18n.t('actions.send_broadcast.name', 'Send Broadcast'),
-    description: i18n.t('actions.send_broadcast.description', 'Send somebody else a message'),
+    description: i18n.t('actions.send_broadcast.description', 'Send a staff member a message'),
     form: SendBroadcastForm,
     localization: KeyLocalizationForm,
     localizeableKeys: ['text'],
@@ -273,17 +295,20 @@ export const typeConfigList: Type[] = [
   },
   {
     type: Types.add_contact_groups,
-    name: i18n.t('actions.add_contact_groups.name', 'Add to Group'),
-    description: i18n.t('actions.add_contact_groups.description', 'Add the contact to a group'),
+    name: i18n.t('actions.add_contact_groups.name', 'Add to Collection'),
+    description: i18n.t(
+      'actions.add_contact_groups.description',
+      'Add the contact to a collection'
+    ),
     form: AddGroupsForm,
     component: ChangeGroupsComp
   },
   {
     type: Types.remove_contact_groups,
-    name: i18n.t('actions.remove_contact_groups.name', 'Remove from Group'),
+    name: i18n.t('actions.remove_contact_groups.name', 'Remove from Collection'),
     description: i18n.t(
       'actions.remove_contact_groups.description',
-      'Remove the contact from a group'
+      'Remove the contact from a collection'
     ),
     form: RemoveGroupsForm,
     component: ChangeGroupsComp
@@ -475,8 +500,8 @@ export const typeConfigList: Type[] = [
   },
   {
     type: Types.split_by_groups,
-    name: i18n.t('actions.split_by_groups.name', 'Split by Group Membership'),
-    description: i18n.t('actions.split_by_groups.description', 'Split by group membership'),
+    name: i18n.t('actions.split_by_groups.name', 'Split by Collection Membership'),
+    description: i18n.t('actions.split_by_groups.description', 'Split by Collection Membership'),
     localization: RouterLocalizationForm,
     localizeableKeys: ['exits'],
     form: GroupsRouterForm

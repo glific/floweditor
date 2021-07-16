@@ -12,8 +12,6 @@ import {
 import { ActionFormProps } from 'components/flow/props';
 import AssetSelector from 'components/form/assetselector/AssetSelector';
 import { hasUseableTranslation } from 'components/form/assetselector/helpers';
-import CheckboxElement from 'components/form/checkbox/CheckboxElement';
-import MultiChoiceInput from 'components/form/multichoice/MultiChoice';
 import SelectElement, { SelectOption } from 'components/form/select/SelectElement';
 import TextInputElement from 'components/form/textinput/TextInputElement';
 import TypeList from 'components/nodeeditor/TypeList';
@@ -40,7 +38,7 @@ import { FeatureFilter } from 'config/interfaces';
 
 import i18n from 'config/i18n';
 import { Trans } from 'react-i18next';
-import { Attachment, renderAttachments } from './attachments';
+import { Attachment, renderAttachments, validateURL } from './attachments';
 
 export interface SendMsgFormState extends FormState {
   message: StringEntry;
@@ -56,6 +54,7 @@ export interface SendMsgFormState extends FormState {
 
 export default class SendMsgForm extends React.Component<ActionFormProps, SendMsgFormState> {
   private filePicker: any;
+  private timeout: any;
 
   constructor(props: ActionFormProps) {
     super(props);
@@ -63,7 +62,6 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     bindCallbacks(this, {
       include: [/^handle/, /^on/]
     });
-
     // intialize our templates if we have them
     if (this.state.template.value !== null) {
       fetchAsset(this.props.assetStore.templates, this.state.template.value.uuid).then(
@@ -106,7 +104,6 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
         [MaxOfTenItems]
       );
     }
-
     const updated = mergeForm(this.state, updates) as SendMsgFormState;
 
     this.setState(updated);
@@ -135,9 +132,12 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
       return;
     }
 
+    if (this.state.attachments.length > 0 && this.state.attachments[0].valid) {
+      return;
+    }
+
     // make sure we validate untouched text fields and contact fields
     let valid = this.handleMessageUpdate(this.state.message.value, null, true);
-
     let templateVariables = this.state.templateVariables;
     // make sure we don't have untouched template variables
     this.state.templateVariables.forEach((variable: StringEntry, num: number) => {
@@ -150,6 +150,9 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
 
     valid = valid && !hasErrors(this.state.quickReplyEntry);
 
+    if (templateVariables.length > 0 && !this.state.message.value) {
+      valid = !valid;
+    }
     if (valid) {
       this.props.updateAction(stateToAction(this.props.nodeSettings, this.state));
       // notify our modal we are done
@@ -180,7 +183,6 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
       });
     } else {
       const templateTranslation = template.translations[0];
-
       const templateVariables =
         this.state.templateVariables.length === 0 ||
         (this.state.template.value && this.state.template.value.uuid !== template.uuid)
@@ -272,7 +274,11 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
                     onChange={(updatedText: string) => {
                       this.handleTemplateVariableChanged(updatedText, num);
                     }}
-                    entry={this.state.templateVariables[num]}
+                    entry={
+                      this.state.templateVariables[num] === undefined
+                        ? { value: '' }
+                        : this.state.templateVariables[num]
+                    }
                     autocomplete={true}
                   />
                 </div>
@@ -286,13 +292,32 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
 
   private handleAttachmentUploaded(response: AxiosResponse) {
     const attachments: any = mutate(this.state.attachments, {
-      $push: [{ type: response.data.type, url: response.data.url, uploaded: true }]
+      $push: [{ type: 'document', url: response.data.url, uploaded: true }]
+    });
+    this.setState({ attachments });
+  }
+
+  private attachmentValidate(body: any, valid: boolean, validationFailures: any) {
+    const attachments: any = mutate(this.state.attachments, {
+      [0]: {
+        $set: { type: body.type, url: body.url, valid, validationFailures }
+      }
     });
     this.setState({ attachments });
   }
 
   private handleAttachmentChanged(index: number, type: string, url: string) {
     let attachments: any = this.state.attachments;
+
+    const isExpression = type === 'expression';
+
+    if (type && !isExpression && url) {
+      window.clearTimeout(this.timeout);
+      this.timeout = setTimeout(() => {
+        validateURL(this.props.assetStore.validateMedia.endpoint, attachments[0], this);
+      }, 1000);
+    }
+
     if (index === -1) {
       attachments = mutate(attachments, {
         $push: [{ type, url }]
@@ -300,7 +325,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     } else {
       attachments = mutate(attachments, {
         [index]: {
-          $set: { type, url }
+          $set: { type, url, valid: !isExpression }
         }
       });
     }
@@ -318,63 +343,21 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
   public render(): JSX.Element {
     const typeConfig = this.props.typeConfig;
 
-    const quickReplies: Tab = {
-      name: i18n.t('forms.quick_replies', 'Quick Replies'),
-      body: (
-        <>
-          <p>
-            {i18n.t(
-              'forms.quick_replies_summary',
-              'Quick Replies are made into buttons for supported channels. For example, when asking a question, you might add a Quick Reply for "Yes" and one for "No".'
-            )}
-          </p>
-
-          <MultiChoiceInput
-            name={i18n.t('forms.quick_reply', 'quick_reply')}
-            helpText={
-              <Trans i18nKey="forms.add_quick_reply">Add a new Quick Reply and press enter.</Trans>
-            }
-            items={this.state.quickReplies}
-            entry={this.state.quickReplyEntry}
-            onChange={this.handleQuickRepliesUpdate}
-          />
-        </>
-      ),
-      checked: this.state.quickReplies.value.length > 0,
-      hasErrors: hasErrors(this.state.quickReplyEntry)
-    };
-
     const attachments: Tab = {
       name: i18n.t('forms.attachments', 'Attachments'),
       body: renderAttachments(
         this.context.config.endpoints.attachments,
+        this.context.config.attachmentsEnabled,
         this.state.attachments,
         this.handleAttachmentUploaded,
         this.handleAttachmentChanged,
         this.handleAttachmentRemoved
       ),
-      checked: this.state.attachments.length > 0
+      checked: this.state.attachments.length > 0,
+      hasErrors: this.state.attachments.length > 0 && this.state.attachments[0].valid
     };
 
-    const advanced: Tab = {
-      name: i18n.t('forms.advanced', 'Advanced'),
-      body: (
-        <CheckboxElement
-          name={i18n.t('forms.all_destinations', 'All Destinations')}
-          title={i18n.t('forms.all_destinations', 'All Destinations')}
-          labelClassName={styles.checkbox}
-          checked={this.state.sendAll}
-          description={i18n.t(
-            'forms.all_destinations_description',
-            "Send a message to all destinations known for this contact. If you aren't sure what this means, leave it unchecked."
-          )}
-          onChange={this.handleSendAllUpdate}
-        />
-      ),
-      checked: this.state.sendAll
-    };
-
-    const tabs = [quickReplies, attachments, advanced];
+    const tabs = [attachments];
 
     if (hasFeature(this.context.config, FeatureFilter.HAS_WHATSAPP)) {
       const templates: Tab = {
@@ -382,15 +365,6 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
         body: this.renderTemplateConfig(),
         checked: this.state.template.value != null,
         hasErrors: !!this.state.templateVariables.find((entry: StringEntry) => hasErrors(entry))
-      };
-      tabs.splice(0, 0, templates);
-    }
-
-    if (hasFeature(this.context.config, FeatureFilter.HAS_FACEBOOK)) {
-      const templates: Tab = {
-        name: 'Facebook',
-        body: this.renderTopicConfig(),
-        checked: this.state.topic.value != null
       };
       tabs.splice(0, 0, templates);
     }

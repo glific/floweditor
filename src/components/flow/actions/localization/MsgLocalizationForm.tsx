@@ -3,7 +3,6 @@ import Dialog, { ButtonSet, Tab } from 'components/dialog/Dialog';
 import styles from 'components/flow/actions/action/Action.module.scss';
 import { determineTypeConfig } from 'components/flow/helpers';
 import { LocalizationFormProps } from 'components/flow/props';
-import MultiChoiceInput from 'components/form/multichoice/MultiChoice';
 import TextInputElement from 'components/form/textinput/TextInputElement';
 import UploadButton from 'components/uploadbutton/UploadButton';
 import { fakePropType } from 'config/ConfigProvider';
@@ -15,10 +14,9 @@ import { MaxOfTenItems, validate } from 'store/validators';
 
 import { initializeLocalizedForm } from './helpers';
 import i18n from 'config/i18n';
-import { Trans } from 'react-i18next';
 import { range } from 'utils';
 import { renderIssues } from '../helpers';
-import { Attachment, renderAttachments } from '../sendmsg/attachments';
+import { Attachment, renderAttachments, validateURL } from '../sendmsg/attachments';
 import { AxiosResponse } from 'axios';
 
 export interface MsgLocalizationFormState extends FormState {
@@ -34,6 +32,7 @@ export default class MsgLocalizationForm extends React.Component<
   LocalizationFormProps,
   MsgLocalizationFormState
 > {
+  private timeout: any;
   constructor(props: LocalizationFormProps) {
     super(props);
     this.state = initializeLocalizedForm(this.props.nodeSettings);
@@ -167,13 +166,31 @@ export default class MsgLocalizationForm extends React.Component<
 
   private handleAttachmentUploaded(response: AxiosResponse) {
     const attachments: any = mutate(this.state.attachments, {
-      $push: [{ type: response.data.type, url: response.data.url, uploaded: true }]
+      $push: [{ type: 'document', url: response.data.url, uploaded: true }]
+    });
+    this.setState({ attachments });
+  }
+
+  private attachmentValidate(body: any, valid: boolean, validationFailures: any) {
+    const attachments: any = mutate(this.state.attachments, {
+      [0]: {
+        $set: { type: body.type, url: body.url, valid, validationFailures }
+      }
     });
     this.setState({ attachments });
   }
 
   private handleAttachmentChanged(index: number, type: string, url: string) {
     let attachments: any = this.state.attachments;
+
+    const isExpression = type === 'expression';
+
+    if (type && !isExpression && url) {
+      window.clearTimeout(this.timeout);
+      this.timeout = setTimeout(() => {
+        validateURL(this.props.assetStore.validateMedia.endpoint, attachments[0], this);
+      }, 1000);
+    }
     if (index === -1) {
       attachments = mutate(attachments, {
         $push: [{ type, url }]
@@ -181,7 +198,7 @@ export default class MsgLocalizationForm extends React.Component<
     } else {
       attachments = mutate(attachments, {
         [index]: {
-          $set: { type, url }
+          $set: { type, url, valid: !isExpression }
         }
       });
     }
@@ -252,38 +269,40 @@ export default class MsgLocalizationForm extends React.Component<
         name: i18n.t('forms.attachments', 'Attachments'),
         body: renderAttachments(
           this.context.config.endpoints.attachments,
+          this.context.config.attachmentsEnabled,
           this.state.attachments,
           this.handleAttachmentUploaded,
           this.handleAttachmentChanged,
           this.handleAttachmentRemoved
         ),
-        checked: this.state.attachments.length > 0
+        checked: this.state.attachments.length > 0,
+        hasErrors: this.state.attachments.length > 0 && this.state.attachments[0].valid
       });
     }
 
-    if (typeConfig.localizeableKeys!.indexOf('quick_replies') > -1) {
-      tabs.push({
-        name: i18n.t('forms.quick_replies', 'Quick Replies'),
-        body: (
-          <>
-            <MultiChoiceInput
-              name={i18n.t('forms.quick_reply', 'Quick Reply')}
-              helpText={
-                <Trans
-                  i18nKey="forms.localized_quick_replies"
-                  values={{ language: this.props.language.name }}
-                >
-                  Add a new [[language]] Quick Reply and press enter.
-                </Trans>
-              }
-              items={this.state.quickReplies}
-              onChange={this.handleQuickReplyChanged}
-            />
-          </>
-        ),
-        checked: this.state.quickReplies.value.length > 0
-      });
-    }
+    // if (typeConfig.localizeableKeys!.indexOf('quick_replies') > -1) {
+    //   tabs.push({
+    //     name: i18n.t('forms.quick_replies', 'Quick Replies'),
+    //     body: (
+    //       <>
+    //         <MultiChoiceInput
+    //           name={i18n.t('forms.quick_reply', 'Quick Reply')}
+    //           helpText={
+    //             <Trans
+    //               i18nKey="forms.localized_quick_replies"
+    //               values={{ language: this.props.language.name }}
+    //             >
+    //               Add a new [[language]] Quick Reply and press enter.
+    //             </Trans>
+    //           }
+    //           items={this.state.quickReplies}
+    //           onChange={this.handleQuickReplyChanged}
+    //         />
+    //       </>
+    //     ),
+    //     checked: this.state.quickReplies.value.length > 0
+    //   });
+    // }
 
     let audioButton: JSX.Element | null = null;
     if (typeConfig.localizeableKeys!.indexOf('audio_url') > 0) {

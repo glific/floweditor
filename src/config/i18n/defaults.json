@@ -1,8 +1,8 @@
 {
   "actions": {
     "add_contact_groups": {
-      "description": "Add the contact to a group",
-      "name": "Add to Group"
+      "description": "Add the contact to a collection",
+      "name": "Add to Collection"
     },
     "add_contact_urn": {
       "description": "Add a URN for the contact",
@@ -37,16 +37,16 @@
       "name": "Play Message"
     },
     "remove_contact_groups": {
-      "description": "Remove the contact from a group",
-      "name": "Remove from Group"
+      "description": "Remove the contact from a collection",
+      "name": "Remove from Collection"
     },
     "say_msg": {
       "placeholder": "Send a message to the contact"
     },
     "send_broadcast": {
-      "description": "Send somebody else a message",
+      "description": "Send a staff member a message",
       "name": "Send Broadcast",
-      "placeholder": "Send a message to the contact"
+      "placeholder": "Send a staff member a message"
     },
     "send_email": {
       "description": "Send an email",
@@ -74,8 +74,8 @@
       "name": "Split by Expression"
     },
     "split_by_groups": {
-      "description": "Split by group membership",
-      "name": "Split by Group Membership"
+      "description": "Split by Collection Membership",
+      "name": "Split by Collection Membership"
     },
     "split_by_intent": {
       "description": "Split by intent",
@@ -129,6 +129,11 @@
       "description": "Wait for the contact to respond",
       "name": "Wait for Response"
     },
+    "wait_for_time": {
+      "description": "Wait for time",
+      "name": "Wait for time"
+    },
+
     "wait_for_video": {
       "description": "Wait for a video",
       "name": "Wait for Video"
@@ -178,8 +183,8 @@
   },
   "flow_start": "Flow Start",
   "forms": {
+    "add_groups_summary": "Select the collections to add the contact to.",
     "add_attachment": "Add Attachment",
-    "add_groups_summary": "Select the groups to add the contact to.",
     "add_labels_summary": "Select the labels to apply to the incoming message.",
     "add_quick_reply": "Add a new Quick Reply and press enter.",
     "add_urn_summary": "Add a new URN to reach the contact such as a phone number.",
@@ -261,9 +266,9 @@
     "recording": "Recording",
     "recording_label": "Previous Recording",
     "remove_from_all_label": "Remove from all",
-    "remove_from_all_summary": "Remove the active contact from all groups they're a member of.",
+    "remove_from_all_summary": "Remove the active contact from all collections they're a member of.",
     "remove_groups_placeholder": "Enter the name of an existing group",
-    "remove_groups_summary": "Select the groups to remove the contact from.",
+    "remove_groups_summary": "Select the collections to remove the contact from.",
     "remove_value": "Remove Value",
     "resthook": "Resthook",
     "resthook_to_call": "Select the resthook to call",
@@ -290,7 +295,7 @@
     "send_msg_summary": "Add an attachment to each message. The attachment can be a file you upload or a dynamic URL using expressions and variables from your Flow.",
     "send_msg_summary_plural": "Add an attachment to each message. The attachment can be a file you upload or a dynamic URL using expressions and variables from your Flow.",
     "split_by_channel_placeholder": "Select the channels to split by",
-    "split_by_groups": "Select the groups you'd like to split by below",
+    "split_by_groups": "Select the collections you'd like to split by below",
     "split_by_scheme": "Channel types",
     "split_by_scheme_summary": "The contact's URN is the address they used to reach you such as their phone number or a Facebook ID. Select which URN types to split by below.",
     "start_type": "Start Type",
@@ -336,7 +341,7 @@
     "value": "Value",
     "variable": "Variable",
     "video_url": "Video URL",
-    "webhook_body_summary": "Modify the body of the [[method]] request that will be sent to your webhook.",
+    "webhook_body_summary": "Modify the body of the [[method]] request that will be sent to your webhook.(Please update only custom-key value pairs)",
     "webhook_example": "This response would add <1>@webhook.product</1> and <4>@webhook[\"stock level\"]</4> for use in the flow.",
     "webhook_header": "Header",
     "webhook_header_name": "Header Name",
@@ -388,7 +393,17 @@
     "has_value": "is not empty",
     "has_value_category": "Not Empty",
     "has_ward": "has ward",
-    "has_ward_category": "Has Ward"
+    "has_ward_category": "Has Ward",
+    "has_media": "has media",
+    "has_audio": "has audio",
+    "has_image": "has image",
+    "has_video": "has video",
+    "has_file": "has file",
+    "has_location": "has location"
+  },
+  "recent_messages": {
+    "header": "Recent Messages",
+    "header_empty": "No Recent Messages"
   },
   "recent_messages": {
     "header": "Recent Messages",

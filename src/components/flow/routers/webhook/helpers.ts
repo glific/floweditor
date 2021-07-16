@@ -6,6 +6,7 @@ import { getType } from 'config/typeConfigs';
 import { CallWebhook } from 'flowTypes';
 import { RenderNode } from 'store/flowContext';
 import { NodeEditorSettings, StringEntry } from 'store/nodeEditor';
+import { ValidatorFunc } from 'store/validators';
 import { createUUID } from 'utils';
 
 export enum Methods {
@@ -14,7 +15,8 @@ export enum Methods {
   PUT = 'PUT',
   DELETE = 'DELETE',
   HEAD = 'HEAD',
-  PATCH = 'PATCH'
+  PATCH = 'PATCH',
+  FUNCTION = 'FUNCTION'
 }
 
 export interface MethodOption {
@@ -34,10 +36,11 @@ export const GET_METHOD: MethodOption = {
 export const METHOD_OPTIONS: MethodOption[] = [
   GET_METHOD,
   { value: Methods.POST, name: Methods.POST },
-  { value: Methods.PUT, name: Methods.PUT },
-  { value: Methods.DELETE, name: Methods.DELETE },
-  { value: Methods.HEAD, name: Methods.HEAD },
-  { value: Methods.PATCH, name: Methods.PATCH }
+  // { value: Methods.PUT, name: Methods.PUT },
+  // { value: Methods.DELETE, name: Methods.DELETE }, // These methods are not needed currently
+  // { value: Methods.HEAD, name: Methods.HEAD },
+  { value: Methods.PATCH, name: Methods.PATCH },
+  { value: Methods.FUNCTION, name: Methods.FUNCTION }
 ];
 
 export const getOriginalAction = (settings: NodeEditorSettings): CallWebhook => {
@@ -138,4 +141,16 @@ export const stateToNode = (
 
 export const getDefaultBody = (method: string): string => {
   return method === Methods.GET ? '' : DEFAULT_BODY;
+};
+
+export const isValidJson = (): ValidatorFunc => (name, body: any) => {
+  try {
+    var o = JSON.parse(body);
+
+    if (o && typeof o === 'object') {
+      return { failures: [], value: body };
+    }
+  } catch (e) {
+    return { failures: [{ message: 'Not a valid JSON' }], value: body };
+  }
 };

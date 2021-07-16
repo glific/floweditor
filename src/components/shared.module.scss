@@ -55,6 +55,10 @@
   background: $dark_blue;
 }
 
+.wait_for_time {
+  background: $mongoose;
+}
+
 .add_contact_groups {
   background: $green;
 }
@@ -72,6 +76,10 @@
 .say_msg,
 .send_msg {
   background: $blue;
+}
+
+.send_interactive_msg {
+  background: $cerulean_blue;
 }
 
 .open_ticket,

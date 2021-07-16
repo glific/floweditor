@@ -29,6 +29,11 @@ export const operatorConfigList: Operator[] = [
     operands: 1
   },
   {
+    type: Operators.has_multiple,
+    verboseName: i18n.t('operators.has_multiple', 'has multiple values'),
+    operands: 1
+  },
+  {
     type: Operators.has_all_words,
     verboseName: i18n.t('operators.has_all_words', 'has all of the words'),
     operands: 1
@@ -177,6 +182,48 @@ export const operatorConfigList: Operator[] = [
     type: Operators.has_pattern,
     verboseName: i18n.t('operators.has_pattern', 'matches regex'),
     operands: 1
+  },
+
+  {
+    type: Operators.has_media,
+    verboseName: i18n.t('operators.has_media', 'has media'),
+    operands: 0,
+    categoryName: 'Has Media'
+  },
+
+  {
+    type: Operators.has_audio,
+    verboseName: i18n.t('operators.has_audio', 'has audio'),
+    operands: 0,
+    categoryName: 'Has Audio'
+  },
+
+  {
+    type: Operators.has_image,
+    verboseName: i18n.t('operators.has_image', 'has image'),
+    operands: 0,
+    categoryName: 'Has Image'
+  },
+
+  {
+    type: Operators.has_video,
+    verboseName: i18n.t('operators.has_video', 'has video'),
+    operands: 0,
+    categoryName: 'Has Video'
+  },
+
+  {
+    type: Operators.has_file,
+    verboseName: i18n.t('operators.has_file', 'has file'),
+    operands: 0,
+    categoryName: 'Has File'
+  },
+
+  {
+    type: Operators.has_location,
+    verboseName: i18n.t('operators.has_location', 'has location'),
+    operands: 0,
+    categoryName: 'Has Location'
   }
 ];
 

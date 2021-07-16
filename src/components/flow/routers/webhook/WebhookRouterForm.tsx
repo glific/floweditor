@@ -9,7 +9,8 @@ import {
   Methods,
   nodeToState,
   stateToNode,
-  getDefaultBody
+  getDefaultBody,
+  isValidJson
 } from 'components/flow/routers/webhook/helpers';
 import { createResultNameInput } from 'components/flow/routers/widgets';
 import SelectElement from 'components/form/select/SelectElement';
@@ -128,7 +129,7 @@ export default class WebhookRouterForm extends React.Component<
     }
 
     if (keys.hasOwnProperty('body')) {
-      updates.body = { value: keys.body };
+      updates.body = validate('POST body', keys.body, [isValidJson()]);
     }
 
     if (keys.hasOwnProperty('header')) {
@@ -207,10 +208,15 @@ export default class WebhookRouterForm extends React.Component<
 
   private handleSave(): void {
     // validate our url in case they haven't interacted
-    const valid = this.handleUpdate(
-      { url: this.state.url.value, resultName: this.state.resultName.value },
-      true
-    );
+    let valid = false;
+    if (this.state.method.value.name === 'FUNCTION') {
+      valid = this.handleUpdate({ resultName: this.state.resultName.value }, true);
+    } else {
+      valid = this.handleUpdate(
+        { url: this.state.url.value, resultName: this.state.resultName.value },
+        true
+      );
+    }
 
     if (valid) {
       this.props.updateRouter(stateToNode(this.props.nodeSettings, this.state));
@@ -297,7 +303,10 @@ export default class WebhookRouterForm extends React.Component<
           />
         </div>
       ),
-      checked: this.state.body.value !== getDefaultBody(method)
+      checked: this.state.body.value !== getDefaultBody(method),
+      hasErrors: this.state.body.validationFailures
+        ? this.state.body.validationFailures.length > 0
+        : false
     });
 
     return (
@@ -321,9 +330,17 @@ export default class WebhookRouterForm extends React.Component<
           <div className={styles.url}>
             <TextInputElement
               name={i18n.t('forms.url', 'URL')}
-              placeholder={i18n.t('forms.enter_a_url', 'Enter a URL')}
+              placeholder={
+                method === 'FUNCTION'
+                  ? 'Enter function'
+                  : i18n.t('forms.enter_a_url', 'Enter a URL')
+              }
               entry={this.state.url}
-              onChange={this.handleUrlUpdate}
+              onChange={(url, name) => {
+                method === 'FUNCTION'
+                  ? this.setState({ url: { value: url } })
+                  : this.handleUrlUpdate(url, name);
+              }}
               autocomplete={true}
             />
           </div>

@@ -1,13 +1,15 @@
-.type_choice {
-  display: inline-block;
-  width: 180px;
+@import 'variables.module.scss';
+
+.template_text {
+  margin-top: 10px;
+  padding: 10px;
+  background: $light_gray_2;
+  border-radius: 5px;
+  margin-bottom: 10px;
 }
 
-.loading {
-  color: #f5a142;
-  font-weight: 500;
-  display: flex;
-  align-items: baseline;
+.variable {
+  margin-bottom: 6px;
 }
 
 .crossIcon {
@@ -25,6 +27,9 @@
   margin-bottom: 8px;
   display: flex;
   align-items: center;
+
+  .upload {
+  }
 
   .remove_upload {
     margin-left: 8px;
@@ -49,4 +54,9 @@
   .remove {
     margin-top: 4px;
   }
+}
+
+.type_choice {
+  display: inline-block;
+  width: 180px;
 }

@@ -254,7 +254,6 @@ export default class UpdateContactForm extends React.Component<
           )}
           assets={this.props.assetStore.languages}
           entry={this.state.language}
-          valueClearable={true}
           onChange={this.handleLanguageUpdate}
           shouldExclude={(language: any) => {
             return language.iso === 'base';

@@ -43,9 +43,12 @@ export interface Endpoints {
   simulateStart: string;
   simulateResume: string;
   editor: string;
+  validateMedia: string;
+  interactives: string;
 }
 
 export interface FlowEditorConfig {
+  attachmentsEnabled: boolean;
   localStorage: boolean;
   endpoints: Endpoints;
   flow: string;
@@ -67,6 +70,10 @@ export interface FlowEditorConfig {
   forceSaveOnLoad?: boolean;
 
   filters?: string[];
+
+  excludeTypes?: string[];
+
+  excludeOperators?: string[];
 }
 
 export interface LocalizationMap {
@@ -223,7 +230,8 @@ export interface Hint {
 
 export interface Timeout {
   category_uuid: string;
-  seconds: number;
+  seconds?: number;
+  expression?: string;
 }
 
 export interface Wait {
@@ -347,6 +355,16 @@ export interface SendMsg extends Action {
   templating?: MsgTemplating;
 }
 
+export interface SendInteractiveMsg extends Action {
+  text: string;
+  id: number;
+  name: string;
+}
+
+export interface Delay extends Action {
+  delay: string;
+}
+
 export interface SayMsg extends Action {
   text: string;
   audio_url?: string;
@@ -358,6 +376,8 @@ export interface PlayAudio extends Action {
 
 export interface BroadcastMsg extends RecipientsAction {
   text: string;
+  attachments?: string[];
+  templating?: MsgTemplating;
 }
 
 export interface AddLabels extends Action {
@@ -493,7 +513,8 @@ export type AnyAction =
   | CallClassifier
   | CallWebhook
   | StartFlow
-  | StartSession;
+  | StartSession
+  | Delay;
 
 export enum ContactProperties {
   UUID = 'uuid',

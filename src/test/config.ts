@@ -5,6 +5,7 @@ export const config: FlowEditorConfig = {
   flow: 'a4f64f1b-85bc-477e-b706-de313a022979',
   localStorage: true,
   showDownload: true,
+  attachmentsEnabled: false,
   flowType: FlowTypes.MESSAGING,
   mutable: true,
   filters: ['whatsapp', 'airtime', 'resthook', 'classifier', 'ticketer'],
@@ -29,9 +30,11 @@ export const config: FlowEditorConfig = {
     recents: '/assets/recents.json',
     templates: '/assets/templates.json',
     editor: '/flow/editor',
+    validateMedia: '',
     activity: '',
     simulateStart: '',
-    simulateResume: ''
+    simulateResume: '',
+    interactives: ''
   },
   onChangeLanguage: (code: string, name: string) => {}
 };

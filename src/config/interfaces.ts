@@ -30,6 +30,7 @@ export enum Types {
   call_webhook = 'call_webhook',
   open_ticket = 'open_ticket',
   send_msg = 'send_msg',
+  send_interactive_msg = 'send_interactive_msg',
   send_email = 'send_email',
   send_broadcast = 'send_broadcast',
   enter_flow = 'enter_flow',
@@ -49,6 +50,7 @@ export enum Types {
   split_by_subflow = 'split_by_subflow',
   split_by_webhook = 'split_by_webhook',
   wait_for_response = 'wait_for_response',
+  wait_for_time = 'wait_for_time',
   wait_for_menu = 'wait_for_menu',
   wait_for_dial = 'wait_for_dial',
   wait_for_digits = 'wait_for_digits',
@@ -93,7 +95,14 @@ export enum Operators {
   has_error = 'has_error',
   has_intent = 'has_intent',
   has_top_intent = 'has_top_intent',
-  has_category = 'has_category'
+  has_category = 'has_category',
+  has_media = 'has_media',
+  has_audio = 'has_audio',
+  has_image = 'has_image',
+  has_video = 'has_video',
+  has_file = 'has_file',
+  has_location = 'has_location',
+  has_multiple = 'has_multiple'
 }
 
 export enum FeatureFilter {

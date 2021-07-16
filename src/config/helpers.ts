@@ -12,11 +12,11 @@ export const isOnlineFlowType = (flowType: FlowTypes) => {
 };
 
 export const filterOperators = (operators: Operator[], config: FlowEditorConfig): Operator[] => {
-  return filterVisibility(operators, config);
+  return filterVisibility(excludeOperators(operators, config), config);
 };
 
 export const filterTypeConfigs = (typeConfigs: Type[], config: FlowEditorConfig): Type[] => {
-  return filterVisibility(typeConfigs, config);
+  return filterVisibility(excludeTypes(typeConfigs, config), config);
 };
 
 const filterVisibility = (items: FlowTypeVisibility[], config: FlowEditorConfig): any[] => {
@@ -34,4 +34,18 @@ const filterVisibility = (items: FlowTypeVisibility[], config: FlowEditorConfig)
 
     return item.visibility.findIndex((ft: FlowTypes) => ft === config.flowType) > -1;
   });
+};
+
+const excludeTypes = (items: Type[], config: FlowEditorConfig): any[] => {
+  if (!config.excludeTypes) {
+    return items;
+  }
+  return items.filter((item: Type) => !config.excludeTypes.includes(item.type));
+};
+
+const excludeOperators = (items: Operator[], config: FlowEditorConfig): any[] => {
+  if (!config.excludeOperators) {
+    return items;
+  }
+  return items.filter((item: Operator) => !config.excludeOperators.includes(item.type));
 };

@@ -33,7 +33,8 @@ export const initializeForm = (
       const attachment = {
         type,
         url: attachmentString.substring(splitPoint + 1),
-        uploaded: type.indexOf('/') > -1
+        uploaded: type.indexOf('/') > -1,
+        valid: false
       };
 
       attachments.push(attachment);
