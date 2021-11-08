@@ -72,6 +72,9 @@ export const handleUploadFile = (
   // mark us as ajax
   headers['X-Requested-With'] = 'XMLHttpRequest';
 
+  headers['authorization'] =
+    'SFMyNTY.YmQ5ODNlODItMmVjNC00YTUyLTk2YzktNjJjYTczNmViYzY1.IEYCWtdSSDIkqziTJD4NJgHOKW03ySR6U0UPBogUPIg';
+
   const data = new FormData();
   data.append('media', files[0]);
   const mediaName = files[0].name;
@@ -95,7 +98,7 @@ export const renderAttachments = (
 ): JSX.Element => {
   const renderedAttachments = attachments.map((attachment, index: number) =>
     attachment.uploaded
-      ? renderUpload(index, attachment, onAttachmentRemoved)
+      ? renderUpload(index, attachment, onAttachmentRemoved, onAttachmentChanged)
       : renderAttachment(
           attachmentsEnabled,
           index,
@@ -144,14 +147,28 @@ export const renderAttachments = (
 export const renderUpload = (
   index: number,
   attachment: Attachment,
-  onAttachmentRemoved: (index: number) => void
+  onAttachmentRemoved: (index: number) => void,
+  onAttachmentChanged: any
 ): JSX.Element => {
   return (
     <div
       className={styles.url_attachment}
       key={index > -1 ? 'url_attachment_' + index : createUUID()}
     >
-      <div className={styles.type_choice}>
+      <div className={styles.attachment_container}>
+        <SelectElement
+          key={'attachment_type_' + index}
+          style={TembaSelectStyle.small}
+          name={i18n.t('forms.type_options', 'Type Options')}
+          placeholder={i18n.t('forms.add_attachment', 'Add Attachment')}
+          entry={{
+            value: index > -1 ? getAttachmentTypeOption(attachment.type) : null
+          }}
+          onChange={(option: any) => {
+            onAttachmentChanged(index, option.value, index === -1 ? '' : attachment.url);
+          }}
+          options={TYPE_OPTIONS}
+        />
         <SelectElement
           key={'attachment_type_' + index}
           name={i18n.t('forms.type', 'Type')}
