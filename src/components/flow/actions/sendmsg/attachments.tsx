@@ -156,19 +156,21 @@ export const renderUpload = (
       key={index > -1 ? 'url_attachment_' + index : createUUID()}
     >
       <div className={styles.attachment_container}>
-        <SelectElement
-          key={'attachment_type_' + index}
-          style={TembaSelectStyle.small}
-          name={i18n.t('forms.type_options', 'Type Options')}
-          placeholder={i18n.t('forms.add_attachment', 'Add Attachment')}
-          entry={{
-            value: index > -1 ? getAttachmentTypeOption(attachment.type) : null
-          }}
-          onChange={(option: any) => {
-            onAttachmentChanged(index, option.value, index === -1 ? '' : attachment.url);
-          }}
-          options={TYPE_OPTIONS}
-        />
+        <div className={styles.type}>
+          <SelectElement
+            key={'attachment_type_' + index}
+            style={TembaSelectStyle.small}
+            name={i18n.t('forms.type_options', 'Type Options')}
+            placeholder={i18n.t('forms.add_attachment', 'Add Attachment')}
+            entry={{
+              value: index > -1 ? getAttachmentTypeOption(attachment.type) : null
+            }}
+            onChange={(option: any) => {
+              onAttachmentChanged(index, option.value, index === -1 ? '' : attachment.url);
+            }}
+            options={TYPE_OPTIONS}
+          />
+        </div>
         <SelectElement
           key={'attachment_type_' + index}
           name={i18n.t('forms.type', 'Type')}
