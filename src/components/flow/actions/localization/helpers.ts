@@ -32,6 +32,7 @@ export const initializeLocalizedForm = (settings: NodeEditorSettings): MsgLocali
     quickReplies: { value: [] },
     templateVariables: [],
     templating: null,
+    localizedTemplate: { value: '' },
     attachments: [],
     audio: { value: null },
     valid: true
@@ -57,6 +58,7 @@ export const initializeLocalizedForm = (settings: NodeEditorSettings): MsgLocali
     for (const localized of settings.localizations) {
       if (localized.isLocalized()) {
         const localizedObject = localized.getObject() as any;
+        console.log(localizedObject);
 
         if (localizedObject.text) {
           const action = localizedObject as (SendMsg & SayMsg);
@@ -103,13 +105,23 @@ export const initializeLocalizedForm = (settings: NodeEditorSettings): MsgLocali
         }
 
         if (localizedObject.variables) {
+          console.log(localizedObject);
           const templating = localizedObject as MsgTemplating;
+
           state.templateVariables = templating.variables.map((value: string) => {
             return {
               value: 'variables' in localized.localizedKeys ? value : ''
             };
           });
           state.valid = true;
+        }
+
+        if (localizedObject.template) {
+          console.log(localizedObject);
+          state.localizedTemplate.value = {
+            uuid: localizedObject.template.uuid,
+            name: localizedObject.template.name
+          };
         }
       }
     }

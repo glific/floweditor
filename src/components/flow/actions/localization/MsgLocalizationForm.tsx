@@ -6,10 +6,10 @@ import { LocalizationFormProps } from 'components/flow/props';
 import TextInputElement from 'components/form/textinput/TextInputElement';
 import UploadButton from 'components/uploadbutton/UploadButton';
 import { fakePropType } from 'config/ConfigProvider';
-import { SendMsg, MsgTemplating } from 'flowTypes';
+import { SendMsg, MsgTemplating, MsgTemplate, Template } from 'flowTypes';
 import * as React from 'react';
 import mutate from 'immutability-helper';
-import { FormState, mergeForm, StringArrayEntry, StringEntry } from 'store/nodeEditor';
+import { FormEntry, FormState, mergeForm, StringArrayEntry, StringEntry } from 'store/nodeEditor';
 import { MaxOfTenItems, validate } from 'store/validators';
 
 import { initializeLocalizedForm } from './helpers';
@@ -18,6 +18,8 @@ import { range } from 'utils';
 import { renderIssues } from '../helpers';
 import { Attachment, renderAttachments, validateURL } from '../sendmsg/attachments';
 import { AxiosResponse } from 'axios';
+import AssetSelector from 'components/form/assetselector/AssetSelector';
+import { hasUseableTranslation } from 'components/form/assetselector/helpers';
 
 export interface MsgLocalizationFormState extends FormState {
   message: StringEntry;
@@ -25,6 +27,7 @@ export interface MsgLocalizationFormState extends FormState {
   audio: StringEntry;
   templateVariables: StringEntry[];
   templating: MsgTemplating;
+  localizedTemplate: FormEntry;
   attachments: Attachment[];
 }
 
@@ -88,7 +91,14 @@ export default class MsgLocalizationForm extends React.Component<
   }
 
   private handleSave(): void {
-    const { message: text, quickReplies, audio, templateVariables, attachments } = this.state;
+    const {
+      message: text,
+      quickReplies,
+      audio,
+      templateVariables,
+      attachments,
+      localizedTemplate
+    } = this.state;
 
     // make sure we are valid for saving, only quick replies can be invalid
     const typeConfig = determineTypeConfig(this.props.nodeSettings);
@@ -129,7 +139,10 @@ export default class MsgLocalizationForm extends React.Component<
       if (hasTemplateVariables) {
         localizations.push({
           uuid: this.state.templating.uuid,
-          translations: { variables: templateVariables.map((entry: StringEntry) => entry.value) }
+          translations: {
+            template: { uuid: localizedTemplate.value.uuid, name: localizedTemplate.value.name },
+            variables: templateVariables.map((entry: StringEntry) => entry.value)
+          }
         });
       }
 
@@ -213,6 +226,24 @@ export default class MsgLocalizationForm extends React.Component<
     this.setState({ attachments });
   }
 
+  private handleTemplateChanged(selected: any[]): void {
+    const template = selected ? selected[0] : null;
+
+    if (!template) {
+      return;
+    }
+
+    this.setState({
+      localizedTemplate: {
+        value: template
+      }
+    });
+  }
+
+  private handleShouldExcludeTemplate(template: any): boolean {
+    return !hasUseableTranslation(template as Template);
+  }
+
   public render(): JSX.Element {
     const typeConfig = determineTypeConfig(this.props.nodeSettings);
     const tabs: Tab[] = [];
@@ -239,6 +270,18 @@ export default class MsgLocalizationForm extends React.Component<
             </p>
             {this.state.templating && this.state.templating.variables.length > 0 ? (
               <>
+                <div className={styles.asset_selector}>
+                  <AssetSelector
+                    name={i18n.t('forms.template', 'template')}
+                    noOptionsMessage="No templates found"
+                    assets={this.props.assetStore.templates}
+                    entry={this.state.localizedTemplate}
+                    onChange={this.handleTemplateChanged}
+                    searchable={true}
+                    shouldExclude={this.handleShouldExcludeTemplate}
+                    formClearable={true}
+                  />
+                </div>
                 {range(0, this.state.templating.variables.length).map((num: number) => {
                   const entry = this.state.templateVariables[num] || { value: '' };
                   return (
