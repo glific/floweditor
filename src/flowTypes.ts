@@ -374,6 +374,7 @@ export interface SendMsg extends Action {
   topic?: string;
   templating?: MsgTemplating;
   labels?: Label[];
+  delay?: number;
 }
 
 export interface SendInteractiveMsg extends Action {

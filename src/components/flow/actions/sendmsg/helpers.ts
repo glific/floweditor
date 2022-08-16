@@ -81,7 +81,8 @@ export const initializeForm = (
       quickReplies: { value: action.quick_replies || [] },
       quickReplyEntry: { value: '' },
       sendAll: action.all_urns,
-      valid: true
+      valid: true,
+      delay: action.delay ? action.delay : -1
     };
   }
 
@@ -95,7 +96,8 @@ export const initializeForm = (
     quickReplyEntry: { value: '' },
     sendAll: false,
     valid: false,
-    labels: { value: [] }
+    labels: { value: [] },
+    delay: -1
   };
 };
 
@@ -154,6 +156,10 @@ export const stateToAction = (settings: NodeEditorSettings, state: SendMsgFormSt
 
   if (state.topic.value) {
     result.topic = state.topic.value.value;
+  }
+
+  if (state.delay > -1) {
+    result.delay = state.delay;
   }
 
   return result;

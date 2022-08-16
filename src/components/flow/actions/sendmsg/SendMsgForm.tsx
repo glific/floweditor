@@ -45,6 +45,7 @@ import { FeatureFilter } from 'config/interfaces';
 import i18n from 'config/i18n';
 import { Attachment, renderAttachments, validateURL } from './attachments';
 import { AddLabelsFormState } from '../addlabels/AddLabelsForm';
+import DelayControl from 'components/form/delay/DelayControl';
 
 export interface SendMsgFormState extends FormState {
   message: StringEntry;
@@ -58,6 +59,7 @@ export interface SendMsgFormState extends FormState {
   templateTranslation?: TemplateTranslation;
   labels?: any;
   expression?: any;
+  delay?: number;
 }
 
 // this is an additonal item in templates that need to have a same format as other list items
@@ -375,6 +377,10 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     this.setState({ attachments });
   }
 
+  private handleMessageDelay(delay: number) {
+    this.setState({ delay });
+  }
+
   private attachmentValidate(body: any, valid: boolean, validationFailures: any) {
     const attachments: any = mutate(this.state.attachments, {
       0: {
@@ -473,6 +479,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
         title={typeConfig.name}
         headerClass={typeConfig.type}
         buttons={this.getButtons()}
+        gutter={<DelayControl delay={this.state.delay} onChanged={this.handleMessageDelay} />}
         tabs={tabs}
       >
         <TypeList __className="" initialType={typeConfig} onChange={this.props.onTypeChange} />
