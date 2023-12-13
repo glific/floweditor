@@ -65,6 +65,7 @@ export type NodeEditorProps = NodeEditorPassedProps & NodeEditorStoreProps;
 
 export interface FormProps {
   // our two ways of updating
+
   updateRouter(renderNode: RenderNode): void;
   updateAction(action: AnyAction): void;
 
@@ -79,6 +80,7 @@ export interface FormProps {
   onTypeChange?(config: Type): void;
   onClose?(canceled: boolean): void;
   resetNodeEditing: any;
+  updateLocalizations?(languageCode: string, localizations: any[]): void;
 }
 
 /* export interface LocalizationProps {
@@ -175,6 +177,7 @@ export class NodeEditor extends React.Component<NodeEditorProps> {
       const { form: Form } = typeConfig;
 
       const formProps: FormProps = {
+        updateLocalizations: this.updateLocalizations,
         assetStore: this.props.assetStore,
         addAsset: this.handleAddAsset,
         updateAction: this.updateAction,

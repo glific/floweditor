@@ -10,6 +10,8 @@ import { ReactComponent as ButtonIcon } from './icons/button.svg';
 import { SendInteractiveMsgFormState } from './SendInteractiveMsgForm';
 import { createUUID } from 'utils';
 import { stateToNode } from 'components/flow/routers/response/helpers';
+import { getAsset } from 'external';
+import { FormProps } from 'components/nodeeditor/NodeEditor';
 
 export const initializeForm = (settings: NodeEditorSettings): SendInteractiveMsgFormState => {
   if (settings.originalAction && settings.originalAction.type === Types.send_interactive_msg) {
@@ -128,10 +130,26 @@ export const stateToAction = (
   return result;
 };
 
-export const stateToRouter = (
-  settings: NodeEditorSettings,
+export const stateToRouter = async (
+  props: FormProps,
   state: SendInteractiveMsgFormState
-): any => {
+): Promise<any> => {
+  const id = state.interactives.value.id;
+  const { endpoint, type, items } = props.assetStore.interactives;
+  const interactive: any = items[id];
+
+  let translations: any = {};
+  if (interactive) {
+    translations = interactive.translations;
+  } else {
+    const assetValue = await getAsset(endpoint, type, id);
+
+    if (assetValue.interactive_content) {
+      translations = assetValue.translations;
+    }
+  }
+
+  console.log(translations);
   let cases = [];
 
   const content = state.interactives.value.interactive_content;
@@ -179,7 +197,30 @@ export const stateToRouter = (
       },
       valid: true
     };
+
     return values;
+  });
+
+  Object.keys(translations).forEach((translation: any) => {
+    const changes: any = [];
+    const options: any = [];
+    console.log(translations, translation);
+    const content = translations[translation];
+    content.options.forEach((option: any) => {
+      options.push(option.title);
+    });
+    generateCases
+      .filter(cases => cases.categoryName !== '')
+      .forEach((cases, index) => {
+        changes.push({
+          uuid: cases.uuid,
+          translations: {
+            arguments: [options[index]]
+          }
+        });
+      });
+
+    props.updateLocalizations(translation, changes);
   });
 
   cases = cases.concat(generateCases);
@@ -194,7 +235,7 @@ export const stateToRouter = (
     valid: true
   };
 
-  const final = stateToNode(settings, result);
+  const final = stateToNode(props.nodeSettings, result);
 
   return final;
 };

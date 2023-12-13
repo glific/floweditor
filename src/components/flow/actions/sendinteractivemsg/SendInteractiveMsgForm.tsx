@@ -129,7 +129,7 @@ export default class SendMsgForm extends React.Component<
     this.handleLabelsChanged(this.state.labels.value!.concat(label));
   }
 
-  private handleSave(): void {
+  private async handleSave(): Promise<void> {
     // don't continue if our message already has errors
     if (hasErrors(this.state.interactives)) {
       return;
@@ -145,7 +145,7 @@ export default class SendMsgForm extends React.Component<
       this.props.updateAction(stateToAction(this.props.nodeSettings, this.state));
       if (this.props.nodeSettings.originalNode.ghost) {
         this.props.resetNodeEditing();
-        this.props.updateRouter(stateToRouter(this.props.nodeSettings, this.state));
+        this.props.updateRouter(await stateToRouter(this.props, this.state));
       }
       // notify our modal we are done
 
@@ -285,30 +285,25 @@ export default class SendMsgForm extends React.Component<
     }
     const { endpoint, type, items } = this.props.assetStore.interactives;
     const interactive: any = items[id];
+    let content;
 
     if (interactive) {
-      this.setState({
-        interactives: {
-          value: {
-            ...this.state.interactives.value,
-            interactive_content: interactive.interactive_content
-          }
-        }
-      });
+      content = interactive.interactive_content;
     } else {
-      let content = await getAsset(endpoint, type, id);
+      const assetValue = await getAsset(endpoint, type, id);
 
-      if (content.interactive_content) {
-        this.setState({
-          interactives: {
-            value: {
-              ...this.state.interactives.value,
-              interactive_content: content.interactive_content
-            }
-          }
-        });
+      if (assetValue.interactive_content) {
+        content = assetValue.interactive_content;
       }
     }
+    this.setState({
+      interactives: {
+        value: {
+          ...this.state.interactives.value,
+          interactive_content: content
+        }
+      }
+    });
   }
 
   public render(): JSX.Element {

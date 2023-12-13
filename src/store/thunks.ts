@@ -487,6 +487,7 @@ export const onUpdateLocalizations = (language: string, changes: LocalizationUpd
   const {
     flowContext: { definition }
   } = getState();
+  console.log(changes);
   const updated = mutators.updateLocalization(definition, language, changes);
   dispatch(updateDefinition(updated));
 
