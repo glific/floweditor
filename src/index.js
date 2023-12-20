@@ -13,7 +13,7 @@ var componentsExist =
   document.body.innerHTML.indexOf('temba-components') > -1 ||
   document.body.innerHTML.indexOf('temba-modules') > -1;
 if (!componentsExist) {
-  import('@nyaruka/temba-components/dist/index.js').then(() => {
+  import('@glific/temba-components/dist/index.js').then(() => {
     console.log('Loading temba components');
   });
 }
