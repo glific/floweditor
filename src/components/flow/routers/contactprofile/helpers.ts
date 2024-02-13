@@ -49,10 +49,9 @@ export const stateToNode = (
   const newAction: SetContactProfile = {
     profile_type: optionType.value.name,
     result_name: profileName.value,
-    value:
-      optionType.value.name === 'Create Profile'
-        ? { name: profileName.value, type: profileType.value }
-        : profileName.value,
+    value: ['Create Profile', 'Update Profile'].includes(optionType.value.name)
+      ? { name: profileName.value, type: profileType.value }
+      : profileName.value,
     type: Types.set_contact_profile,
     uuid: getActionUUID(settings, Types.set_contact_profile)
   };

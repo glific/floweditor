@@ -20,15 +20,22 @@ export interface ContactProfileRouterFormState extends FormState {
   profileType: FormEntry;
 }
 
-export const profileOptions = {
+export const profileOptions: any = {
   '1': { id: '1', name: 'Create Profile', type: AssetType.ContactProfile },
-  '2': { id: '2', name: 'Switch Profile', type: AssetType.ContactProfile }
+  '2': { id: '2', name: 'Switch Profile', type: AssetType.ContactProfile },
+  '3': { id: '3', name: 'Update Profile', type: AssetType.ContactProfile }
 };
 
-export const profileOptionsWithName: any = {
-  'Create Profile': { id: '1', name: 'Create Profile', type: AssetType.ContactProfile },
-  'Switch Profile': { id: '2', name: 'Switch Profile', type: AssetType.ContactProfile }
-};
+export const profileOptionsWithName = Object.keys(profileOptions).reduce(function(
+  result: any,
+  key
+) {
+  var option = profileOptions[key];
+  result[option.name] = option;
+  return result;
+},
+{});
+console.log(profileOptionsWithName);
 
 export default class ContactProfileRouterForm extends React.Component<
   RouterFormProps,
@@ -109,7 +116,7 @@ export default class ContactProfileRouterForm extends React.Component<
           />
         </div>
 
-        {this.state.optionType.value.id === '1' && (
+        {['Update Profile', 'Create Profile'].includes(this.state.optionType.value.name) && (
           <>
             <TextInputElement
               name={i18n.t('forms.type', 'Type')}
