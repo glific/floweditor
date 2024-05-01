@@ -157,7 +157,7 @@ export default class AirtimeRouterForm extends React.PureComponent<
       <Dialog title={typeConfig.name} headerClass={typeConfig.type} buttons={this.getButtons()}>
         <TypeList __className="" initialType={typeConfig} onChange={this.props.onTypeChange} />
         {this.renderAmounts()}
-        {errors}
+        {errors}rrr
         <div className={styles.result_name}>
           {createResultNameInput(this.state.resultName, this.handleUpdateResultName)}
         </div>

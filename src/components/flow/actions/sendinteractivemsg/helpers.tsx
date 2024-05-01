@@ -78,10 +78,11 @@ export const initializeForm = (settings: NodeEditorSettings): SendInteractiveMsg
 
 export const stateToAction = (
   settings: NodeEditorSettings,
-  state: SendInteractiveMsgFormState
+  state: SendInteractiveMsgFormState,
+  assetStore: AssetStore
 ): SendInteractiveMsg => {
   let result: any = {};
-
+  // console.log(state, assetStore, settings);
   const params = state.listValues
     .filter(listItem => listItem.value.label !== '')
     .map(listItem => listItem.value);
@@ -125,7 +126,7 @@ export const stateToAction = (
   if (state.attachment_url) {
     result.attachment_url = state.attachment_url.value;
   }
-
+  console.log('ACTION', result);
   return result;
 };
 
@@ -135,6 +136,7 @@ export const stateToRouter = (
   assetStore: AssetStore
 ): RenderNode => {
   let cases = [];
+  console.log('router', settings, state, assetStore);
 
   const content = state.interactives.value.interactive_content;
   let options = [''];
@@ -168,7 +170,10 @@ export const stateToRouter = (
     }
   }
   const generateCases = options.map((option: string) => {
-    const uuid = createUUID();
+    const uuid = settings.originalNode.ghost
+      ? createUUID()
+      : settings.originalNode.node.exits[0].destination_uuid;
+    // const uuid = createUUID();
     const values: any = {
       uuid,
       categoryName: `${option.charAt(0).toUpperCase()}${option.slice(1)}`,
@@ -196,6 +201,7 @@ export const stateToRouter = (
   };
 
   const renderedNode = stateToNode(settings, result, assetStore);
+  // console.log('ROUTER', renderedNode);
 
   return renderedNode;
 };

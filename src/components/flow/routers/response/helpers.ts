@@ -60,7 +60,7 @@ export const stateToNode = (
     state.timeout > -1,
     settings.originalNode.node
   );
-
+  console.log(settings, state, assetStore);
   const optionalRouter: Pick<Router, 'result_name'> = {};
   const resultCount = Object.keys(assetStore.results ? assetStore.results.items : {}).length;
   const resultName = `result_${resultCount + 1}`;
@@ -102,6 +102,6 @@ export const stateToNode = (
     [],
     { cases: caseConfig }
   );
-
+  console.log(newRenderNode);
   return newRenderNode;
 };
