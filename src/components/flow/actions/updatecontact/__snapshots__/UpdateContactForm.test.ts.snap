@@ -216,7 +216,10 @@ Object {
     },
   },
   "fieldValue": Object {
-    "value": "",
+    "value": Object {
+      "name": "Opt-in",
+      "value": "optin",
+    },
   },
   "language": Object {
     "value": null,
@@ -302,7 +305,7 @@ Array [
     },
     "type": "set_contact_field",
     "uuid": "70ac6ea6-803a-4c33-81c7-dc26803c313f",
-    "value": "12/25/00",
+    "value": undefined,
   },
   [Function],
 ]
@@ -321,7 +324,10 @@ Object {
     },
   },
   "fieldValue": Object {
-    "value": "",
+    "value": Object {
+      "name": "Opt-in",
+      "value": "optin",
+    },
   },
   "language": Object {
     "validationFailures": Array [],
@@ -365,7 +371,10 @@ Object {
     },
   },
   "fieldValue": Object {
-    "value": "",
+    "value": Object {
+      "name": "Opt-in",
+      "value": "optin",
+    },
   },
   "language": Object {
     "validationFailures": Array [],
@@ -414,7 +423,7 @@ Object {
     },
   },
   "fieldValue": Object {
-    "value": "25",
+    "value": undefined,
   },
   "language": Object {
     "value": null,
@@ -501,7 +510,7 @@ Object {
     },
   },
   "fieldValue": Object {
-    "value": "25",
+    "value": undefined,
   },
   "language": Object {
     "validationFailures": Array [],
@@ -545,8 +554,7 @@ Object {
     },
   },
   "fieldValue": Object {
-    "validationFailures": Array [],
-    "value": "",
+    "value": undefined,
   },
   "language": Object {
     "value": null,
@@ -589,8 +597,7 @@ Object {
     },
   },
   "fieldValue": Object {
-    "validationFailures": Array [],
-    "value": "",
+    "value": undefined,
   },
   "language": Object {
     "value": null,
@@ -638,7 +645,7 @@ Object {
     },
   },
   "fieldValue": Object {
-    "value": "25",
+    "value": undefined,
   },
   "language": Object {
     "value": null,

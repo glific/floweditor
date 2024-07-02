@@ -221,13 +221,16 @@ exports[`UpdateContactForm should render field 1`] = `
             class="ele"
           >
             <div
-              class="wrapper normal"
+              class="normal "
             >
-              <input
-                data-testid="Field Value"
+              <temba-select
+                data-testid="temba_select_field_value"
+                errors="[]"
+                expressions=""
                 name="Field Value"
-                placeholder="Enter a new value for Age"
-                value="25"
+                namekey="name"
+                valuekey="value"
+                values="[]"
               />
             </div>
           </div>
