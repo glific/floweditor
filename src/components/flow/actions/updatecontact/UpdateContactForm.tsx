@@ -53,6 +53,18 @@ export const CONTACT_STATUS_OPTIONS: SelectOption[] = [
   CONTACT_STATUS_ARCHIVED
 ];
 
+export const CONTACT_OPTIN: SelectOption = {
+  name: i18n.t('contact_fieldValue.optin', 'Opt-in'),
+  value: 'optin'
+};
+
+export const CONTACT_OPTOUT: SelectOption = {
+  name: i18n.t('contact_fieldValue.optout', 'Opt-out'),
+  value: 'optout'
+};
+
+export const CONTACT_CONSENT_OPTIONS: SelectOption[] = [CONTACT_OPTIN, CONTACT_OPTOUT];
+
 export default class UpdateContactForm extends React.Component<
   ActionFormProps,
   UpdateContactFormState
@@ -79,7 +91,7 @@ export default class UpdateContactForm extends React.Component<
       language?: Asset;
       status?: SelectOption;
       field?: Asset;
-      fieldValue?: string;
+      fieldValue?: SelectOption;
     },
     submitting = false
   ): boolean {
@@ -165,15 +177,15 @@ export default class UpdateContactForm extends React.Component<
   }
 
   private handleStatusUpdate(status: SelectOption): boolean {
-    return this.handleUpdate({ status, fieldValue: '' });
+    return this.handleUpdate({ status });
   }
 
-  private handleFieldValueUpdate(fieldValue: string): boolean {
+  private handleFieldValueUpdate(fieldValue: SelectOption): boolean {
     return this.handleUpdate({ fieldValue, name: '' });
   }
 
   private handleNameUpdate(name: string): boolean {
-    return this.handleUpdate({ name, fieldValue: '' });
+    return this.handleUpdate({ name });
   }
 
   private onUpdated(dispatch: DispatchWithState, getState: GetState): void {
@@ -279,15 +291,14 @@ export default class UpdateContactForm extends React.Component<
           focus={true}
         />
       );
-    } else {
+    } else if (this.state.type === Types.set_contact_field) {
       return (
-        <TextInputElement
+        <SelectElement
+          key="contact_field_select"
           name={i18n.t('forms.field_value', 'Field Value')}
-          placeholder={i18n.t('forms.enter_field_value', { field: this.state.field.value.label })}
-          onChange={this.handleFieldValueUpdate}
           entry={this.state.fieldValue}
-          autocomplete={true}
-          focus={true}
+          onChange={this.handleFieldValueUpdate}
+          options={CONTACT_CONSENT_OPTIONS}
         />
       );
     }
@@ -299,7 +310,6 @@ export default class UpdateContactForm extends React.Component<
 
   public render(): JSX.Element {
     const typeConfig = this.props.typeConfig;
-
     return (
       <Dialog title={typeConfig.name} headerClass={typeConfig.type} buttons={this.getButtons()}>
         <TypeList __className="" initialType={typeConfig} onChange={this.props.onTypeChange} />

@@ -26,7 +26,9 @@ import {
 } from 'store/nodeEditor';
 import {
   CONTACT_STATUS_OPTIONS,
-  CONTACT_STATUS_ACTIVE
+  CONTACT_STATUS_ACTIVE,
+  CONTACT_OPTIN,
+  CONTACT_CONSENT_OPTIONS
 } from 'components/flow/actions/updatecontact/UpdateContactForm';
 
 export interface UpdateContactFormState extends FormState {
@@ -36,7 +38,7 @@ export interface UpdateContactFormState extends FormState {
   language: FormEntry;
   status: SelectOptionEntry;
   field: FormEntry;
-  fieldValue: StringEntry;
+  fieldValue: SelectOptionEntry;
 }
 
 export const initializeForm = (
@@ -51,7 +53,7 @@ export const initializeForm = (
     language: { value: null },
     status: { value: CONTACT_STATUS_ACTIVE },
     field: { value: null },
-    fieldValue: { value: '' }
+    fieldValue: { value: CONTACT_OPTIN }
   };
 
   if (settings.originalAction) {
@@ -64,7 +66,9 @@ export const initializeForm = (
         case Types.set_contact_field:
           const fieldAction = settings.originalAction as SetContactField;
           state.field = { value: { key: fieldAction.field.key, label: fieldAction.field.name } };
-          state.fieldValue = { value: fieldAction.value };
+          state.fieldValue = {
+            value: CONTACT_CONSENT_OPTIONS.find(o => o.value === fieldAction.value)
+          };
           state.valid = true;
           return state;
         case Types.set_contact_channel:
@@ -122,7 +126,7 @@ export const stateToAction = (
       uuid: getActionUUID(settings, Types.set_contact_field),
       type: state.type,
       field: { name: field.label, key: field.key },
-      value: state.fieldValue.value
+      value: state.fieldValue.value.value
     };
   } else if (state.type === Types.set_contact_channel) {
     if (state.channel.value.type === REMOVE_VALUE_ASSET.type) {
