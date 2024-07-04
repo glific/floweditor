@@ -637,7 +637,6 @@ Object {
   "request_optin": Object {
     "component": [Function],
     "description": "Send an opt-in request",
-    "filter": "optins",
     "form": [Function],
     "name": "Request Opt-In",
     "type": "request_optin",

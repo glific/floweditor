@@ -77,6 +77,7 @@ import RequestOptInForm from 'components/flow/actions/requestoptin/RequestOptInF
 import RequestOptInComp from 'components/flow/actions/requestoptin/RequestOptIn';
 
 const dedupeTypeConfigs = (typeConfigs: Type[]) => {
+  console.log(typeConfigList, 'HER');
   const map: any = {};
   return typeConfigs.filter(config => {
     if (config.type === 'missing') {
@@ -574,8 +575,8 @@ export const typeConfigList: Type[] = [
     name: i18n.t('actions.request_optin.name', 'Request Opt-In'),
     description: i18n.t('actions.request_optin.description', 'Send an opt-in request'),
     form: RequestOptInForm,
-    component: RequestOptInComp,
-    filter: FeatureFilter.HAS_OPTINS
+    component: RequestOptInComp
+    // filter: FeatureFilter.HAS_OPTINS
   }
   // {type: 'random', name: 'Random Split', description: 'Split them up randomly', form: RandomRouterForm}
 ];

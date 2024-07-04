@@ -20,15 +20,19 @@ export const filterTypeConfigs = (typeConfigs: Type[], config: FlowEditorConfig)
 };
 
 const filterVisibility = (items: FlowTypeVisibility[], config: FlowEditorConfig): any[] => {
+  // console.log(items);
   return items.filter((item: FlowTypeVisibility) => {
     // if we have a filter on our type, don't return it unless its present in our config
     if (item.filter) {
+      // console.log(item.filter);
+
       if (!(config.filters || []).find((name: string) => name === item.filter)) {
         return false;
       }
     }
-
     if (item.visibility === undefined) {
+      // console.log(item.visibility, item);
+
       return true;
     }
 
@@ -37,6 +41,7 @@ const filterVisibility = (items: FlowTypeVisibility[], config: FlowEditorConfig)
 };
 
 const excludeTypes = (items: Type[], config: FlowEditorConfig): any[] => {
+  console.log(config);
   if (!config.excludeTypes) {
     return items;
   }
