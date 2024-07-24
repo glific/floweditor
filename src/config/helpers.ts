@@ -23,7 +23,7 @@ const filterVisibility = (items: FlowTypeVisibility[], config: FlowEditorConfig)
   return items.filter((item: FlowTypeVisibility) => {
     // if we have a filter on our type, don't return it unless its present in our config
     if (item.filter) {
-      if (!(config.filters || []).find((name: string) => name === item.filter)) {
+      if ((config.filters || []).find((name: string) => name === item.filter)) {
         return false;
       }
     }
