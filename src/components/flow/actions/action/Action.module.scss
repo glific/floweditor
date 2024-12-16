@@ -61,6 +61,10 @@
     padding: $action_padding;
   }
 
+  &.set_wa_group_field {
+    width: 100%;
+  }
+
   &.call_classifier {
     padding: $action_padding;
     width: inherit;
