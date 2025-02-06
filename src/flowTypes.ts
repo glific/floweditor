@@ -305,6 +305,7 @@ export interface Label {
   uuid: string;
   name: string;
   name_match?: string;
+  arbitrary?: boolean;
 }
 
 export interface OptIn {
