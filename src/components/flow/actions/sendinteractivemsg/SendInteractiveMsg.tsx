@@ -70,20 +70,22 @@ const SendInteractiveMsgComp: React.SFC<SendInteractiveMsg> = ({
 
   if (labels) {
     labelsList = renderAssetList(
-      labels.map((label: any) => {
-        if (label.name_match) {
+      labels
+        .filter(label => !label.arbitrary)
+        .map((label: any) => {
+          if (label.name_match) {
+            return {
+              id: label.name_match,
+              name: label.name_match,
+              type: AssetType.NameMatch
+            };
+          }
           return {
-            id: label.name_match,
-            name: label.name_match,
-            type: AssetType.NameMatch
+            id: label.uuid,
+            name: label.name,
+            type: AssetType.Label
           };
-        }
-        return {
-          id: label.uuid,
-          name: label.name,
-          type: AssetType.Label
-        };
-      }),
+        }),
       MAX_TO_SHOW,
       endpoints
     );

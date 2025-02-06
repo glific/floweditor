@@ -9,12 +9,14 @@ export const initializeForm = (settings: NodeEditorSettings): AddLabelsFormState
     const action = settings.originalAction as AddLabels;
     return {
       labels: {
-        value: action.labels.map((label: Label) => {
-          if (label.name_match) {
-            return { name: label.name_match, expression: true };
-          }
-          return label;
-        })
+        value: action.labels
+          .filter((label: Label) => !label.arbitrary)
+          .map((label: Label) => {
+            if (label.name_match) {
+              return { name: label.name_match, expression: true };
+            }
+            return label;
+          })
       },
       valid: true
     };

@@ -19,12 +19,14 @@ export const initializeForm = (settings: NodeEditorSettings): SendInteractiveMsg
     const interactive_content = JSON.parse(action.text);
 
     const labels = action.labels
-      ? action.labels.map((label: Label) => {
-          if (label.name_match) {
-            return { name: label.name_match, expression: true };
-          }
-          return label;
-        })
+      ? action.labels
+          .filter((label: Label) => !label.arbitrary)
+          .map((label: Label) => {
+            if (label.name_match) {
+              return { name: label.name_match, expression: true };
+            }
+            return label;
+          })
       : [];
 
     const listValues = params

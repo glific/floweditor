@@ -10,20 +10,22 @@ const AddLabelsComp: React.SFC<AddLabels> = ({ labels }, context: any): JSX.Elem
   return (
     <>
       {renderAssetList(
-        labels.map(label => {
-          if (label.name_match) {
+        labels
+          .filter(label => !label.arbitrary)
+          .map(label => {
+            if (label.name_match) {
+              return {
+                id: label.name_match,
+                name: label.name_match,
+                type: AssetType.NameMatch
+              };
+            }
             return {
-              id: label.name_match,
-              name: label.name_match,
-              type: AssetType.NameMatch
+              id: label.uuid,
+              name: label.name,
+              type: AssetType.Label
             };
-          }
-          return {
-            id: label.uuid,
-            name: label.name,
-            type: AssetType.Label
-          };
-        }),
+          }),
         MAX_TO_SHOW,
         context.config.endpoints
       )}

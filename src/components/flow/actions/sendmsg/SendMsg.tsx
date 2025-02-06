@@ -16,20 +16,22 @@ const SendMsgComp: React.SFC<SendMsg> = (action: SendMsg): JSX.Element => {
 
   if (action.labels) {
     labels = renderAssetList(
-      action.labels.map((label: any) => {
-        if (label.name_match) {
+      action.labels
+        .filter(label => !label.arbitrary)
+        .map((label: any) => {
+          if (label.name_match) {
+            return {
+              id: label.name_match,
+              name: label.name_match,
+              type: AssetType.NameMatch
+            };
+          }
           return {
-            id: label.name_match,
-            name: label.name_match,
-            type: AssetType.NameMatch
+            id: label.uuid,
+            name: label.name,
+            type: AssetType.Label
           };
-        }
-        return {
-          id: label.uuid,
-          name: label.name,
-          type: AssetType.Label
-        };
-      }),
+        }),
       MAX_TO_SHOW,
       endpoints
     );
