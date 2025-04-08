@@ -21,6 +21,7 @@ import { createUUID } from 'utils';
 import { PopTabType } from 'config/interfaces';
 import i18n from 'config/i18n';
 import { PopTab } from 'components/poptab/PopTab';
+import { showError } from 'index';
 
 export const SIMULATOR_CONTACT_UUID = 'fb3787ab-2eda-48a0-a2bc-e2ddadec1286';
 const SIMULATOR_CONTACT_URNS = ['tel:+12065551212'];
@@ -299,7 +300,7 @@ export class Simulator extends React.Component<SimulatorProps, SimulatorState> {
           if (isMT(event)) {
             // save off any quick replies we might have
             if (event.msg.quick_replies) {
-              quickReplies = event.msg.quick_replies;
+              quickReplies = event.msg.quick_replies.map(e => e.text);
             }
           }
         }
@@ -486,7 +487,15 @@ export class Simulator extends React.Component<SimulatorProps, SimulatorState> {
         axios.default
           .post(getURL(this.context.config.endpoints.simulateStart), JSON.stringify(body, null, 2))
           .then((response: axios.AxiosResponse) => {
-            this.updateRunContext(response.data as RunContext);
+            if (
+              response.headers['content-type'] === 'application/json' &&
+              response.status >= 200 &&
+              response.status < 300
+            ) {
+              this.updateRunContext(response.data as RunContext);
+            } else {
+              showError();
+            }
           });
       }
     );

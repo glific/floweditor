@@ -90,3 +90,11 @@ temba-completion {
   display: block;
   height: 25px !important;
 }
+
+.message {
+  --textarea-height: 8em;
+}
+
+.has-errors {
+  --color-widget-border: var(--color-error);
+}

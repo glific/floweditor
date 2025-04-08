@@ -1,24 +1,21 @@
 {
-	"name": "floweditor",
-	"build": {
-		"dockerfile": "Dockerfile"
-	},
-	"forwardPorts": [
-		3000,
-		6000
-	],
-	"runArgs": [
-		"--network=textit_default",
-		"--hostname=floweditor"
-	],
-	"remoteUser": "node",
-	"postCreateCommand": "sudo chown node /workspaces/floweditor && yarn install",
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"lfs.vscode-emacs-friendly"
-			]
-		}
-	}
-	// "features": {},
+  "name": "floweditor",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {},
+  "forwardPorts": [3000, 6000],
+  "runArgs": ["--network", "textit_default", "--hostname", "floweditor", "--name", "floweditor"],
+  "remoteUser": "node",
+  "postCreateCommand": "sudo chown node /workspaces/floweditor && sudo rm -R node_modules && yarn install",
+  "customizations": {
+    "vscode": {
+      "extensions": ["lfs.vscode-emacs-friendly"],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "editor.formatOnSave": true,
+        "editor.rulers": [120]
+      }
+    }
+  }
 }

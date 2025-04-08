@@ -40,6 +40,14 @@ export default class TicketRouterForm extends React.Component<
       include: [/^handle/]
     });
   }
+
+  componentDidMount(): void {
+    // set our default topic if we don't have one
+    if (!this.state.topic.value) {
+      this.handleTopicUpdate(this.context.config.defaultTopic);
+    }
+  }
+
   private handleUpdate(
     keys: {
       assignee?: User;
@@ -53,9 +61,7 @@ export default class TicketRouterForm extends React.Component<
     const updates: Partial<TicketRouterFormState> = {};
 
     if (keys.hasOwnProperty('assignee')) {
-      updates.assignee = validate(i18n.t('forms.assignee', 'Assignee'), keys.assignee, [
-        shouldRequireIf(submitting)
-      ]);
+      updates.assignee = validate(i18n.t('forms.assignee', 'Assignee'), keys.assignee, []);
     }
 
     if (keys.hasOwnProperty('topic')) {
@@ -102,6 +108,13 @@ export default class TicketRouterForm extends React.Component<
   }
 
   private handleSave(): void {
+    // force our default topic if it's not set
+    // we have to do it here, because setState is async
+    // if (this.state.topic.value === null) {
+    // eslint-disable-next-line react/no-direct-mutation-state
+    // this.state.topic.value = this.context.config.defaultTopic;
+    // }
+
     // validate all fields in case they haven't interacted
     const valid = this.handleUpdate(
       {
@@ -139,13 +152,14 @@ export default class TicketRouterForm extends React.Component<
           <div style={{ flexBasis: 250 }}>
             <TembaSelect
               key="select_topic"
+              valueKey="uuid"
               name={i18n.t('forms.topic', 'Topic')}
               placeholder={i18n.t('Select')}
               endpoint={this.context.config.endpoints.topics}
               onChange={this.handleTopicUpdate}
-              value={this.state.topic.value}
-              createPrefix={i18n.t('forms.topic_prefix', 'Create Topic: ')}
+              value={this.state.topic.value || this.context.config.defaultTopic}
               searchable={true}
+              errors={(this.state.topic.validationFailures || []).map(failure => failure.message)}
             />
           </div>
 

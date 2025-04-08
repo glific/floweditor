@@ -1,10 +1,11 @@
 import { Methods } from 'components/flow/routers/webhook/helpers';
 import { FlowTypes, Operators, Types, ContactStatus } from 'config/interfaces';
+import { Component } from 'react';
 import { AssetStore } from 'store/flowContext';
 import { ExclusionsCheckboxEntry } from 'store/nodeEditor';
 
 // we don't concern ourselves with patch versions
-export const SPEC_VERSION = '13.2';
+export const SPEC_VERSION = '14.0';
 
 export interface Languages {
   [iso: string]: string;
@@ -67,6 +68,7 @@ export interface FlowEditorConfig {
   path?: string;
   headers?: any;
   brand: string;
+  defaultTopic: { uuid: string; name: string };
 
   onLoad?: () => void;
   onActivityClicked?: (uuid: string) => void;
@@ -120,7 +122,6 @@ export interface Dependency {
 
 export interface FlowMetadata {
   dependencies: Dependency[];
-  waiting_exit_uuids: string[];
   results: Result[];
   parent_refs: string[];
 }
@@ -218,9 +219,11 @@ export interface Category {
 }
 
 export interface TemplateTranslation {
+  channel: Channel;
+  content: string;
   language: string;
   status: string;
-  content: string;
+  variable_count: number;
 }
 
 export interface Template {
@@ -370,7 +373,8 @@ export interface TemplateTranslation {
   content: string;
   language: string;
   status: string;
-  variable_count: number;
+  variables: { type: string }[];
+  components: Component[];
 }
 
 export interface TemplateOptions {
@@ -545,7 +549,8 @@ export interface StartSession extends RecipientsAction {
 export interface UIMetaData {
   nodes: { [key: string]: UINode };
   languages: { [iso: string]: string }[];
-  translation_filters?: { categories: boolean; rules: boolean };
+  translation_filters?: { categories: boolean };
+  auto_translations?: { [language: string]: { [uuid: string]: string[] } };
 }
 
 export interface FlowPosition {

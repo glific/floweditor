@@ -68,10 +68,14 @@ exports[`TicketRouterForm render should render 1`] = `
                 expressions=""
                 name="Topic"
                 namekey="name"
+<<<<<<< HEAD
                 placeholder="Select"
+=======
+                placeholder="Select a topic"
+>>>>>>> upstream/main
                 searchable="true"
-                valuekey="value"
-                values="[]"
+                valuekey="uuid"
+                values="[{\\"uuid\\":\\"b6e1babf2-85bc-477e-b706-de313a022979\\",\\"name\\":\\"Default\\"}]"
               />
             </div>
           </div>
@@ -97,7 +101,7 @@ exports[`TicketRouterForm render should render 1`] = `
           </div>
         </div>
         <div
-          class="body"
+          class="note"
         >
           <div
             class="ele"
@@ -106,9 +110,9 @@ exports[`TicketRouterForm render should render 1`] = `
               class="wrapper normal"
             >
               <input
-                data-testid="Body"
-                name="Body"
-                placeholder="Enter a body (optional)"
+                data-testid="Note"
+                name="Note"
+                placeholder="Enter a note (optional)"
                 value="Where are my cookies"
               />
             </div>
@@ -222,10 +226,14 @@ exports[`TicketRouterForm updates should save changes 1`] = `
                 expressions=""
                 name="Topic"
                 namekey="name"
+<<<<<<< HEAD
                 placeholder="Select"
+=======
+                placeholder="Select a topic"
+>>>>>>> upstream/main
                 searchable="true"
-                valuekey="value"
-                values="[]"
+                valuekey="uuid"
+                values="[{\\"uuid\\":\\"b6e1babf2-85bc-477e-b706-de313a022979\\",\\"name\\":\\"Default\\"}]"
               />
             </div>
           </div>
@@ -251,7 +259,7 @@ exports[`TicketRouterForm updates should save changes 1`] = `
           </div>
         </div>
         <div
-          class="body"
+          class="note"
         >
           <div
             class="ele"
@@ -260,9 +268,9 @@ exports[`TicketRouterForm updates should save changes 1`] = `
               class="wrapper normal"
             >
               <input
-                data-testid="Body"
-                name="Body"
-                placeholder="Enter a body (optional)"
+                data-testid="Note"
+                name="Note"
+                placeholder="Enter a note (optional)"
                 value="Where are my cookies"
               />
             </div>

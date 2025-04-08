@@ -174,6 +174,9 @@ export class Flow extends React.PureComponent<FlowStoreProps, {}> {
 
   public componentWillUnmount(): void {
     this.Plumber.reset();
+    if ((window as any).activityTimeout) {
+      clearTimeout((window as any).activityTimeout);
+    }
   }
 
   /**
