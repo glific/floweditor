@@ -16,7 +16,7 @@ import {
   getBundleKey
 } from './helpers';
 import CheckboxElement from 'components/form/checkbox/CheckboxElement';
-import { UpdateTranslationFilters } from 'store/thunks';
+import { OnUpdateLocalizations, UpdateTranslationFilters } from 'store/thunks';
 import { getSwitchRouter } from 'components/flow/routers/helpers';
 import { getType } from 'config/typeConfigs';
 import { fakePropType } from 'config/ConfigProvider';
@@ -45,18 +45,18 @@ export interface Translation {
 }
 
 export interface TranslatorTabProps {
+  baseLanguage: Asset;
   localization: { [uuid: string]: any };
   language: Asset;
   languages: AssetMap;
-
-  translationFilters: { categories: boolean; rules: boolean };
-
+  translationFilters: { categories: boolean };
   nodes: RenderNodeMap;
   onToggled: (visible: boolean, tab: PopTabType) => void;
   onTranslationClicked: (bundle: TranslationBundle) => void;
   onTranslationOpened: (bundle: TranslationBundle) => void;
   onTranslationFilterChanged: UpdateTranslationFilters;
   popped: string;
+  onUpdateLocalizations: OnUpdateLocalizations;
 }
 
 export interface TranslatorTabState {
@@ -65,7 +65,7 @@ export interface TranslatorTabState {
   translationBundles: TranslationBundle[];
   optionsVisible: boolean;
   pctComplete: number;
-  translationFilters: { categories: boolean; rules: boolean };
+  translationFilters: { categories: boolean };
 }
 
 export class TranslatorTab extends React.Component<TranslatorTabProps, TranslatorTabState> {
@@ -82,7 +82,7 @@ export class TranslatorTab extends React.Component<TranslatorTabProps, Translato
       translationBundles: [],
       optionsVisible: false,
       pctComplete: 0,
-      translationFilters: props.translationFilters || { categories: true, rules: true }
+      translationFilters: props.translationFilters || { categories: true }
     };
 
     bindCallbacks(this, {
@@ -117,7 +117,7 @@ export class TranslatorTab extends React.Component<TranslatorTabProps, Translato
       // check for router level translations
       if (
         renderNode.node.router &&
-        (this.state.translationFilters.categories || this.state.translationFilters.rules)
+        (renderNode.node.router && this.state.translationFilters.categories)
       ) {
         const typeConfig = getTypeConfig(getType(renderNode));
 
@@ -134,23 +134,6 @@ export class TranslatorTab extends React.Component<TranslatorTabProps, Translato
               )
             );
           });
-        }
-
-        if (this.state.translationFilters.rules) {
-          const localizeableKeys = ['arguments'];
-          const switchRouter = getSwitchRouter(renderNode.node);
-          if (switchRouter) {
-            switchRouter.cases.forEach((kase: Case) => {
-              translations.push(
-                ...findTranslations(
-                  TranslationType.CASE,
-                  localizeableKeys,
-                  kase,
-                  this.props.localization
-                )
-              );
-            });
-          }
         }
 
         if (translations.length > 0) {
@@ -223,20 +206,9 @@ export class TranslatorTab extends React.Component<TranslatorTabProps, Translato
   }
 
   private toggleCategories(categories: boolean): void {
-    this.setState(
-      { translationFilters: { categories, rules: this.state.translationFilters.rules } },
-      () => {
-        this.props.onTranslationFilterChanged(this.state.translationFilters);
-      }
-    );
-  }
-  private toggleRules(rules: boolean): void {
-    this.setState(
-      { translationFilters: { rules, categories: this.state.translationFilters.categories } },
-      () => {
-        this.props.onTranslationFilterChanged(this.state.translationFilters);
-      }
-    );
+    this.setState({ translationFilters: { categories } }, () => {
+      this.props.onTranslationFilterChanged(this.state.translationFilters);
+    });
   }
 
   private renderMissing(key: string, from: string, summary: string) {
@@ -367,14 +339,6 @@ export class TranslatorTab extends React.Component<TranslatorTabProps, Translato
                     checked={this.state.translationFilters.categories}
                     description={'Categories'}
                     onChange={this.toggleCategories}
-                  />
-                </div>
-                <div>
-                  <CheckboxElement
-                    name={i18n.t('forms.rules', 'rules')}
-                    checked={this.state.translationFilters.rules}
-                    description={'Rule Arguments'}
-                    onChange={this.toggleRules}
                   />
                 </div>
               </div>

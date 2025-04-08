@@ -29,7 +29,8 @@
       border-bottom-right-radius: 0px !important;
     }
 
-
+    border-left: 1px solid darken($translation_bg, 5%);
+    background: $translation_bg;
 
     .endpoint {
       position: relative;
@@ -49,7 +50,6 @@
   }
 
   &.missing_localization {
-
     color: $translation_missing;
     border-left: 1px solid darken($translation_bg, 5%);
     background: $translation_bg;

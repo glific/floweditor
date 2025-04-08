@@ -61,7 +61,9 @@ export default class TicketRouterForm extends React.Component<
     const updates: Partial<TicketRouterFormState> = {};
 
     if (keys.hasOwnProperty('assignee')) {
-      updates.assignee = validate(i18n.t('forms.assignee', 'Assignee'), keys.assignee, []);
+      updates.assignee = validate(i18n.t('forms.assignee', 'Assignee'), keys.assignee, [
+        shouldRequireIf(submitting)
+      ]);
     }
 
     if (keys.hasOwnProperty('topic')) {
@@ -108,13 +110,6 @@ export default class TicketRouterForm extends React.Component<
   }
 
   private handleSave(): void {
-    // force our default topic if it's not set
-    // we have to do it here, because setState is async
-    // if (this.state.topic.value === null) {
-    // eslint-disable-next-line react/no-direct-mutation-state
-    // this.state.topic.value = this.context.config.defaultTopic;
-    // }
-
     // validate all fields in case they haven't interacted
     const valid = this.handleUpdate(
       {
@@ -158,6 +153,7 @@ export default class TicketRouterForm extends React.Component<
               endpoint={this.context.config.endpoints.topics}
               onChange={this.handleTopicUpdate}
               value={this.state.topic.value || this.context.config.defaultTopic}
+              createPrefix={i18n.t('forms.topic_prefix', 'Create Topic: ')}
               searchable={true}
               errors={(this.state.topic.validationFailures || []).map(failure => failure.message)}
             />

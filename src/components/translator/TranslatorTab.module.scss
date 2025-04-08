@@ -43,8 +43,6 @@
   background: $red;
 }
 
-
-
 .options {
   background: #777;
   color: $light_gray_2;
@@ -55,6 +53,7 @@
 
     .filters {
       height: 35px;
+      padding: 6px;
       opacity: 1;
       padding-bottom: 0px;
 
@@ -67,6 +66,14 @@
       .toggle {
         transform: rotate(0deg);
       }
+    }
+  }
+
+  &.change_visible {
+    .changeLanguage {
+      height: 20px;
+      padding: 6px;
+      opacity: 1;
     }
   }
 
@@ -135,8 +142,8 @@
     .pct_complete {
       font-size: 18px;
       align-self: center;
-
-      padding: 0px 6px;
+      margin-top: -6px;
+      padding: 0px 4px;
       opacity: 0;
       cursor: pointer;
       transition: opacity 600ms ease-in-out;
@@ -147,22 +154,14 @@
       --checkbox-padding: 2px 6px;
       --checkbox-hover-bg: rgba(0, 0, 0, 0.1);
       --color-text: rgba(255, 255, 255, 0.8);
-
+      > div:last-child {
+        margin-top: 4px;
+      }
     }
   }
 
   .buttons {
     display: flex;
-
-    button {
-      background: rgba(0, 0, 0, 0.1);
-      color: $light_gray_2;
-      border: solid 1px rgba(255, 255, 255, 0.5);
-      width: 100%;
-      border-radius: var(--curvature);
-      margin: 4px;
-      padding: 2px 0px;
-    }
 
     button:hover {
       background: rgba(0, 0, 0, 0.2);
@@ -179,6 +178,17 @@
     background: #fff;
   }
 
+  .changeLanguage {
+    height: 0px;
+    opacity: 0;
+
+    button {
+      background: #777;
+      color: $light_gray_2;
+      border: solid 1px $light_gray_2;
+      width: 100%;
+    }
+  }
 }
 
 .translate_block {

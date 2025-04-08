@@ -491,14 +491,16 @@ export const handleLanguageChange: HandleLanguageChange = language => (dispatch,
   }
 };
 
-export const onUpdateLocalizations = (language: string, changes: LocalizationUpdates) => (
-  dispatch: DispatchWithState,
-  getState: GetState
-): FlowDefinition => {
+export const onUpdateLocalizations = (
+  language: string,
+  autoTranslated: boolean,
+  changes: LocalizationUpdates
+) => (dispatch: DispatchWithState, getState: GetState): FlowDefinition => {
   const {
     flowContext: { definition }
   } = getState();
-  const updated = mutators.updateLocalization(definition, language, changes);
+
+  const updated = mutators.updateLocalization(definition, language, changes, autoTranslated);
   dispatch(updateDefinition(updated));
 
   markDirty();

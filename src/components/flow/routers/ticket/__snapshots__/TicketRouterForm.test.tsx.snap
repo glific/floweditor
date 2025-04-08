@@ -68,11 +68,7 @@ exports[`TicketRouterForm render should render 1`] = `
                 expressions=""
                 name="Topic"
                 namekey="name"
-<<<<<<< HEAD
                 placeholder="Select"
-=======
-                placeholder="Select a topic"
->>>>>>> upstream/main
                 searchable="true"
                 valuekey="uuid"
                 values="[{\\"uuid\\":\\"b6e1babf2-85bc-477e-b706-de313a022979\\",\\"name\\":\\"Default\\"}]"
@@ -226,11 +222,7 @@ exports[`TicketRouterForm updates should save changes 1`] = `
                 expressions=""
                 name="Topic"
                 namekey="name"
-<<<<<<< HEAD
                 placeholder="Select"
-=======
-                placeholder="Select a topic"
->>>>>>> upstream/main
                 searchable="true"
                 valuekey="uuid"
                 values="[{\\"uuid\\":\\"b6e1babf2-85bc-477e-b706-de313a022979\\",\\"name\\":\\"Default\\"}]"
