@@ -822,7 +822,7 @@ exports[`TranslatorTab renders 1`] = `
             <div
               class="header_label"
             >
-              Spanish
+              Spanish Translations
             </div>
           </div>
           <div
@@ -863,7 +863,7 @@ exports[`TranslatorTab renders 1`] = `
                   <div>
                     <temba-checkbox
                       checked="true"
-                      label="Include categories"
+                      help_text="Categories"
                     />
                   </div>
                 </div>
@@ -875,7 +875,7 @@ exports[`TranslatorTab renders 1`] = `
                 </div>
               </div>
               <div
-                class="buttons"
+                class="changeLanguage"
               />
             </div>
           </div>

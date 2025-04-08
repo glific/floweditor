@@ -31,7 +31,10 @@ describe(TicketRouterForm.name, () => {
       expect(baseElement).toMatchSnapshot();
 
       const okButton = getByText('Ok');
+      const resultName = getByTestId('Result Name');
 
+      // our body and result name are required
+      fireChangeText(resultName, '');
       fireEvent.click(okButton);
       expect(ticketForm.updateRouter).not.toBeCalled();
 
@@ -50,7 +53,7 @@ describe(TicketRouterForm.name, () => {
         uuid: '6f38eba0-d673-4a35-82df-21bae2b6d466'
       });
 
-      // fireChangeText(resultName, 'My Ticket Result');
+      fireChangeText(resultName, 'My Ticket Result');
 
       fireEvent.click(okButton);
       expect(ticketForm.updateRouter).toBeCalled();

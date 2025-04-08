@@ -7,7 +7,8 @@ import {
   createSendMsgAction,
   createExit,
   createMatchRouter,
-  createSendEmailAction
+  createSendEmailAction,
+  English
 } from 'testUtils/assetCreators';
 import { RenderNodeMap } from 'store/flowContext';
 import { createUUID } from 'utils';
@@ -15,6 +16,7 @@ import { Category } from 'flowTypes';
 import { getSwitchRouter } from 'components/flow/routers/helpers';
 
 const translatorProps: TranslatorTabProps = {
+  baseLanguage: English,
   localization: {},
   nodes: {},
   languages: {},
@@ -27,12 +29,12 @@ const translatorProps: TranslatorTabProps = {
   onTranslationFilterChanged: jest.fn(),
 
   translationFilters: {
-    categories: true,
-    rules: true
+    categories: true
   },
 
   // translation
-  language: Spanish
+  language: Spanish,
+  onUpdateLocalizations: jest.fn()
 };
 
 const createMessageNode = (
@@ -92,7 +94,7 @@ const createRouterNode = (
 describe(TranslatorTab.name, () => {
   it('renders', () => {
     const { baseElement, getByText } = render(<TranslatorTab {...translatorProps} />);
-    getByText('Spanish');
+    getByText('Spanish Translations');
     expect(baseElement).toMatchSnapshot();
   });
 
@@ -154,6 +156,8 @@ describe(TranslatorTab.name, () => {
 
     // category list
     getByText('Blue, Other');
+    getByText('50%');
+
     expect(baseElement).toMatchSnapshot();
   });
 
@@ -166,6 +170,7 @@ describe(TranslatorTab.name, () => {
 
     rerender(<TranslatorTab {...translatorProps} {...updates} />);
     expect(queryByText('Hello World!')).toBeNull();
+    getByText('50%');
     expect(baseElement).toMatchSnapshot();
   });
 });
