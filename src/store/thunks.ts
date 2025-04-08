@@ -236,59 +236,57 @@ export const createDirty = (
 
   lastDirtyAttemptTimeout = window.setTimeout(() => {
     postingRevision = true;
-    saveRevision(revisionsEndpoint, newDefinition)
-      .then(
-        (result: SaveResult) => {
-          const revision = result.revision;
-          definition.revision = revision.revision;
-          dispatch(updateDefinition(definition));
-          dispatch(updateIssues(createFlowIssueMap(issues, result.issues)));
+    saveRevision(revisionsEndpoint, newDefinition).then(
+      (result: SaveResult) => {
+        const revision = result.revision;
+        definition.revision = revision.revision;
+        dispatch(updateDefinition(definition));
+        dispatch(updateIssues(createFlowIssueMap(issues, result.issues)));
 
-          if (result.metadata) {
-            dispatch(updateMetadata(result.metadata));
-          }
-
-          const updatedAssets = mutators.addRevision(assetStore, revision);
-          dispatch(updateAssets(updatedAssets));
-          dispatch(
-            mergeEditorState({
-              currentRevision: revision.revision,
-              saving: false,
-              activityInterval: ACTIVITY_INTERVAL
-            })
-          );
-
-          lastSuccessfulMillis = new Date().getTime();
-          postingRevision = false;
-        },
-        (error: AxiosError) => {
-          let body = NETWORK_ERROR;
-
-          if (error.response && error.response.status === 500) {
-            body = SERVER_ERROR;
-          }
-
-          if (error.response && error.response.data && error.response.data.description) {
-            body = error.response.data.description;
-          }
-
-          if (error.message) {
-            body = error.message;
-          }
-
-          dispatch(
-            mergeEditorState({
-              modalMessage: {
-                title: "Uh oh, we couldn't save your changes",
-                body
-              },
-              saving: false
-            })
-          );
-          postingRevision = false;
+        if (result.metadata) {
+          dispatch(updateMetadata(result.metadata));
         }
-      )
-      .catch(() => {
+
+        const updatedAssets = mutators.addRevision(assetStore, revision);
+        dispatch(updateAssets(updatedAssets));
+        dispatch(
+          mergeEditorState({
+            currentRevision: revision.revision,
+            saving: false,
+            activityInterval: ACTIVITY_INTERVAL
+          })
+        );
+
+        lastSuccessfulMillis = new Date().getTime();
+        postingRevision = false;
+      },
+      (error: AxiosError) => {
+        let body = NETWORK_ERROR;
+
+        if (error.response && error.response.status === 500) {
+          body = SERVER_ERROR;
+        }
+
+        if (error.response && error.response.data && error.response.data.description) {
+          body = error.response.data.description;
+        }
+
+        if (error.message) {
+          body = error.message;
+        }
+
+        dispatch(
+          mergeEditorState({
+            modalMessage: {
+              title: "Uh oh, we couldn't save your changes",
+              body
+            },
+            saving: false
+          })
+        );
+        postingRevision = false;
+      }
+    ).catch(() => {
         dispatch(
           mergeEditorState({
             modalMessage: {
