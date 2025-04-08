@@ -52,7 +52,7 @@ exports[`TranslatorTab finds email translations 1`] = `
             <div
               class="header_label"
             >
-              Spanish
+              Spanish Translations
             </div>
           </div>
           <div
@@ -135,7 +135,7 @@ exports[`TranslatorTab finds email translations 1`] = `
                   <div>
                     <temba-checkbox
                       checked="true"
-                      label="Include categories"
+                      help_text="Categories"
                     />
                   </div>
                 </div>
@@ -210,7 +210,7 @@ exports[`TranslatorTab finds message translations 1`] = `
             <div
               class="header_label"
             >
-              Spanish
+              Spanish Translations
             </div>
           </div>
           <div
@@ -307,7 +307,7 @@ exports[`TranslatorTab finds message translations 1`] = `
                   <div>
                     <temba-checkbox
                       checked="true"
-                      label="Include categories"
+                      help_text="Categories"
                     />
                   </div>
                 </div>
@@ -384,7 +384,7 @@ exports[`TranslatorTab finds split translations 1`] = `
             <div
               class="header_label"
             >
-              Spanish
+              Spanish Translations
             </div>
           </div>
           <div
@@ -453,7 +453,7 @@ exports[`TranslatorTab finds split translations 1`] = `
                   <div>
                     <temba-checkbox
                       checked="true"
-                      label="Include categories"
+                      help_text="Categories"
                     />
                   </div>
                 </div>
@@ -531,7 +531,7 @@ exports[`TranslatorTab handles partial category translation 1`] = `
             <div
               class="header_label"
             >
-              Spanish
+              Spanish Translations
             </div>
           </div>
           <div
@@ -600,7 +600,7 @@ exports[`TranslatorTab handles partial category translation 1`] = `
                   <div>
                     <temba-checkbox
                       checked="true"
-                      label="Include categories"
+                      help_text="Categories"
                     />
                   </div>
                 </div>
@@ -679,7 +679,7 @@ exports[`TranslatorTab hides completed translations 1`] = `
             <div
               class="header_label"
             >
-              Spanish
+              Spanish Translations
             </div>
           </div>
           <div
@@ -687,8 +687,36 @@ exports[`TranslatorTab hides completed translations 1`] = `
             style="background: rgb(119, 119, 119);"
           >
             <div
-              class="translations_wrapper complete"
-            />
+              class="translations_wrapper"
+            >
+              <div
+                class="translate_block"
+              >
+                <div
+                  class="needs_translation"
+                >
+                  <div
+                    class="type_name"
+                  >
+                    Send Message
+                  </div>
+                  <div
+                    class="item"
+                  >
+                    <div
+                      class="text from_text"
+                    >
+                      yes, no
+                    </div>
+                    <div
+                      class="text attribute"
+                    >
+                      Quick Replies
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div
               class="options"
             >
@@ -699,8 +727,8 @@ exports[`TranslatorTab hides completed translations 1`] = `
                   class="progress_bar"
                 >
                   <div
-                    class="filled hundredpct"
-                    style="width: 100%;"
+                    class="filled"
+                    style="width: 50%;"
                   />
                 </div>
                 <div
@@ -720,19 +748,19 @@ exports[`TranslatorTab hides completed translations 1`] = `
                   <div>
                     <temba-checkbox
                       checked="true"
-                      label="Include categories"
+                      help_text="Categories"
                     />
                   </div>
                 </div>
                 <div
                   class="pct_complete"
                 >
-                  100
+                  50
                   %
                 </div>
               </div>
               <div
-                class="buttons"
+                class="changeLanguage"
               />
             </div>
           </div>

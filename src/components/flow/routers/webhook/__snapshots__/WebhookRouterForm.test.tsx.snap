@@ -21,6 +21,9 @@ exports[`WebhookRouterForm should render 1`] = `
         "body": <div
           className="body_form"
         >
+          <h4>
+            GET Body
+          </h4>
           <p>
             <Trans
               i18nKey="forms.webhook_body_summary"

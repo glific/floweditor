@@ -101,7 +101,6 @@ exports[`MsgLocalizationForm inits inits with initial values 1`] = `
     </div>
   </div>
   <TextInputElement
-    __className="message"
     autocomplete={true}
     entry={
       Object {
@@ -219,7 +218,6 @@ exports[`MsgLocalizationForm render should render 1`] = `
     </div>
   </div>
   <TextInputElement
-    __className="message"
     autocomplete={true}
     entry={
       Object {

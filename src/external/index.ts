@@ -154,7 +154,7 @@ export const getAssetPage = (url: string, type: AssetType, id: string): Promise<
         if (
           // test assets don't have headers or status
           (!response.headers && !response.status) ||
-          (response.headers['content-type'] === 'application/json' &&
+          (response.headers['content-type'].includes('application/json') &&
             response.status >= 200 &&
             response.status < 300)
         ) {
@@ -454,15 +454,8 @@ export const getFlowDetails = (revisions: Assets, id: string = null): Promise<Fl
         axios
           .get(url)
           .then((response: AxiosResponse) => {
-            if (
-              response.headers['content-type'] === 'application/json' &&
-              response.status >= 200 &&
-              response.status < 300
-            ) {
-              const details = response.data as FlowDetails;
-              return resolve(details);
-            }
-            return reject(response);
+            const details = response.data as FlowDetails;
+            return resolve(details);
           })
           .catch(error => reject(error));
       } else {
