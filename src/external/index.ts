@@ -55,6 +55,9 @@ export const saveRevision = (endpoint: string, definition: FlowDefinition): Prom
   definition.spec_version = [SPEC_VERSION, patch].join('.');
 
   return new Promise<SaveResult>((resolve, reject) => {
+    if (!csrf) {
+      throw new Error('Session expired. Please refresh the page.');
+    }
     axios
       .post(endpoint, definition, { headers })
       .then((response: AxiosResponse) => {
