@@ -1,5 +1,6 @@
 import { Methods } from 'components/flow/routers/webhook/helpers';
 import { FlowTypes, Operators, Types, ContactStatus } from 'config/interfaces';
+import { Component } from 'react';
 import { AssetStore } from 'store/flowContext';
 import { ExclusionsCheckboxEntry } from 'store/nodeEditor';
 
@@ -371,6 +372,8 @@ export interface TemplateTranslation {
   content: string;
   language: string;
   status: string;
+  variables: { type: string }[];
+  components: Component[];
   variable_count: number;
 }
 
@@ -399,6 +402,11 @@ export interface SendMsg extends Action {
   templating?: MsgTemplating;
   labels?: Label[];
   skipValidation?: boolean;
+  template?: {
+    uuid: string;
+    name: string;
+  };
+  template_variables?: string[];
 }
 
 export interface SendInteractiveMsg extends Action {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { react as bindCallbacks } from 'auto-bind';
@@ -48,6 +49,7 @@ import { FeatureFilter } from 'config/interfaces';
 import i18n from 'config/i18n';
 import { Attachment, renderAttachments, validateURL } from './attachments';
 import { AddLabelsFormState } from '../addlabels/AddLabelsForm';
+import { TembaComponent } from 'temba/TembaComponent';
 
 export interface SendMsgFormState extends FormState {
   message: StringEntry;
@@ -57,9 +59,9 @@ export interface SendMsgFormState extends FormState {
   attachments: Attachment[];
   uploadInProgress: boolean;
   uploadError: string;
-  template: FormEntry;
+  template: { uuid: string; name: string };
   topic: SelectOptionEntry;
-  templateVariables: StringEntry[];
+  templateVariables: string[];
   templateTranslation?: TemplateTranslation;
   labels?: any;
   expression?: any;
@@ -88,16 +90,6 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     bindCallbacks(this, {
       include: [/^handle/, /^on/]
     });
-    // intialize our templates if we have them
-    if (this.state.template.value !== null && this.state.template.value.name !== 'Expression') {
-      fetchAsset(this.props.assetStore.templates, this.state.template.value.uuid).then(
-        (asset: Asset) => {
-          if (asset !== null) {
-            this.handleTemplateChanged([{ ...this.state.template.value, ...asset.content }]);
-          }
-        }
-      );
-    }
   }
 
   public static contextTypes = {
@@ -117,7 +109,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     if (keys.hasOwnProperty('text')) {
       let validatorFuncs = [
         shouldRequireIf(
-          submitting && !this.state.template.value && this.state.attachments.length === 0
+          submitting && !this.state.template.name && this.state.attachments.length === 0
         ),
         CharactersLessThan(4096, '4096 characters')
       ];
@@ -134,10 +126,10 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
         ['image', 'video', 'document'].includes(keys.template.value.type) &&
         this.state.attachments.length === 0
       ) {
-        updates.template = {
-          ...keys.template,
-          validationFailures: [{ message: 'Attachment is required for media template' }]
-        };
+        // updates.template = {
+        //   ...keys.template,
+        //   validationFailures: [{ message: 'Attachment is required for media template' }]
+        // };
       }
     }
 
@@ -178,38 +170,61 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     return this.handleUpdate({ sendAll });
   }
 
+  private hasTemplateErrors(): boolean {
+    // if there is an attachment variable, make sure it's not empty
+    const { templateVariables, templateTranslation } = this.state;
+    if (templateTranslation && templateVariables && templateTranslation.variables.length > 0) {
+      const hasMissingAttachment = !!templateTranslation.variables.find(
+        (variable: any, index: number) => {
+          if (
+            variable.type === 'image' ||
+            variable.type === 'document' ||
+            variable.type === 'video' ||
+            variable.type === 'audio'
+          ) {
+            if (templateVariables[index] === '') {
+              return true;
+            }
+          }
+          return false;
+        }
+      );
+      if (hasMissingAttachment) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private handleSave(): void {
     if (this.state.attachments.length > 0 && this.state.attachments[0].valid) {
       return;
     }
 
     // make sure we validate untouched text fields and contact fields
-    let valid = true;
-
-    let templateVariables = this.state.templateVariables;
-    let template = this.state.template;
-
-    // make sure we don't have untouched template variables
-    this.state.templateVariables.forEach((variable: StringEntry, num: number) => {
-      const updated = validate(`Variable ${num + 1}`, variable.value, [Required]);
-      templateVariables = mutate(templateVariables, {
-        [num]: { $merge: updated }
-      }) as StringEntry[];
-      valid = valid && !hasErrors(updated);
-    });
-
-    valid = valid && this.handleMessageUpdate(this.state.message.value, 'message', true);
-
-    valid = valid && this.handleTemplateUpdate(template, true);
-
-    valid = valid && !hasErrors(this.state.quickReplyEntry);
+    let valid = this.handleMessageUpdate(this.state.message.value, null, true);
+    valid = valid && !hasErrors(this.state.quickReplyEntry) && !this.hasTemplateErrors();
 
     if (valid) {
       this.props.updateAction(stateToAction(this.props.nodeSettings, this.state));
+
+      // if we had a template and it doen't match our new template
+      if (this.props.nodeSettings.originalAction) {
+        const originalTemplate = (this.props.nodeSettings.originalAction as any).template;
+        if (originalTemplate) {
+          if (
+            (this.state.template && this.state.template.uuid !== originalTemplate.uuid) ||
+            !this.state.template
+          ) {
+            this.props.removeLocalizations(this.props.nodeSettings.originalAction.uuid, [
+              'template_variables'
+            ]);
+          }
+        }
+      }
+
       // notify our modal we are done
       this.props.onClose(false);
-    } else {
-      this.setState({ templateVariables, valid });
     }
   }
 
@@ -223,45 +238,20 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     };
   }
 
-  private handleTemplateChanged(selected: any[]): void {
-    const template = selected ? selected[0] : null;
-
-    if (!template) {
-      this.setState({
-        expression: null,
-        template: { value: null },
-        templateTranslation: null,
-        templateVariables: []
-      });
-    } else {
-      const templateTranslation = template.translations[0];
-      const templateVariables =
-        this.state.templateVariables.length === 0 ||
-        (this.state.template.value && this.state.template.value.uuid !== template.uuid)
-          ? range(0, templateTranslation.variable_count).map(() => {
-              return {
-                value: ''
-              };
-            })
-          : this.state.templateVariables;
-
-      this.setState({
-        expression: null,
-        template: { value: template },
-        templateTranslation,
-        templateVariables
-      });
-    }
-    if (template.name === 'Expression') {
-      this.setState({ expression: { value: this.state.expression } });
-    }
+  private handleTemplateChanged(event: any): void {
+    const { template, translation, variables } = event.detail;
+    this.setState({
+      template: template ? { uuid: template.uuid, name: template.name } : null,
+      templateVariables: variables,
+      templateTranslation: translation
+    });
   }
 
   private handleTemplateVariableChanged(updatedText: string, num: number): void {
     const entry = validate(`Variable ${num + 1}`, updatedText, [Required]);
     const templateVariables = mutate(this.state.templateVariables, {
       $merge: { [num]: entry }
-    }) as StringEntry[];
+    }) as string[];
     this.setState({ templateVariables });
   }
 
@@ -323,6 +313,8 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
   }
 
   private renderTemplateConfig(): JSX.Element {
+    const uuid = this.state.template ? this.state.template.uuid : null;
+
     return (
       <>
         <p>
@@ -331,17 +323,23 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
             'Sending messages over a WhatsApp channel requires that a template be used if you have not received a message from a contact in the last 24 hours. Setting a template to use over WhatsApp is especially important for the first message in your flow.'
           )}
         </p>
-        <AssetSelector
-          additionalOptions={[additionalOption]}
-          name={i18n.t('forms.template', 'template')}
-          noOptionsMessage="No templates found"
-          assets={this.props.assetStore.templates}
-          entry={this.state.template}
-          onChange={this.handleTemplateChanged}
-          shouldExclude={this.handleShouldExcludeTemplate}
-          searchable={true}
-          formClearable={true}
-        />
+        <TembaComponent
+          tag="temba-template-editor"
+          eventHandlers={{
+            'temba-context-changed': this.handleTemplateChanged,
+            'temba-content-changed': this.handleTemplateVariableChanged
+          }}
+          template={uuid}
+          url={this.props.assetStore.templates.endpoint}
+          variables={JSON.stringify(this.state.templateVariables)}
+          lang={
+            this.props.language
+              ? this.props.language.id !== 'base'
+                ? this.props.language.id
+                : null
+              : null
+          }
+        ></TembaComponent>
         {this.state.expression && (
           <div className={styles.expression}>
             <TextInputElement
@@ -371,11 +369,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
                     onChange={(updatedText: string) => {
                       this.handleTemplateVariableChanged(updatedText, num);
                     }}
-                    entry={
-                      this.state.templateVariables[num] === undefined
-                        ? { value: '' }
-                        : this.state.templateVariables[num]
-                    }
+                    // entry={this.state.templateVariables[num]}
                     autocomplete={true}
                   />
                 </div>
@@ -549,10 +543,17 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
       const templates: Tab = {
         name: 'WhatsApp',
         body: this.renderTemplateConfig(),
-        checked: this.state.template.value != null,
-        hasErrors:
-          !!this.state.templateVariables.find((entry: StringEntry) => hasErrors(entry)) ||
-          hasErrors(this.state.template)
+        checked: this.state.template !== null,
+        hasErrors: this.hasTemplateErrors()
+      };
+      tabs.splice(0, 0, templates);
+    }
+
+    if (hasFeature(this.context.config, FeatureFilter.HAS_FACEBOOK)) {
+      const templates: Tab = {
+        name: 'Facebook',
+        body: this.renderTopicConfig(),
+        checked: this.state.topic.value != null
       };
       tabs.splice(0, 0, templates);
     }

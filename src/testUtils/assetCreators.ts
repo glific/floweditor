@@ -483,6 +483,9 @@ export const getActionFormProps = (action: AnyAction): ActionFormProps => ({
     recipients: { items: {}, type: AssetType.Contact || AssetType.Group || AssetType.URN }
   },
   helpArticles: {},
+  language: null,
+  removeLocalizations: jest.fn(),
+
   addAsset: jest.fn(),
   updateAction: jest.fn(),
   onClose: jest.fn(),
