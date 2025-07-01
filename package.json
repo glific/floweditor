@@ -2,7 +2,7 @@
   "name": "@glific/flow-editor",
   "license": "AGPL-3.0",
   "repository": "git://github.com/glific/floweditor.git",
-  "version": "1.33.0",
+  "version": "1.37.0",
   "description": "'Standalone flow editing tool designed for use within the RapidPro suite of messaging tools but can be adopted for use outside of that ecosystem.'",
   "browser": "umd/flow-editor.min.js",
   "unpkg": "umd/flow-editor.min.js",
@@ -12,6 +12,7 @@
   ],
   "private": false,
   "dependencies": {
+    "@nyaruka/temba-components": "0.101.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-icons": "4.1.0"
@@ -22,7 +23,6 @@
     "lambda": "yarn run lambda:build && yarn run lambda:serve",
     "prettify": "prettier --write 'src/**/*.{ts,tsx,json,js,css,md}'",
     "netlify": "yarn run build && yarn run lambda:build",
-    "precommit": "lint-staged",
     "preversion": "yarn test --watchAll=false",
     "postversion": "git push --tags && git push origin main",
     "version": "yarn run build && auto-changelog -p && git add CHANGELOG.md",
@@ -159,5 +159,10 @@
     "typescript": "3.4.5",
     "uniqid": "5.0.3",
     "uuid": "3.3.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }

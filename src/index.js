@@ -44,3 +44,11 @@ document.dispatchEvent(new CustomEvent('temba-floweditor-loaded'));
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();
+
+export const showError = (error = null) => {
+  if (window.showErrorDialog) {
+    window.showErrorDialog(error);
+  } else {
+    console.error(error);
+  }
+};

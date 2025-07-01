@@ -84,6 +84,8 @@ const additionalOption = {
 export default class SendMsgForm extends React.Component<ActionFormProps, SendMsgFormState> {
   private timeout: any;
 
+  saveAttempted = false;
+
   constructor(props: ActionFormProps, context: any) {
     super(props);
     this.state = stateToForm(this.props.nodeSettings, context.config);
@@ -205,6 +207,8 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
   }
 
   private handleSave(): void {
+    this.saveAttempted = true;
+
     if (this.state.attachments.length > 0 && this.state.attachments[0].valid) {
       return;
     }
@@ -374,7 +378,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
             'Sending messages over a WhatsApp channel requires that a template be used if you have not received a message from a contact in the last 24 hours. Setting a template to use over WhatsApp is especially important for the first message in your flow.'
           )}
         </p>
-        d
+
         <AssetSelector
           additionalOptions={[additionalOption]}
           name={i18n.t('forms.template', 'template')}

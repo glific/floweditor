@@ -97,7 +97,7 @@ exports[`TicketRouterForm render should render 1`] = `
           </div>
         </div>
         <div
-          class="body"
+          class="note"
         >
           <div
             class="ele"
@@ -106,9 +106,9 @@ exports[`TicketRouterForm render should render 1`] = `
               class="wrapper normal"
             >
               <input
-                data-testid="Body"
-                name="Body"
-                placeholder="Enter a body (optional)"
+                data-testid="Note"
+                name="Note"
+                placeholder="Enter a note (optional)"
                 value="Where are my cookies"
               />
             </div>
@@ -251,7 +251,7 @@ exports[`TicketRouterForm updates should save changes 1`] = `
           </div>
         </div>
         <div
-          class="body"
+          class="note"
         >
           <div
             class="ele"
@@ -260,9 +260,9 @@ exports[`TicketRouterForm updates should save changes 1`] = `
               class="wrapper normal"
             >
               <input
-                data-testid="Body"
-                name="Body"
-                placeholder="Enter a body (optional)"
+                data-testid="Note"
+                name="Note"
+                placeholder="Enter a note (optional)"
                 value="Where are my cookies"
               />
             </div>

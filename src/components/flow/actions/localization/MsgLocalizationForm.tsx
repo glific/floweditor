@@ -18,6 +18,7 @@ import { range } from 'utils';
 import { renderIssues } from '../helpers';
 import { Attachment, renderAttachments, validateURL } from '../sendmsg/attachments';
 import { AxiosError, AxiosResponse } from 'axios';
+import { TembaComponent } from 'temba/TembaComponent';
 
 export interface MsgLocalizationFormState extends FormState {
   message: StringEntry;
@@ -28,6 +29,10 @@ export interface MsgLocalizationFormState extends FormState {
   attachments: Attachment[];
   uploadInProgress: boolean;
   uploadError: string;
+
+  // template uuid to dict of component key to array
+  template: { uuid: string; name: string };
+  // templateVariables: string[];
 }
 
 export default class MsgLocalizationForm extends React.Component<
@@ -369,6 +374,36 @@ export default class MsgLocalizationForm extends React.Component<
       );
     }
 
+    if (this.state.template && this.state.templateVariables.length > 0) {
+      tabs.push({
+        name: 'WhatsApp',
+        body: (
+          <>
+            <p>
+              {i18n.t(
+                'forms.whatsapp_warning',
+                'Sending messages over a WhatsApp channel requires that a template be used if you have not received a message from a contact in the last 24 hours. Setting a template to use over WhatsApp is especially important for the first message in your flow.'
+              )}
+            </p>
+            {this.state.template ? (
+              <TembaComponent
+                tag="temba-template-editor"
+                eventHandlers={{
+                  'temba-content-changed': this.handleTemplateVariableChanged
+                }}
+                template={this.state.template.uuid}
+                url={this.props.assetStore.templates.endpoint}
+                lang={this.props.language.id}
+                variables={JSON.stringify(this.state.templateVariables)}
+                translating={true}
+              ></TembaComponent>
+            ) : null}
+          </>
+        ),
+        checked: this.state.templateVariables.length > 0
+      });
+    }
+
     const translation = i18n.t('forms.translation', 'Translation');
 
     return (
@@ -386,6 +421,7 @@ export default class MsgLocalizationForm extends React.Component<
 
         <TextInputElement
           name={i18n.t('forms.message', 'Message')}
+          __className={styles.message}
           showLabel={false}
           onChange={this.handleMessageUpdate}
           entry={this.state.message}

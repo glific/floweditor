@@ -86,3 +86,7 @@ temba-completion {
   display: block;
   height: 25px !important;
 }
+
+.has-errors {
+  --color-widget-border: var(--color-error);
+}

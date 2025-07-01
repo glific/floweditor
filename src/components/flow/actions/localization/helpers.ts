@@ -36,7 +36,8 @@ export const initializeLocalizedForm = (settings: NodeEditorSettings): MsgLocali
     audio: { value: null },
     valid: true,
     uploadInProgress: false,
-    uploadError: ''
+    uploadError: '',
+    template: null
   };
 
   // check if our form should use a localized action
