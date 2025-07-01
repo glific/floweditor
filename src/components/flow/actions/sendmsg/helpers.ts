@@ -19,8 +19,8 @@ export const initializeForm = (
   settings: NodeEditorSettings,
   config: FlowEditorConfig
 ): SendMsgFormState => {
-  let template: { uuid: string; name: string } = null;
-  let templateVariables: string[] = [];
+  let template: FormEntry = { value: null };
+  let templateVariables: StringEntry[] = [];
   let skipValidation = false;
 
   if (config.skipValidation) {
@@ -50,8 +50,18 @@ export const initializeForm = (
       if (action.templating.expression) {
         expressionValue = { value: action.templating.expression };
       }
-      template = action.template;
-      templateVariables = action.template_variables || [];
+      console.log(msgTemplate);
+      template = {
+        value: {
+          uuid: msgTemplate.uuid,
+          name: msgTemplate.name
+        }
+      };
+      templateVariables = action.templating.variables.map((value: string) => {
+        return {
+          value
+        };
+      });
     }
 
     const labels = action.labels
@@ -107,14 +117,14 @@ export const stateToAction = (settings: NodeEditorSettings, state: SendMsgFormSt
 
   let templating: MsgTemplating = null;
 
-  if (state.template) {
+  if (state.template && state.template.value) {
     let templatingUUID = createUUID();
     if (settings.originalAction && settings.originalAction.type === Types.send_msg) {
       const action = settings.originalAction as SendMsg;
       if (
         action.templating &&
         action.templating.template &&
-        action.templating.template.uuid === state.template.uuid
+        action.templating.template.uuid === state.template.value.id
       ) {
         templatingUUID = action.templating.uuid;
       }
@@ -123,10 +133,10 @@ export const stateToAction = (settings: NodeEditorSettings, state: SendMsgFormSt
     templating = {
       uuid: templatingUUID,
       template: {
-        uuid: state.template.uuid,
-        name: state.template.name
+        uuid: state.template.value.uuid,
+        name: state.template.value.name
       },
-      variables: state.templateVariables.map((variable: string) => variable)
+      variables: state.templateVariables.map((variable: StringEntry) => variable.value)
     };
 
     if (state.expression && state.expression.value) {

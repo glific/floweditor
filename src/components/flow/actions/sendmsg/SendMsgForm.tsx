@@ -59,9 +59,9 @@ export interface SendMsgFormState extends FormState {
   attachments: Attachment[];
   uploadInProgress: boolean;
   uploadError: string;
-  template: { uuid: string; name: string };
+  template: FormEntry;
   topic: SelectOptionEntry;
-  templateVariables: string[];
+  templateVariables: StringEntry[];
   templateTranslation?: TemplateTranslation;
   labels?: any;
   expression?: any;
@@ -90,6 +90,16 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     bindCallbacks(this, {
       include: [/^handle/, /^on/]
     });
+
+    if (this.state.template.value !== null && this.state.template.value.name !== 'Expression') {
+      fetchAsset(this.props.assetStore.templates, this.state.template.value.uuid).then(
+        (asset: Asset) => {
+          if (asset !== null) {
+            this.handleTemplateChanged([{ ...this.state.template.value, ...asset.content }]);
+          }
+        }
+      );
+    }
   }
 
   public static contextTypes = {
@@ -108,9 +118,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     const updates: Partial<SendMsgFormState> = {};
     if (keys.hasOwnProperty('text')) {
       let validatorFuncs = [
-        shouldRequireIf(
-          submitting && !this.state.template.name && this.state.attachments.length === 0
-        ),
+        shouldRequireIf(submitting && !this.state.template && this.state.attachments.length === 0),
         CharactersLessThan(4096, '4096 characters')
       ];
 
@@ -126,10 +134,10 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
         ['image', 'video', 'document'].includes(keys.template.value.type) &&
         this.state.attachments.length === 0
       ) {
-        // updates.template = {
-        //   ...keys.template,
-        //   validationFailures: [{ message: 'Attachment is required for media template' }]
-        // };
+        updates.template = {
+          ...keys.template,
+          validationFailures: [{ message: 'Attachment is required for media template' }]
+        };
       }
     }
 
@@ -182,7 +190,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
             variable.type === 'video' ||
             variable.type === 'audio'
           ) {
-            if (templateVariables[index] === '') {
+            if (templateVariables[index].value === '') {
               return true;
             }
           }
@@ -202,8 +210,25 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     }
 
     // make sure we validate untouched text fields and contact fields
-    let valid = this.handleMessageUpdate(this.state.message.value, null, true);
-    valid = valid && !hasErrors(this.state.quickReplyEntry) && !this.hasTemplateErrors();
+    let valid = true;
+
+    let templateVariables = this.state.templateVariables;
+    let template = this.state.template;
+
+    // make sure we don't have untouched template variables
+    this.state.templateVariables.forEach((variable: StringEntry, num: number) => {
+      const updated = validate(`Variable ${num + 1}`, variable.value, [Required]);
+      templateVariables = mutate(templateVariables, {
+        [num]: { $merge: updated }
+      }) as StringEntry[];
+      valid = valid && !hasErrors(updated);
+    });
+
+    valid = valid && this.handleMessageUpdate(this.state.message.value, 'message', true);
+
+    valid = valid && this.handleTemplateUpdate(template, true);
+
+    valid = valid && !hasErrors(this.state.quickReplyEntry);
 
     if (valid) {
       this.props.updateAction(stateToAction(this.props.nodeSettings, this.state));
@@ -213,7 +238,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
         const originalTemplate = (this.props.nodeSettings.originalAction as any).template;
         if (originalTemplate) {
           if (
-            (this.state.template && this.state.template.uuid !== originalTemplate.uuid) ||
+            (this.state.template && this.state.template.value.uuid !== originalTemplate.uuid) ||
             !this.state.template
           ) {
             this.props.removeLocalizations(this.props.nodeSettings.originalAction.uuid, [
@@ -225,6 +250,8 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
 
       // notify our modal we are done
       this.props.onClose(false);
+    } else {
+      this.setState({ templateVariables, valid });
     }
   }
 
@@ -237,21 +264,45 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
       }
     };
   }
+  private handleTemplateChanged(selected: any[]): void {
+    const template = selected ? selected[0] : null;
 
-  private handleTemplateChanged(event: any): void {
-    const { template, translation, variables } = event.detail;
-    this.setState({
-      template: template ? { uuid: template.uuid, name: template.name } : null,
-      templateVariables: variables,
-      templateTranslation: translation
-    });
+    if (!template) {
+      this.setState({
+        expression: null,
+        template: { value: null },
+        templateTranslation: null,
+        templateVariables: []
+      });
+    } else {
+      const templateTranslation = template.translations[0];
+      const templateVariables =
+        this.state.templateVariables.length === 0 ||
+        (this.state.template.value && this.state.template.value.uuid !== template.uuid)
+          ? range(0, templateTranslation.variable_count).map(() => {
+              return {
+                value: ''
+              };
+            })
+          : this.state.templateVariables;
+
+      this.setState({
+        expression: null,
+        template: { value: template },
+        templateTranslation,
+        templateVariables
+      });
+    }
+    if (template.name === 'Expression') {
+      this.setState({ expression: { value: this.state.expression } });
+    }
   }
 
   private handleTemplateVariableChanged(updatedText: string, num: number): void {
     const entry = validate(`Variable ${num + 1}`, updatedText, [Required]);
     const templateVariables = mutate(this.state.templateVariables, {
       $merge: { [num]: entry }
-    }) as string[];
+    }) as StringEntry[];
     this.setState({ templateVariables });
   }
 
@@ -313,7 +364,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
   }
 
   private renderTemplateConfig(): JSX.Element {
-    const uuid = this.state.template ? this.state.template.uuid : null;
+    const uuid = this.state.template ? this.state.template.value.uuid : null;
 
     return (
       <>
@@ -323,23 +374,18 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
             'Sending messages over a WhatsApp channel requires that a template be used if you have not received a message from a contact in the last 24 hours. Setting a template to use over WhatsApp is especially important for the first message in your flow.'
           )}
         </p>
-        <TembaComponent
-          tag="temba-template-editor"
-          eventHandlers={{
-            'temba-context-changed': this.handleTemplateChanged,
-            'temba-content-changed': this.handleTemplateVariableChanged
-          }}
-          template={uuid}
-          url={this.props.assetStore.templates.endpoint}
-          variables={JSON.stringify(this.state.templateVariables)}
-          lang={
-            this.props.language
-              ? this.props.language.id !== 'base'
-                ? this.props.language.id
-                : null
-              : null
-          }
-        ></TembaComponent>
+        d
+        <AssetSelector
+          additionalOptions={[additionalOption]}
+          name={i18n.t('forms.template', 'template')}
+          noOptionsMessage="No templates found"
+          assets={this.props.assetStore.templates}
+          entry={this.state.template}
+          onChange={this.handleTemplateChanged}
+          shouldExclude={this.handleShouldExcludeTemplate}
+          searchable={true}
+          formClearable={true}
+        />
         {this.state.expression && (
           <div className={styles.expression}>
             <TextInputElement
@@ -369,7 +415,11 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
                     onChange={(updatedText: string) => {
                       this.handleTemplateVariableChanged(updatedText, num);
                     }}
-                    // entry={this.state.templateVariables[num]}
+                    entry={
+                      this.state.templateVariables[num] === undefined
+                        ? { value: '' }
+                        : this.state.templateVariables[num]
+                    }
                     autocomplete={true}
                   />
                 </div>
@@ -538,7 +588,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     // };
 
     const tabs = [attachments];
-
+    console.log(this.context.config);
     if (hasFeature(this.context.config, FeatureFilter.HAS_WHATSAPP)) {
       const templates: Tab = {
         name: 'WhatsApp',
