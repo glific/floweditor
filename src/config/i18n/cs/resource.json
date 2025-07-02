@@ -217,7 +217,8 @@
     "email_recipient_name": "Příjemce",
     "email_recipient_placeholder": "Komu",
     "email_recipient_prompt": "Zadejte e-mailovou adresu",
-    "enter_a_note": "Zadejte poznámku (volitelný)",
+    "enter_a_body": "Zadejte obsah zprávy",
+
     "enter_a_subject": "Zadejte předmět",
     "enter_a_url": "Zadejte URL",
     "enter_field_value": "Zadejte novou hodnotu pro [[field]]",

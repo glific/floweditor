@@ -402,10 +402,7 @@ export interface SendMsg extends Action {
   templating?: MsgTemplating;
   labels?: Label[];
   skipValidation?: boolean;
-  template?: {
-    uuid: string;
-    name: string;
-  };
+
   template_variables?: string[];
 }
 

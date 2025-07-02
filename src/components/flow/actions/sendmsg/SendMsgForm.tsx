@@ -49,7 +49,6 @@ import { FeatureFilter } from 'config/interfaces';
 import i18n from 'config/i18n';
 import { Attachment, renderAttachments, validateURL } from './attachments';
 import { AddLabelsFormState } from '../addlabels/AddLabelsForm';
-import { TembaComponent } from 'temba/TembaComponent';
 
 export interface SendMsgFormState extends FormState {
   message: StringEntry;
@@ -93,11 +92,17 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
       include: [/^handle/, /^on/]
     });
 
+    // intialize our templates if we have them
     if (this.state.template.value !== null && this.state.template.value.name !== 'Expression') {
       fetchAsset(this.props.assetStore.templates, this.state.template.value.uuid).then(
         (asset: Asset) => {
           if (asset !== null) {
-            this.handleTemplateChanged([{ ...this.state.template.value, ...asset.content }]);
+            this.handleTemplateChanged([
+              {
+                ...this.state.template.value,
+                ...asset.content
+              }
+            ]);
           }
         }
       );
@@ -180,6 +185,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     return this.handleUpdate({ sendAll });
   }
 
+  // TODO: refacctor
   private hasTemplateErrors(): boolean {
     // if there is an attachment variable, make sure it's not empty
     const { templateVariables, templateTranslation } = this.state;
@@ -590,13 +596,14 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     // };
 
     const tabs = [attachments];
-    console.log(this.context.config);
     if (hasFeature(this.context.config, FeatureFilter.HAS_WHATSAPP)) {
       const templates: Tab = {
         name: 'WhatsApp',
         body: this.renderTemplateConfig(),
-        checked: this.state.template !== null
-        // hasErrors: this.hasTemplateErrors()
+        checked: this.state.template !== null,
+        hasErrors:
+          !!this.state.templateVariables.find((entry: StringEntry) => hasErrors(entry)) ||
+          hasErrors(this.state.template)
       };
       tabs.splice(0, 0, templates);
     }
