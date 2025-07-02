@@ -418,7 +418,6 @@ export default class MsgLocalizationForm extends React.Component<
             {(this.props.nodeSettings.originalAction as SendMsg).text}
           </div>
         </div>
-
         <TextInputElement
           name={i18n.t('forms.message', 'Message')}
           __className={styles.message}
@@ -430,7 +429,6 @@ export default class MsgLocalizationForm extends React.Component<
           focus={true}
           textarea={true}
         />
-
         {audioButton}
         {renderIssues(this.props)}
       </Dialog>

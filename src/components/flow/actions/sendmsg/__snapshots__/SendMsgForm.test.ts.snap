@@ -112,25 +112,12 @@ exports[`SendMsgForm render should render 1`] = `
                 "value": null,
               }
             }
-<<<<<<< HEAD
             formClearable={true}
             name="template"
             noOptionsMessage="No templates found"
             onChange={[Function]}
             searchable={true}
             shouldExclude={[Function]}
-=======
-            lang={null}
-            style={
-              Object {
-                "--color-widget-border": "inherit",
-              }
-            }
-            tag="temba-template-editor"
-            template={null}
-            url="assets/templates.json"
-            variables="[]"
->>>>>>> 5a6e3bb00cb0ba2845e937159bb6eb2dfc061395
           />
           <div
             className="label_container"
@@ -162,8 +149,7 @@ exports[`SendMsgForm render should render 1`] = `
             />
           </div>
         </React.Fragment>,
-        "checked": false,
-        "hasErrors": false,
+        "checked": true,
         "name": "WhatsApp",
       },
     ]

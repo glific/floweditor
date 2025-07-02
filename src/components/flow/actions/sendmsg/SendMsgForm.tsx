@@ -368,8 +368,6 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
   }
 
   private renderTemplateConfig(): JSX.Element {
-    const uuid = this.state.template ? this.state.template.value.uuid : null;
-
     return (
       <>
         <p>
@@ -597,8 +595,8 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
       const templates: Tab = {
         name: 'WhatsApp',
         body: this.renderTemplateConfig(),
-        checked: this.state.template !== null,
-        hasErrors: this.hasTemplateErrors()
+        checked: this.state.template !== null
+        // hasErrors: this.hasTemplateErrors()
       };
       tabs.splice(0, 0, templates);
     }
