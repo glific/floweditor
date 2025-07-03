@@ -4,8 +4,9 @@ import thunk from 'redux-thunk';
 
 import rootReducer from 'store/rootReducer';
 import AppState, { initialState } from 'store/state';
+import middlewareFunction from '../services/indexDB';
 
-const middlewares: Middleware[] = [thunk];
+const middlewares: Middleware[] = [thunk, middlewareFunction];
 
 export default (state: AppState = initialState) => {
   const store = createStore(
