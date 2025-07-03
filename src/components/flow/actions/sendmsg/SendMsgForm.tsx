@@ -547,7 +547,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
 
     if (hasFeature(this.context.config, FeatureFilter.HAS_WHATSAPP)) {
       const templates: Tab = {
-        name: 'WhatsApp',
+        name: 'HSM Templates',
         body: this.renderTemplateConfig(),
         checked: this.state.template.value != null,
         hasErrors:

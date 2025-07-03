@@ -57,9 +57,16 @@ export default class Dialog extends React.Component<DialogProps, DialogState> {
 
   constructor(props: DialogProps) {
     super(props);
-    this.state = {
-      activeTab: this.props.defaultTab !== null ? this.props.defaultTab : -1
-    };
+
+    if (this.props.tabs && this.props.tabs.length > 0) {
+      this.state = {
+        activeTab: this.props.tabs.length
+      };
+    } else {
+      this.state = {
+        activeTab: -1
+      };
+    }
 
     bindCallbacks(this, {
       include: [/^handle/, /^get/]
@@ -162,6 +169,15 @@ export default class Dialog extends React.Component<DialogProps, DialogState> {
   }
 
   public render(): JSX.Element {
+    const homeTab: Tab = {
+      name: 'Home',
+      body: <>{this.props.children}</>
+    };
+    let allTabs = [...(this.props.tabs || [])];
+    if (this.props.tabs && this.props.tabs.length > 0) {
+      allTabs = [...allTabs, homeTab];
+    }
+
     const headerClasses = [styles.header];
 
     if (this.state.activeTab > -1) {
@@ -205,9 +221,9 @@ export default class Dialog extends React.Component<DialogProps, DialogState> {
               <div className={styles.title}>{this.props.title}</div>
               <div className={styles.subtitle}>{this.props.subtitle}</div>
             </div>
-            {(this.props.tabs || []).length > 0 ? (
+            {allTabs.length > 0 ? (
               <div className={styles.tabs}>
-                {(this.props.tabs || []).map((tab: Tab, index: number) => (
+                {allTabs.map((tab: Tab, index: number) => (
                   <div
                     key={'tab_' + tab.name}
                     style={{ display: 'flex' }}
@@ -231,9 +247,7 @@ export default class Dialog extends React.Component<DialogProps, DialogState> {
         </div>
 
         <div className={this.props.noPadding ? '' : styles.content}>
-          {this.state.activeTab > -1
-            ? this.props.tabs![this.state.activeTab].body
-            : this.props.children}
+          {this.state.activeTab > -1 ? allTabs[this.state.activeTab].body : homeTab.body}
         </div>
 
         <div className={styles.footer}>
