@@ -24,7 +24,8 @@ import {
   StartIsNonNumeric,
   validate,
   ValidURL,
-  validateIf
+  validateIf,
+  Alphanumeric
 } from 'store/validators';
 import { createUUID } from 'utils';
 
@@ -123,8 +124,8 @@ export default class WebhookRouterForm extends React.Component<
 
     if (keys.hasOwnProperty('resultName')) {
       updates.resultName = validate(i18n.t('forms.result_name', 'Result Name'), keys.resultName, [
-        shouldRequireIf(submitting),
         LowerCaseAlphaNumeric,
+        Alphanumeric,
         StartIsNonNumeric
       ]);
     }
@@ -268,7 +269,6 @@ export default class WebhookRouterForm extends React.Component<
       name,
       body: (
         <div key="post_body" className={styles.body_form}>
-          <h4>{name}</h4>
           <p>
             <Trans
               i18nKey="forms.webhook_body_summary"
@@ -283,6 +283,7 @@ export default class WebhookRouterForm extends React.Component<
             showLabel={false}
             entry={this.state.body}
             onChange={this.handleBodyUpdate}
+            autogrow={true}
             helpText={
               <Trans
                 i18nKey="forms.webhook_body_summary"
@@ -352,7 +353,7 @@ export default class WebhookRouterForm extends React.Component<
           <p>
             <Trans i18nKey="forms.webhook_example">
               This response would add <span className={styles.example}>@webhook.product</span> and{' '}
-              <span className={styles.example}>@webhook["stock level"]</span> for use in the flow.
+              <span className={styles.example}>@(webhook["stock level"])</span> for use in the flow.
             </Trans>
           </p>
         </div>

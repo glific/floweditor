@@ -1,5 +1,5 @@
-import { createWebhookBasedNode } from 'components/flow/routers/helpers';
-import { Types } from 'config/interfaces';
+import { createServiceCallSplitNode } from 'components/flow/routers/helpers';
+import { Operators, Types } from 'config/interfaces';
 import { CallResthook } from 'flowTypes';
 import { RenderNode } from 'store/flowContext';
 import { FormEntry, NodeEditorSettings } from 'store/nodeEditor';
@@ -9,7 +9,7 @@ import { ResthookRouterFormState } from './ResthookRouterForm';
 
 export const nodeToState = (settings: NodeEditorSettings): ResthookRouterFormState => {
   let resthookAsset: FormEntry = { value: null };
-  let resultName = { value: 'Result' };
+  let resultName = { value: '' };
   let valid = false;
 
   const originalAction = getOriginalAction(settings) as CallResthook;
@@ -46,7 +46,13 @@ export const stateToNode = (
     result_name: state.resultName.value
   };
 
-  return createWebhookBasedNode(newAction, settings.originalNode, false);
+  return createServiceCallSplitNode(
+    newAction,
+    settings.originalNode,
+    '@webhook.status',
+    Operators.has_number_between,
+    ['200', '299']
+  );
 };
 
 export const getOriginalAction = (settings: NodeEditorSettings): CallResthook => {

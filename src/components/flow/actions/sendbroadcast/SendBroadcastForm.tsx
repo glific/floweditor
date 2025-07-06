@@ -25,6 +25,7 @@ import { shouldRequireIf, validate } from 'store/validators';
 import i18n from 'config/i18n';
 import { renderIssues } from '../helpers';
 import TextInputElement from 'components/form/textinput/TextInputElement';
+import { MAX_ATTACHMENTS, MAX_TEXT_LEN } from 'config/interfaces';
 
 export interface SendBroadcastFormState extends FormState {
   template: FormEntry;
@@ -487,6 +488,8 @@ export default class SendBroadcastForm extends React.Component<
           chatbox
           counter
           entry={this.state.compose}
+          maxlength={MAX_TEXT_LEN}
+          maxattachments={MAX_ATTACHMENTS}
           onChange={this.handleComposeChanged}
         ></ComposeElement> */}
         <p>Step 2: Select a template on the WhatsApp tab</p>

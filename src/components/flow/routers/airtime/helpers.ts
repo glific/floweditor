@@ -2,12 +2,13 @@ import {
   AirtimeRouterFormState,
   AirtimeTransferEntry
 } from 'components/flow/routers/airtime/AirtimeRouterForm';
-import { createWebhookBasedNode } from 'components/flow/routers/helpers';
-import { Types } from 'config/interfaces';
-import { TransferAirtime } from 'flowTypes';
+import { createServiceCallSplitNode } from 'components/flow/routers/helpers';
+
+import { Operators, Types } from 'config/interfaces';
+import { ServiceCallExitNames, TransferAirtime } from 'flowTypes';
 import { RenderNode } from 'store/flowContext';
 import { NodeEditorSettings } from 'store/nodeEditor';
-import { createUUID } from 'utils';
+import { createUUID, snakify } from 'utils';
 
 export const nodeToState = (settings: NodeEditorSettings): AirtimeRouterFormState => {
   const originalAction = getOriginalAction(settings);
@@ -56,7 +57,13 @@ export const stateToNode = (
     result_name: state.resultName.value
   };
 
-  return createWebhookBasedNode(newAction, settings.originalNode, true);
+  return createServiceCallSplitNode(
+    newAction,
+    settings.originalNode,
+    '@results.' + snakify(state.resultName.value),
+    Operators.has_category,
+    [ServiceCallExitNames.Success]
+  );
 };
 
 export const getOriginalAction = (settings: NodeEditorSettings): TransferAirtime => {

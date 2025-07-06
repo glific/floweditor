@@ -7,7 +7,7 @@
   "forwardPorts": [3000, 6000],
   "runArgs": ["--name=dev-floweditor", "--network=textit_default", "--hostname=floweditor"],
   "remoteUser": "node",
-  "postCreateCommand": "sudo chown node /workspaces/floweditor && yarn install",
+  "postCreateCommand": "sudo chown node /workspaces/floweditor && sudo rm -R node_modules && yarn install",
   "customizations": {
     "vscode": {
       "extensions": ["lfs.vscode-emacs-friendly"],

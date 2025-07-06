@@ -157,7 +157,6 @@ export const initialState: FlowContext = {
   metadata: {
     dependencies: [],
     results: [],
-    waiting_exit_uuids: [],
     parent_refs: []
   },
   contactFields: {},

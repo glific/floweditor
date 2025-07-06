@@ -14,7 +14,7 @@ import {
   SwitchRouter,
   TransferAirtime,
   UIConfig,
-  WebhookExitNames,
+  ServiceCallExitNames,
   CallClassifier,
   OpenTicket,
   Delay,
@@ -22,7 +22,7 @@ import {
   LinkSheets
 } from 'flowTypes';
 import { RenderNode } from 'store/flowContext';
-import { createUUID, snakify } from 'utils';
+import { createUUID } from 'utils';
 
 export interface CategorizedCases {
   cases: Case[];
@@ -334,7 +334,7 @@ export const resolveRoutes = (
   return results;
 };
 
-export const createWebhookBasedNode = (
+export const createServiceCallSplitNode = (
   action:
     | CallWebhook
     | CallResthook
@@ -343,10 +343,11 @@ export const createWebhookBasedNode = (
     | SetContactProfile
     | LinkSheets,
   originalNode: RenderNode,
-  useCategoryTest: boolean
+  operand: string,
+  test: Operators,
+  args: string[]
 ): RenderNode => {
   const exits: Exit[] = [];
-  let cases: Case[] = [];
   let categories: Category[] = [];
 
   // see if we are editing an existing router so we reuse exits
@@ -355,9 +356,7 @@ export const createWebhookBasedNode = (
     originalNode.node.actions.length === 1 &&
     originalNode.node.actions[0].type === action.type
   ) {
-    const previousRouter = getSwitchRouter(originalNode.node);
-    originalNode.node.exits.forEach((exit: any) => exits.push(exit));
-    previousRouter.cases.forEach(kase => cases.push(kase));
+    originalNode.node.exits.forEach((exit: Exit) => exits.push(exit));
     originalNode.node.router.categories.forEach(category => categories.push(category));
   } else {
     // Otherwise, let's create some new ones
@@ -375,30 +374,25 @@ export const createWebhookBasedNode = (
     categories = [
       {
         uuid: createUUID(),
-        name: WebhookExitNames.Success,
+        name: ServiceCallExitNames.Success,
         exit_uuid: exits[0].uuid
       },
       {
         uuid: createUUID(),
-        name: WebhookExitNames.Failure,
+        name: ServiceCallExitNames.Failure,
         exit_uuid: exits[1].uuid
       }
     ];
-
-    cases = [
-      {
-        uuid: createUUID(),
-        type: useCategoryTest ? Operators.has_category : Operators.has_only_text,
-        arguments: [WebhookExitNames.Success],
-        category_uuid: categories[0].uuid
-      }
-    ];
   }
 
-  let operand = '@results.' + snakify(action.result_name);
-  if (!useCategoryTest) {
-    operand += '.category';
-  }
+  const cases = [
+    {
+      uuid: createUUID(),
+      type: test,
+      arguments: args,
+      category_uuid: categories[0].uuid
+    }
+  ];
 
   const router: SwitchRouter = {
     type: RouterTypes.switch,

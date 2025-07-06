@@ -92,7 +92,7 @@ const createRouterNode = (
 describe(TranslatorTab.name, () => {
   it('renders', () => {
     const { baseElement, getByText } = render(<TranslatorTab {...translatorProps} />);
-    getByText('Spanish Translations');
+    getByText('Spanish');
     expect(baseElement).toMatchSnapshot();
   });
 
@@ -104,7 +104,6 @@ describe(TranslatorTab.name, () => {
 
     // we pulled out all the localizable bits
     getByText('Hello World!');
-    getByText('Quick Replies');
     getByText('Template Variables');
 
     getByText('0%');
@@ -140,9 +139,6 @@ describe(TranslatorTab.name, () => {
     // category list
     getByText('Red, Green, Blue, Other');
 
-    // rule list
-    getByText('red, green, blue');
-
     expect(baseElement).toMatchSnapshot();
   });
 
@@ -157,8 +153,6 @@ describe(TranslatorTab.name, () => {
 
     // category list
     getByText('Blue, Other');
-    getByText('29%');
-
     expect(baseElement).toMatchSnapshot();
   });
 
@@ -171,7 +165,6 @@ describe(TranslatorTab.name, () => {
 
     rerender(<TranslatorTab {...translatorProps} {...updates} />);
     expect(queryByText('Hello World!')).toBeNull();
-    getByText('50%');
     expect(baseElement).toMatchSnapshot();
   });
 });

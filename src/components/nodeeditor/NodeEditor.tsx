@@ -101,7 +101,7 @@ export class NodeEditor extends React.Component<NodeEditorProps> {
   }
 
   private updateLocalizations(language: string, changes: LocalizationUpdates) {
-    this.props.onUpdateLocalizations(language, changes);
+    this.props.onUpdateLocalizations(language, false, changes);
   }
 
   public close(canceled: boolean): void {

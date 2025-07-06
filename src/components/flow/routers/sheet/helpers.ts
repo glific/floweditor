@@ -1,12 +1,13 @@
 import { getActionUUID } from 'components/flow/actions/helpers';
-import { Types } from 'config/interfaces';
-import { LinkSheets } from 'flowTypes';
+import { Operators, Types } from 'config/interfaces';
+import { LinkSheets, ServiceCallExitNames } from 'flowTypes';
 import { FormEntry, NodeEditorSettings, StringEntry } from 'store/nodeEditor';
 
-import { createWebhookBasedNode } from '../helpers';
+import { createServiceCallSplitNode } from '../helpers';
 
 import { SheetFormState } from './SheetForm';
 import { getType } from 'config/typeConfigs';
+import { snakify } from 'utils';
 
 export const ACTION_OPTIONS = [{ name: 'Read', value: 'READ' }, { name: 'Write', value: 'WRITE' }];
 
@@ -115,5 +116,11 @@ export const stateToNode = (settings: NodeEditorSettings, state: SheetFormState)
       break;
   }
 
-  return createWebhookBasedNode(newAction, settings.originalNode, false);
+  return createServiceCallSplitNode(
+    newAction,
+    settings.originalNode,
+    '@results.' + snakify(state.result_name.value),
+    Operators.has_category,
+    [ServiceCallExitNames.Success]
+  );
 };
