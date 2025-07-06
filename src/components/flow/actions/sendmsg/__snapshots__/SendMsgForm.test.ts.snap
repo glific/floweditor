@@ -91,8 +91,17 @@ exports[`SendMsgForm render should render 1`] = `
           <p>
             Sending messages over a WhatsApp channel requires that a template be used if you have not received a message from a contact in the last 24 hours. Setting a template to use over WhatsApp is especially important for the first message in your flow.
           </p>
-          <AssetSelector
-            additionalOptions={
+          <TembaSelectElement
+            clearable={true}
+            endpoint="/assets/templates.json"
+            entry={
+              Object {
+                "value": null,
+              }
+            }
+            name="template"
+            onChange={[Function]}
+            options={
               Array [
                 Object {
                   "name": "Expression",
@@ -107,15 +116,6 @@ exports[`SendMsgForm render should render 1`] = `
                 },
               ]
             }
-            entry={
-              Object {
-                "value": null,
-              }
-            }
-            formClearable={true}
-            name="template"
-            noOptionsMessage="No templates found"
-            onChange={[Function]}
             searchable={true}
             shouldExclude={[Function]}
           />
@@ -125,15 +125,10 @@ exports[`SendMsgForm render should render 1`] = `
             <p>
               Select the labels to apply to the outgoing message.
             </p>
-            <AssetSelector
-              assets={
-                Object {
-                  "items": Object {},
-                  "type": "label",
-                }
-              }
-              createAssetFromInput={[Function]}
+            <TembaSelectElement
+              createArbitraryOption={[Function]}
               createPrefix="Create Label: "
+              endpoint="/assets/labels.json"
               entry={
                 Object {
                   "value": Array [],
@@ -142,7 +137,6 @@ exports[`SendMsgForm render should render 1`] = `
               expressions={true}
               multi={true}
               name="Labels"
-              onAssetCreated={[Function]}
               onChange={[Function]}
               placeholder="Enter the name of an existing label or create a new one"
               searchable={true}
@@ -202,15 +196,10 @@ exports[`SendMsgForm render should render 1`] = `
     <p>
       Select the labels to apply to the outgoing message.
     </p>
-    <AssetSelector
-      assets={
-        Object {
-          "items": Object {},
-          "type": "label",
-        }
-      }
-      createAssetFromInput={[Function]}
+    <TembaSelectElement
+      createArbitraryOption={[Function]}
       createPrefix="Create Label: "
+      endpoint="/assets/labels.json"
       entry={
         Object {
           "value": Array [],
@@ -219,7 +208,6 @@ exports[`SendMsgForm render should render 1`] = `
       expressions={true}
       multi={true}
       name="Labels"
-      onAssetCreated={[Function]}
       onChange={[Function]}
       placeholder="Enter the name of an existing label or create a new one"
       searchable={true}

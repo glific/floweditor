@@ -89,8 +89,8 @@ exports[`ClassifyRouterForm defaults to correct result name: initial result name
             class="normal "
           >
             <temba-select
-              cachekey="0"
               data-testid="temba_select_classifier"
+              endpoint="/assets/classifiers.json"
               errors="[]"
               expressions=""
               name="Classifier"
@@ -382,8 +382,8 @@ exports[`ClassifyRouterForm should render: default render 1`] = `
             class="normal "
           >
             <temba-select
-              cachekey="0"
               data-testid="temba_select_classifier"
+              endpoint="/assets/classifiers.json"
               errors="[]"
               expressions=""
               name="Classifier"
@@ -677,8 +677,8 @@ exports[`ClassifyRouterForm updates the result name: updated result name 1`] = `
             class="normal "
           >
             <temba-select
-              cachekey="0"
               data-testid="temba_select_classifier"
+              endpoint="/assets/classifiers.json"
               errors="[]"
               expressions=""
               name="Classifier"

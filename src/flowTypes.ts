@@ -5,7 +5,7 @@ import { AssetStore } from 'store/flowContext';
 import { ExclusionsCheckboxEntry } from 'store/nodeEditor';
 
 // we don't concern ourselves with patch versions
-export const SPEC_VERSION = '14.2';
+export const SPEC_VERSION = '14.3';
 
 export interface Languages {
   [iso: string]: string;
@@ -140,6 +140,7 @@ export interface User {
   last_name?: string;
   role?: string;
   created_on?: string;
+  name?: string;
 }
 
 export interface Topic {

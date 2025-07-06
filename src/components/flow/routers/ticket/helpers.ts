@@ -1,11 +1,18 @@
 import { createServiceCallSplitNode } from 'components/flow/routers/helpers';
 import { Operators, Types } from 'config/interfaces';
 import { getType } from 'config/typeConfigs';
-import { OpenTicket, SwitchRouter } from 'flowTypes';
+import { OpenTicket, SwitchRouter, Topic, User } from 'flowTypes';
 import { RenderNode } from 'store/flowContext';
 import { NodeEditorSettings, FormEntry } from 'store/nodeEditor';
 import { createUUID } from 'utils';
 import { TicketRouterFormState } from 'components/flow/routers/ticket/TicketRouterForm';
+
+export const getUserName = (user: User): string => {
+  if (!user.first_name && !user.last_name) {
+    return user.email || '';
+  }
+  return `${user.first_name} ${user.last_name}`;
+};
 
 export const getOriginalAction = (settings: NodeEditorSettings): OpenTicket => {
   const action =
@@ -57,12 +64,14 @@ export const stateToNode = (
     uuid = originalAction.uuid;
   }
 
+  const topic = state.topic.value as Topic;
+  const assignee = state.assignee.value as User;
   const newAction: OpenTicket = {
     uuid,
     type: Types.open_ticket,
     body: state.body.value,
-    topic: state.topic.value,
-    assignee: state.assignee.value,
+    topic: topic ? { uuid: topic.uuid, name: topic.name } : null,
+    assignee: assignee ? { email: assignee.email, name: getUserName(assignee) } : null,
     result_name: state.resultName.value
   };
 

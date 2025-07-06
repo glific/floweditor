@@ -1,7 +1,6 @@
 import { react as bindCallbacks } from 'auto-bind';
 import Dialog, { ButtonSet, Tab } from 'components/dialog/Dialog';
 import { ActionFormProps } from 'components/flow/props';
-import AssetSelector from 'components/form/assetselector/AssetSelector';
 import TypeList from 'components/nodeeditor/TypeList';
 import * as React from 'react';
 import { Asset } from 'store/flowContext';
@@ -23,6 +22,8 @@ import i18n from 'config/i18n';
 import { renderIssues } from '../helpers';
 import styles from './StartSessionForm.module.scss';
 import CheckboxElement from 'components/form/checkbox/CheckboxElement';
+import { fakePropType } from 'config/ConfigProvider';
+import TembaSelectElement from 'temba/TembaSelectElement';
 
 export const START_TYPE_ASSETS: SelectOption = {
   name: i18n.t('forms.start_type_manual', 'Select recipients manually'),
@@ -48,6 +49,10 @@ export interface StartSessionFormState extends FormState {
 }
 
 export class StartSessionForm extends React.Component<ActionFormProps, StartSessionFormState> {
+  public static contextTypes = {
+    config: fakePropType
+  };
+
   constructor(props: ActionFormProps) {
     super(props);
 
@@ -62,11 +67,7 @@ export class StartSessionForm extends React.Component<ActionFormProps, StartSess
     return this.handleUpdate({ recipients });
   }
 
-  public handleFlowChanged(flows: Asset[]): boolean {
-    let flow = null;
-    if (flows && flows.length > 0) {
-      flow = flows[0];
-    }
+  public handleFlowChanged(flow: Asset): boolean {
     return this.handleUpdate({ flow });
   }
 
@@ -217,20 +218,23 @@ export class StartSessionForm extends React.Component<ActionFormProps, StartSess
         <div>
           {renderIf(this.state.startType.value === START_TYPE_ASSETS)(
             <div data-testid="recipients">
-              <AssetSelector
+              <TembaSelectElement
+                key="recipient_select"
+                endpoint={this.context.config.endpoints.contacts}
                 name={i18n.t('forms.recipients', 'Recipients')}
                 placeholder={i18n.t(
                   'forms.select_who_to_start',
                   'Select who should be started in the flow'
                 )}
                 getName={this.getName}
-                assets={this.props.assetStore.contacts}
                 entry={this.state.recipients}
                 searchable={true}
                 multi={true}
                 expressions={true}
+                queryParam="search"
                 onChange={this.handleRecipientsChanged}
               />
+
               <p />
             </div>
           )}
@@ -251,11 +255,13 @@ export class StartSessionForm extends React.Component<ActionFormProps, StartSess
             </div>
           )}
 
-          <AssetSelector
+          <TembaSelectElement
+            key="flow_select"
             name={i18n.t('forms.flow', 'Flow')}
             placeholder={i18n.t('forms.select_flow', 'Select the flow to start')}
-            assets={this.props.assetStore.flows}
+            endpoint={this.context.config.endpoints.flows}
             entry={this.state.flow}
+            valueKey="uuid"
             searchable={true}
             onChange={this.handleFlowChanged}
           />

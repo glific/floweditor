@@ -1,7 +1,7 @@
 import { react as bindCallbacks } from 'auto-bind';
 import Dialog, { ButtonSet } from 'components/dialog/Dialog';
 import { ActionFormProps } from 'components/flow/props';
-import AssetSelector from 'components/form/assetselector/AssetSelector';
+
 import TextInputElement from 'components/form/textinput/TextInputElement';
 import TypeList from 'components/nodeeditor/TypeList';
 import { fakePropType } from 'config/ConfigProvider';
@@ -16,6 +16,7 @@ import styles from './UpdateGroupForm.module.scss';
 import i18n from 'config/i18n';
 import { renderIssues } from '../helpers';
 import { getName, initializeForm, stateToAction, UpdateGroupFormState } from './helpers';
+import TembaSelectElement from 'temba/TembaSelectElement';
 
 export default class UpdateGroupForm extends React.Component<
   ActionFormProps,
@@ -138,18 +139,17 @@ export default class UpdateGroupForm extends React.Component<
       <Dialog title={typeConfig.name} headerClass={typeConfig.type} buttons={this.getButtons()}>
         <TypeList __className="" initialType={typeConfig} onChange={this.props.onTypeChange} />
         <p>{i18n.t('forms.select_what_to_update', 'Select what to update')}</p>
-        <AssetSelector
+        <TembaSelectElement
           name={i18n.t('forms.wa_group_field', 'Group Field')}
           placeholder={i18n.t('Select')}
-          assets={this.props.assetStore.waGroupFields}
+          endpoint={this.context.config.endpoints.waGroupFields}
           entry={this.state.field}
           searchable={true}
           onChange={this.handlePropertyChange}
           getName={getName}
           // Fields can be created on the fly
           createPrefix="Create Group Field: "
-          createAssetFromInput={this.handleCreateAssetFromInput}
-          onAssetCreated={this.handleFieldAdded}
+          createArbitraryOption={this.handleCreateAssetFromInput}
         />
 
         <div className={styles.value}>{this.getValueWidget()}</div>

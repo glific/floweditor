@@ -6,13 +6,13 @@ import { ServiceCallExitNames, SetContactProfile } from 'flowTypes';
 import { RenderNode } from 'store/flowContext';
 import { NodeEditorSettings } from 'store/nodeEditor';
 
-import { ContactProfileRouterFormState, profileOptions } from './ContactProfileRouterForm';
+import { ContactProfileRouterFormState, profileOptionsList } from './ContactProfileRouterForm';
 import { snakify } from 'utils';
 
 export const nodeToState = (settings: NodeEditorSettings): ContactProfileRouterFormState => {
   let resulNode: ContactProfileRouterFormState = {
     valid: true,
-    optionType: { value: profileOptions['1'] },
+    optionType: { value: profileOptionsList[0] },
     profileName: { value: '' },
     profileType: { value: '' }
   };
@@ -22,11 +22,11 @@ export const nodeToState = (settings: NodeEditorSettings): ContactProfileRouterF
 
     if (action.profile_type) {
       const option =
-        Object.values(profileOptions).find(value => value.name === action.profile_type) ||
-        profileOptions['1'];
+        profileOptionsList.find(value => value.name === action.profile_type) ||
+        profileOptionsList[0];
 
       resulNode.optionType = {
-        value: option
+        value: option.name
       };
 
       if (typeof action.value === 'string') {
@@ -37,7 +37,7 @@ export const nodeToState = (settings: NodeEditorSettings): ContactProfileRouterF
       }
     }
   }
-
+  console.log(resulNode);
   return resulNode;
 };
 

@@ -11,8 +11,6 @@ import {
   TOPIC_OPTIONS
 } from 'components/flow/actions/sendmsg/helpers';
 import { ActionFormProps } from 'components/flow/props';
-import AssetSelector from 'components/form/assetselector/AssetSelector';
-import { hasUseableTranslation } from 'components/form/assetselector/helpers';
 import SelectElement, { SelectOption } from 'components/form/select/SelectElement';
 import TextInputElement from 'components/form/textinput/TextInputElement';
 import TypeList from 'components/nodeeditor/TypeList';
@@ -52,6 +50,7 @@ import { AddLabelsFormState } from '../addlabels/AddLabelsForm';
 import { MAX_TEXT_LEN } from 'config/interfaces';
 import { Trans } from 'react-i18next';
 import MultiChoiceInput from 'components/form/multichoice/MultiChoice';
+import TembaSelectElement from 'temba/TembaSelectElement';
 
 export interface SendMsgFormState extends FormState {
   message: StringEntry;
@@ -167,6 +166,12 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     this.setState(updated);
     return updated.valid;
   }
+
+  private hasUseableTranslation = (template: Template) => {
+    return !!template.translations.find(
+      translation => translation.status === 'pending' || translation.status === 'approved'
+    );
+  };
 
   public handleMessageInput(event: React.KeyboardEvent) {
     return this.handleUpdate({ text: (event.target as any).value }, false);
@@ -320,7 +325,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
   }
 
   private handleShouldExcludeTemplate(template: any): boolean {
-    return !hasUseableTranslation(template as Template);
+    return !this.hasUseableTranslation(template as Template);
   }
 
   private renderTopicConfig(): JSX.Element {
@@ -358,21 +363,20 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
       <div className={styles.label_container}>
         <p>Select the labels to apply to the outgoing message.</p>
 
-        <AssetSelector
+        <TembaSelectElement
           name={i18n.t('forms.labels', 'Labels')}
           placeholder={i18n.t(
             'enter_to_create_label',
             'Enter the name of an existing label or create a new one'
           )}
-          assets={this.props.assetStore.labels}
+          endpoint={this.context.config.endpoints.labels}
           entry={this.state.labels}
           searchable={true}
           multi={true}
           expressions={true}
           onChange={this.handleLabelsChanged}
           createPrefix={i18n.t('create_label', 'Create Label') + ': '}
-          createAssetFromInput={this.handleCreateAssetFromInput}
-          onAssetCreated={this.handleLabelCreated}
+          createArbitraryOption={this.handleCreateAssetFromInput}
         />
       </div>
     );
@@ -388,16 +392,16 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
           )}
         </p>
 
-        <AssetSelector
-          additionalOptions={[additionalOption]}
+        <TembaSelectElement
+          options={[additionalOption]}
           name={i18n.t('forms.template', 'template')}
-          noOptionsMessage="No templates found"
-          assets={this.props.assetStore.templates}
+          //  noOptionsMessage="No templates found"
+          endpoint={this.context.config.endpoints.templates}
           entry={this.state.template}
           onChange={this.handleTemplateChanged}
           shouldExclude={this.handleShouldExcludeTemplate}
           searchable={true}
-          formClearable={true}
+          clearable={true}
         />
         {this.state.expression && (
           <div className={styles.expression}>

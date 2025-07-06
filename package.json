@@ -2,7 +2,7 @@
   "name": "@glific/flow-editor",
   "license": "AGPL-3.0",
   "repository": "git://github.com/glific/floweditor.git",
-  "version": "1.42.0",
+  "version": "1.43.0",
   "description": "'Standalone flow editing tool designed for use within the Glific suite of messaging tools'",
   "browser": "umd/flow-editor.min.js",
   "unpkg": "umd/flow-editor.min.js",
@@ -12,7 +12,7 @@
   ],
   "private": false,
   "dependencies": {
-    "@nyaruka/temba-components": "0.120.3",
+    "@nyaruka/temba-components": "0.120.4",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-icons": "4.1.0"

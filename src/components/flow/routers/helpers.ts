@@ -414,6 +414,8 @@ export const createServiceCallSplitNode = (
     splitType = Types.split_by_ticket;
   } else if (action.type === Types.transfer_airtime) {
     splitType = Types.split_by_airtime;
+  } else if (action.type === Types.call_llm) {
+    splitType = Types.split_by_llm;
   } else if (action.type === Types.set_contact_profile) {
     splitType = Types.set_contact_profile;
   }
