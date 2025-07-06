@@ -1,13 +1,13 @@
 import { react as bindCallbacks } from 'auto-bind';
 import Dialog, { ButtonSet } from 'components/dialog/Dialog';
-import { renderIssues } from 'components/flow/actions/helpers';
+import { hasErrors, renderIssues } from 'components/flow/actions/helpers';
 import { RouterFormProps } from 'components/flow/props';
 import { nodeToState, stateToNode } from './helpers';
 // import { createResultNameInput } from 'components/flow/routers/widgets';
 import TypeList from 'components/nodeeditor/TypeList';
 import * as React from 'react';
 import { FormState, mergeForm, StringEntry, FormEntry } from 'store/nodeEditor';
-import { shouldRequireIf, validate } from 'store/validators';
+import { Alphanumeric, shouldRequireIf, StartIsNonNumeric, validate } from 'store/validators';
 import styles from './TicketRouterForm.module.scss';
 import i18n from 'config/i18n';
 import TextInputElement from 'components/form/textinput/TextInputElement';
@@ -81,9 +81,11 @@ export default class TicketRouterForm extends React.Component<
     }
 
     // if (keys.hasOwnProperty('resultName')) {
-    //   updates.resultName = validate(i18n.t('forms.result_name', 'Result Name'), keys.resultName, [
-    //     shouldRequireIf(submitting)
-    //   ]);
+    //   updates.resultName = validate(
+    // i18n.t('forms.result_name', 'Result Name'),
+    // keys.resultName,
+    //     []
+    //   );
     // }
 
     const updated = mergeForm(this.state, updates);
@@ -105,6 +107,16 @@ export default class TicketRouterForm extends React.Component<
     return this.handleUpdate({ subject }, submitting);
   }
 
+  private handleResultNameUpdate(value: string): void {
+    const resultName = validate(i18n.t('forms.result_name', 'Result Name'), value, [
+      Alphanumeric,
+      StartIsNonNumeric
+    ]);
+    this.setState({
+      resultName,
+      valid: this.state.valid && !hasErrors(resultName)
+    });
+  }
   private handleBodyUpdate(body: string): boolean {
     return this.handleUpdate({ body });
   }

@@ -109,6 +109,7 @@ exports[`MsgLocalizationForm inits inits with initial values 1`] = `
       }
     }
     focus={true}
+    maxLength={10000}
     name="Message"
     onChange={[Function]}
     placeholder="Spanish Translation"
@@ -227,6 +228,7 @@ exports[`MsgLocalizationForm render should render 1`] = `
       }
     }
     focus={true}
+    maxLength={10000}
     name="Message"
     onChange={[Function]}
     placeholder="Spanish Translation"

@@ -29,6 +29,7 @@ export enum Types {
   call_classifier = 'call_classifier',
   call_resthook = 'call_resthook',
   call_webhook = 'call_webhook',
+  call_llm = 'call_llm',
   link_google_sheet = 'link_google_sheet',
   open_ticket = 'open_ticket',
   send_msg = 'send_msg',
@@ -51,6 +52,7 @@ export enum Types {
   split_by_scheme = 'split_by_scheme',
   split_by_subflow = 'split_by_subflow',
   split_by_webhook = 'split_by_webhook',
+  split_by_llm = 'split_by_llm',
   wait_for_response = 'wait_for_response',
   wait_for_time = 'wait_for_time',
   wait_for_menu = 'wait_for_menu',
@@ -119,7 +121,8 @@ export enum FeatureFilter {
   HAS_FACEBOOK = 'facebook',
   HAS_LOCATIONS = 'locations',
   HAS_OPTINS = 'optins',
-  HAS_GROUPS = 'groups'
+  HAS_GROUPS = 'groups',
+  HAS_LLM = 'llm'
 }
 
 export interface FlowTypeVisibility {
@@ -181,3 +184,4 @@ export const VISIBILITY_HIDDEN = [FlowTypes.NONE];
 
 export const MAX_TEXT_LEN = 10000;
 export const MAX_ATTACHMENTS = 1;
+export const MAX_QUICK_REPLIES = 10;

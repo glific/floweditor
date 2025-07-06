@@ -437,7 +437,7 @@ export const createOpenTicketNode = (subject: string, body: string): FlowNode =>
     type: Types.open_ticket,
     subject: subject,
     body: body,
-    result_name: 'Result'
+    result_name: ''
   };
   return createWebhookNode(action, true);
 };

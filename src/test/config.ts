@@ -31,6 +31,7 @@ const config: FlowEditorConfig = {
     recipients: '/assets/recipients.json',
     contacts: '/assets/recipients.json',
     labels: '/assets/labels.json',
+    llms: '/assets/llms.json',
     languages: '/assets/languages.json',
     channels: '/assets/channels.json',
     environment: '/assets/environment.json',

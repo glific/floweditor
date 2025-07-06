@@ -19,6 +19,7 @@ import { renderIssues } from '../helpers';
 import { Attachment, renderAttachments, validateURL } from '../sendmsg/attachments';
 import { AxiosError, AxiosResponse } from 'axios';
 import { TembaComponent } from 'temba/TembaComponent';
+import { MAX_QUICK_REPLIES, MAX_TEXT_LEN } from 'config/interfaces';
 
 export interface MsgLocalizationFormState extends FormState {
   message: StringEntry;
@@ -394,6 +395,7 @@ export default class MsgLocalizationForm extends React.Component<
           autocomplete={true}
           focus={true}
           textarea={true}
+          maxLength={MAX_TEXT_LEN}
         />
         {audioButton}
         {renderIssues(this.props)}
