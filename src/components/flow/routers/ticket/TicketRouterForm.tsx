@@ -61,7 +61,9 @@ export default class TicketRouterForm extends React.Component<
     const updates: Partial<TicketRouterFormState> = {};
 
     if (keys.hasOwnProperty('assignee')) {
-      updates.assignee = validate(i18n.t('forms.assignee', 'Assignee'), keys.assignee, []);
+      updates.assignee = validate(i18n.t('forms.assignee', 'Assignee'), keys.assignee, [
+        shouldRequireIf(submitting)
+      ]);
     }
 
     if (keys.hasOwnProperty('topic')) {

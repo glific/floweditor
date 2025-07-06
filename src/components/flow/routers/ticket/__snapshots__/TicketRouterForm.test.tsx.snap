@@ -224,7 +224,7 @@ exports[`TicketRouterForm updates should save changes 1`] = `
                 namekey="name"
                 placeholder="Select"
                 searchable="true"
-                valuekey="uuid"
+                valuekey="value"
                 values="[{\\"uuid\\":\\"b6e1babf2-85bc-477e-b706-de313a022979\\",\\"name\\":\\"Default\\"}]"
               />
             </div>

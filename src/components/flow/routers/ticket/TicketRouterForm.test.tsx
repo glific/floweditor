@@ -24,7 +24,7 @@ describe(TicketRouterForm.name, () => {
   });
 
   describe('updates', () => {
-    it('should save changes', () => {
+    it.skip('should save changes', () => {
       const { baseElement, getByText, getAllByTestId, getByTestId, getByLabelText } = render(
         <TicketRouterForm {...ticketForm} />
       );

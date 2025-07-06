@@ -42,9 +42,6 @@ describe(WebhookRouterForm.name, () => {
       const url = getByTestId('URL');
       fireChangeText(url, 'http://app.rapidpro.io');
 
-      const toggleLink = getByTestId('toggle-link');
-      toggleLink.click();
-
       const resultName = getByTestId('Result Name');
       fireChangeText(resultName, 'my_webhook_result');
 
@@ -100,9 +97,6 @@ describe(WebhookRouterForm.name, () => {
       // set our url and add a result name
       const url = getByTestId('URL');
       fireChangeText(url, 'bad url');
-
-      const toggleLink = getByTestId('toggle-link');
-      toggleLink.click();
 
       const resultName = getByTestId('Result Name');
       fireChangeText(resultName, 'my_webhook_result');

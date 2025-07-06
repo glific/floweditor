@@ -124,6 +124,7 @@ export default class WebhookRouterForm extends React.Component<
 
     if (keys.hasOwnProperty('resultName')) {
       updates.resultName = validate(i18n.t('forms.result_name', 'Result Name'), keys.resultName, [
+        shouldRequireIf(submitting),
         LowerCaseAlphaNumeric,
         Alphanumeric,
         StartIsNonNumeric
@@ -269,6 +270,7 @@ export default class WebhookRouterForm extends React.Component<
       name,
       body: (
         <div key="post_body" className={styles.body_form}>
+          <h4>{name}</h4>
           <p>
             <Trans
               i18nKey="forms.webhook_body_summary"
