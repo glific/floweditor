@@ -25,7 +25,6 @@ import { shouldRequireIf, validate } from 'store/validators';
 import i18n from 'config/i18n';
 import { renderIssues } from '../helpers';
 import TextInputElement from 'components/form/textinput/TextInputElement';
-import { MAX_ATTACHMENTS, MAX_TEXT_LEN } from 'config/interfaces';
 
 export interface SendBroadcastFormState extends FormState {
   template: FormEntry;

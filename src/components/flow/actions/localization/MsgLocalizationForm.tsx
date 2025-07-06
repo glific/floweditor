@@ -18,8 +18,7 @@ import { range } from 'utils';
 import { renderIssues } from '../helpers';
 import { Attachment, renderAttachments, validateURL } from '../sendmsg/attachments';
 import { AxiosError, AxiosResponse } from 'axios';
-import { TembaComponent } from 'temba/TembaComponent';
-import { MAX_QUICK_REPLIES, MAX_TEXT_LEN } from 'config/interfaces';
+import { MAX_TEXT_LEN } from 'config/interfaces';
 
 export interface MsgLocalizationFormState extends FormState {
   message: StringEntry;
