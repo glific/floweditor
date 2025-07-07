@@ -48,8 +48,6 @@ import i18n from 'config/i18n';
 import { Attachment, renderAttachments, validateURL } from './attachments';
 import { AddLabelsFormState } from '../addlabels/AddLabelsForm';
 import { MAX_TEXT_LEN } from 'config/interfaces';
-import { Trans } from 'react-i18next';
-import MultiChoiceInput from 'components/form/multichoice/MultiChoice';
 import TembaSelectElement from 'temba/TembaSelectElement';
 
 export interface SendMsgFormState extends FormState {
@@ -568,33 +566,33 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
   public render(): JSX.Element {
     const typeConfig = this.props.typeConfig;
 
-    const quickReplies: Tab = {
-      name: i18n.t('forms.quick_replies', 'Quick Replies'),
-      body: (
-        <>
-          <p>
-            {i18n.t(
-              'forms.quick_replies_summary',
-              'Quick Replies are made into buttons for supported channels. For example, when asking a question, you might add a Quick Reply for "Yes" and one for "No".'
-            )}
-          </p>
+    // const quickReplies: Tab = {
+    //   name: i18n.t('forms.quick_replies', 'Quick Replies'),
+    //   body: (
+    //     <>
+    //       <p>
+    //         {i18n.t(
+    //           'forms.quick_replies_summary',
+    //           'Quick Replies are made into buttons for supported channels. For example, when asking a question, you might add a Quick Reply for "Yes" and one for "No".'
+    //         )}
+    //       </p>
 
-          <MultiChoiceInput
-            name={i18n.t('forms.quick_reply', 'quick_reply')}
-            helpText={
-              <Trans i18nKey="forms.add_quick_reply">Add a new Quick Reply and press enter.</Trans>
-            }
-            items={this.state.quickReplies}
-            entry={this.state.quickReplyEntry}
-            onChange={this.handleQuickRepliesUpdate}
-            maxItems={10}
-            maxItemsText="You can only add 10 Quick Replies"
-          />
-        </>
-      ),
-      checked: this.state.quickReplies.value.length > 0,
-      hasErrors: hasErrors(this.state.quickReplyEntry)
-    };
+    //       <MultiChoiceInput
+    //         name={i18n.t('forms.quick_reply', 'quick_reply')}
+    //         helpText={
+    //           <Trans i18nKey="forms.add_quick_reply">Add a new Quick Reply and press enter.</Trans>
+    //         }
+    //         items={this.state.quickReplies}
+    //         entry={this.state.quickReplyEntry}
+    //         onChange={this.handleQuickRepliesUpdate}
+    //         maxItems={10}
+    //         maxItemsText="You can only add 10 Quick Replies"
+    //       />
+    //     </>
+    //   ),
+    //   checked: this.state.quickReplies.value.length > 0,
+    //   hasErrors: hasErrors(this.state.quickReplyEntry)
+    // };
 
     const attachments: Tab = {
       name: i18n.t('forms.attachments', 'Attachments'),
