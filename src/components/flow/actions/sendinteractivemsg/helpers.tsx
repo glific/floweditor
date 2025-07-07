@@ -174,7 +174,7 @@ export const stateToRouter = (
       categoryName: `${option.charAt(0).toUpperCase()}${option.slice(1)}`,
       kase: {
         arguments: [option],
-        type: Operators.has_any_word,
+        type: Operators.has_only_phrase,
         uuid,
         category_uuid: null
       },
