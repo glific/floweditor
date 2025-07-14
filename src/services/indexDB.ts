@@ -26,7 +26,6 @@ async function initDB(): Promise<IDBDatabase> {
 
     request.onsuccess = () => {
       console.log('IndexedDB Initialised...');
-
       dbInstance = request.result;
       resolve(dbInstance);
     };
@@ -35,8 +34,7 @@ async function initDB(): Promise<IDBDatabase> {
       const db = (event.target as IDBOpenDBRequest).result;
 
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: 'uuid' });
-        store.createIndex('timestamp', 'timeStamp', { unique: false });
+        db.createObjectStore(STORE_NAME, { keyPath: 'uuid' });
       }
     };
   });
@@ -52,7 +50,7 @@ async function saveFlowDefinition(uuid: string, definition: any): Promise<void> 
     const flowData = {
       uuid: uuid,
       definition: definition,
-      timeStamp: new Date().toISOString()
+      timestamp: new Date().toISOString()
     };
 
     const request = store.put(flowData);
