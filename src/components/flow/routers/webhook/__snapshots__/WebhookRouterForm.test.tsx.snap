@@ -358,8 +358,11 @@ exports[`WebhookRouterForm updates should save changes 1`] = `
       class="dialog"
     >
       <div
-        class="header call_webhook"
+        class="header clickable call_webhook"
       >
+        <div
+          class="header_overlay"
+        />
         <div
           class="title_container"
         >
@@ -397,6 +400,14 @@ exports[`WebhookRouterForm updates should save changes 1`] = `
                 name="check"
                 style="margin-left: 8px;"
               />
+            </div>
+            <div
+              class="tab active"
+              style="display: flex;"
+            >
+              <div>
+                Home
+              </div>
             </div>
           </div>
         </div>

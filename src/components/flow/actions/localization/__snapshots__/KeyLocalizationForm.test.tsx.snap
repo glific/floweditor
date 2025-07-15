@@ -24,8 +24,11 @@ exports[`KeyLocalizationForm removes translations 1`] = `
       class="dialog"
     >
       <div
-        class="header send_email"
+        class="header clickable send_email"
       >
+        <div
+          class="header_overlay"
+        />
         <div
           class="title_container"
         >
@@ -50,6 +53,14 @@ exports[`KeyLocalizationForm removes translations 1`] = `
             >
               <div>
                 Body Translation
+              </div>
+            </div>
+            <div
+              class="tab active"
+              style="display: flex;"
+            >
+              <div>
+                Home
               </div>
             </div>
           </div>
@@ -142,8 +153,11 @@ exports[`KeyLocalizationForm renders send email 1`] = `
       class="dialog"
     >
       <div
-        class="header send_email"
+        class="header clickable send_email"
       >
+        <div
+          class="header_overlay"
+        />
         <div
           class="title_container"
         >
@@ -168,6 +182,14 @@ exports[`KeyLocalizationForm renders send email 1`] = `
             >
               <div>
                 Body Translation
+              </div>
+            </div>
+            <div
+              class="tab active"
+              style="display: flex;"
+            >
+              <div>
+                Home
               </div>
             </div>
           </div>

@@ -275,7 +275,7 @@ export default class MsgLocalizationForm extends React.Component<
       const variable = i18n.t('forms.variable', 'Variable');
 
       tabs.push({
-        name: 'WhatsApp',
+        name: 'HSM Templates',
         body: (
           <>
             <p>

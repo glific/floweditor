@@ -8,8 +8,11 @@ exports[`ClassifyRouterForm defaults to correct result name: initial result name
       class="dialog"
     >
       <div
-        class="header split_by_intent"
+        class="header clickable split_by_intent"
       >
+        <div
+          class="header_overlay"
+        />
         <div
           class="title_container"
         >
@@ -39,6 +42,14 @@ exports[`ClassifyRouterForm defaults to correct result name: initial result name
                 name="check"
                 style="margin-left: 8px;"
               />
+            </div>
+            <div
+              class="tab active"
+              style="display: flex;"
+            >
+              <div>
+                Home
+              </div>
             </div>
           </div>
         </div>
@@ -301,8 +312,11 @@ exports[`ClassifyRouterForm should render: default render 1`] = `
       class="dialog"
     >
       <div
-        class="header split_by_intent"
+        class="header clickable split_by_intent"
       >
+        <div
+          class="header_overlay"
+        />
         <div
           class="title_container"
         >
@@ -332,6 +346,14 @@ exports[`ClassifyRouterForm should render: default render 1`] = `
                 name="check"
                 style="margin-left: 8px;"
               />
+            </div>
+            <div
+              class="tab active"
+              style="display: flex;"
+            >
+              <div>
+                Home
+              </div>
             </div>
           </div>
         </div>
@@ -596,8 +618,11 @@ exports[`ClassifyRouterForm updates the result name: updated result name 1`] = `
       class="dialog"
     >
       <div
-        class="header split_by_intent"
+        class="header clickable split_by_intent"
       >
+        <div
+          class="header_overlay"
+        />
         <div
           class="title_container"
         >
@@ -627,6 +652,14 @@ exports[`ClassifyRouterForm updates the result name: updated result name 1`] = `
                 name="check"
                 style="margin-left: 8px;"
               />
+            </div>
+            <div
+              class="tab active"
+              style="display: flex;"
+            >
+              <div>
+                Home
+              </div>
             </div>
           </div>
         </div>
