@@ -145,7 +145,7 @@ exports[`SendMsgForm render should render 1`] = `
         </React.Fragment>,
         "checked": true,
         "hasErrors": false,
-        "name": "WhatsApp",
+        "name": "HSM Templates",
       },
     ]
   }

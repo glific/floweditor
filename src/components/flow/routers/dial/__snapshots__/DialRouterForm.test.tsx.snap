@@ -7,8 +7,11 @@ exports[`DialRouterForm should render 1`] = `
       class="dialog"
     >
       <div
-        class="header wait_for_dial"
+        class="header clickable wait_for_dial"
       >
+        <div
+          class="header_overlay"
+        />
         <div
           class="title_container"
         >
@@ -33,6 +36,14 @@ exports[`DialRouterForm should render 1`] = `
             >
               <div>
                 Advanced
+              </div>
+            </div>
+            <div
+              class="tab active"
+              style="display: flex;"
+            >
+              <div>
+                Home
               </div>
             </div>
           </div>

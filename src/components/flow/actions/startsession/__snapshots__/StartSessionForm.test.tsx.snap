@@ -7,8 +7,11 @@ exports[`StartSessionForm render should render 1`] = `
       class="dialog"
     >
       <div
-        class="header start_session"
+        class="header clickable start_session"
       >
+        <div
+          class="header_overlay"
+        />
         <div
           class="title_container"
         >
@@ -33,6 +36,14 @@ exports[`StartSessionForm render should render 1`] = `
             >
               <div>
                 Advanced
+              </div>
+            </div>
+            <div
+              class="tab active"
+              style="display: flex;"
+            >
+              <div>
+                Home
               </div>
             </div>
           </div>
