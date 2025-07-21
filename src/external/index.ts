@@ -2,7 +2,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { SaveResult } from 'components/revisions/RevisionExplorer';
 import { Endpoints, Exit, FlowDefinition, SPEC_VERSION, FlowDetails } from 'flowTypes';
-import { currencies } from 'store/currencies';
+import { CURRENCIES } from 'store/currencies';
 import { Activity, RecentContact } from 'store/editor';
 import { Asset, AssetMap, Assets, AssetStore, AssetType } from 'store/flowContext';
 import { assetListToMap } from 'store/helpers';
@@ -369,7 +369,7 @@ export const createAssetStore = (endpoints: Endpoints): Promise<AssetStore> => {
       currencies: {
         type: AssetType.Currency,
         id: 'id',
-        items: currencies,
+        items: CURRENCIES,
         prefetched: true
       },
       validateMedia: {
@@ -438,7 +438,7 @@ export const getFlowDetails = (revisions: Assets, id: string = null): Promise<Fl
             const details = response.data as FlowDetails;
             return resolve(details);
           })
-          .catch(error => reject(error));
+          .catch((error: any) => reject(error));
       } else {
         reject(new Error('No revision found for flow'));
       }
@@ -460,11 +460,6 @@ export const getURL = (path: string): string => {
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url;
   }
-
-  // Set url for netlify deployments
-  // if (process.env.NODE_ENV === "preview") {
-  // url = "/.netlify/functions/" + url;
-  // }
 
   const result = `${getBaseURL() + url}`;
   return result;

@@ -112,15 +112,15 @@ exports[`SendBroadcastForm render should render an empty form with no action 2`]
           <p>
             Sending messages over a WhatsApp channel requires that a template be used if you have not received a message from a contact in the last 24 hours. Setting a template to use over WhatsApp is especially important for the first message in your flow.
           </p>
-          <AssetSelector
+          <TembaSelectElement
+            clearable={true}
+            endpoint="/assets/templates.json"
             entry={
               Object {
                 "value": null,
               }
             }
-            formClearable={true}
             name="template"
-            noOptionsMessage="No templates found"
             onChange={[Function]}
             searchable={true}
             shouldExclude={[Function]}
@@ -152,23 +152,20 @@ exports[`SendBroadcastForm render should render an empty form with no action 2`]
     }
     onChange={[MockFunction]}
   />
-  <AssetSelector
-    assets={
-      Object {
-        "items": Object {},
-        "type": "contact",
-      }
-    }
+  <TembaSelectElement
+    endpoint="/assets/recipients.json"
     entry={
       Object {
         "value": Array [],
       }
     }
     expressions={true}
+    key="recipient_select"
     multi={true}
     name="Recipients"
     onChange={[Function]}
     placeholder="Select Contacts"
+    queryParam="search"
     searchable={true}
     shouldExclude={[Function]}
   />
@@ -270,15 +267,15 @@ exports[`SendBroadcastForm render should render self, children with base props 1
           <p>
             Sending messages over a WhatsApp channel requires that a template be used if you have not received a message from a contact in the last 24 hours. Setting a template to use over WhatsApp is especially important for the first message in your flow.
           </p>
-          <AssetSelector
+          <TembaSelectElement
+            clearable={true}
+            endpoint="/assets/templates.json"
             entry={
               Object {
                 "value": null,
               }
             }
-            formClearable={true}
             name="template"
-            noOptionsMessage="No templates found"
             onChange={[Function]}
             searchable={true}
             shouldExclude={[Function]}
@@ -310,13 +307,8 @@ exports[`SendBroadcastForm render should render self, children with base props 1
     }
     onChange={[MockFunction]}
   />
-  <AssetSelector
-    assets={
-      Object {
-        "items": Object {},
-        "type": "contact",
-      }
-    }
+  <TembaSelectElement
+    endpoint="/assets/recipients.json"
     entry={
       Object {
         "value": Array [
@@ -352,10 +344,12 @@ exports[`SendBroadcastForm render should render self, children with base props 1
       }
     }
     expressions={true}
+    key="recipient_select"
     multi={true}
     name="Recipients"
     onChange={[Function]}
     placeholder="Select Contacts"
+    queryParam="search"
     searchable={true}
     shouldExclude={[Function]}
   />

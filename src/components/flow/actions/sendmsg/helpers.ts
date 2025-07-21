@@ -50,6 +50,7 @@ export const initializeForm = (
       if (action.templating.expression) {
         expressionValue = { value: action.templating.expression };
       }
+
       template = {
         value: {
           uuid: msgTemplate.uuid,

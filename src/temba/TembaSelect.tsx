@@ -2,7 +2,6 @@ import { react as bindCallbacks } from 'auto-bind';
 import * as React from 'react';
 import { bool, snakify } from 'utils';
 import styles from './TembaSelect.module.scss';
-import { Assets } from 'store/flowContext';
 
 export enum TembaSelectStyle {
   small = 'small',
@@ -12,15 +11,15 @@ export enum TembaSelectStyle {
 export interface TembaSelectProps {
   name: string;
   options?: any[];
-  value: any;
+  value?: any;
   onChange: (option: any) => void;
   onFocus?: () => void;
   shouldExclude?: (option: any) => boolean;
   disabled?: boolean;
 
   createPrefix?: string;
+  allowCreate?: boolean;
   expressions?: boolean;
-  assets?: Assets;
   errors?: string[];
   style?: TembaSelectStyle;
   endpoint?: string;
@@ -46,6 +45,9 @@ export interface TembaSelectProps {
   clearable?: boolean;
 
   queryParam?: string;
+
+  maxItems?: Number;
+  maxItemsText?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -108,7 +110,7 @@ export default class TembaSelect extends React.Component<TembaSelectProps, Temba
 
   public componentDidMount(): void {
     const select = this;
-    // add the option to create groups abitrarily
+    // add the option to create groups arbitrarily
     if (this.props.createPrefix) {
       (this.selectbox as any).createArbitraryOption = (input: string, options: any[]) => {
         if (input.indexOf('@') === -1) {
@@ -151,11 +153,12 @@ export default class TembaSelect extends React.Component<TembaSelectProps, Temba
     selectbox.getName = select.getName.bind(select);
 
     this.selectbox.addEventListener('change', (event: any) => {
+      event.preventDefault();
+      event.stopPropagation();
       const values = event.target.values || [event.target.value];
-
       let resolved = values;
 
-      if (!this.props.assets && !this.props.tags && !this.props.endpoint) {
+      if (!this.props.tags && !this.props.endpoint) {
         resolved = values.map((op: any) => {
           const result = (this.props.options || []).find(
             (option: any) => this.getValue(option) === this.getValue(op)
@@ -210,7 +213,7 @@ export default class TembaSelect extends React.Component<TembaSelectProps, Temba
           name={this.props.name}
           cacheKey={this.props.cacheKey}
           expressions={this.props.expressions ? 'session' : ''}
-          endpoint={this.props.assets ? this.props.assets.endpoint : this.props.endpoint}
+          endpoint={this.props.endpoint}
           values={values}
           errors={JSON.stringify(this.props.errors ? this.props.errors : [])}
           hideErrors={this.props.hideError}
@@ -221,7 +224,10 @@ export default class TembaSelect extends React.Component<TembaSelectProps, Temba
           clearable={this.props.clearable}
           tags={this.props.tags}
           queryParam={this.props.queryParam}
-        />
+          maxItems={this.props.maxItems}
+          maxItemsText={this.props.maxItemsText}
+          allowCreate={this.props.allowCreate}
+        ></temba-select>
       </div>
     );
   }

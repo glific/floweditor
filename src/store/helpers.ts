@@ -54,7 +54,7 @@ interface Reflow {
 }
 
 // track if we have an active timeout before issuing a new one
-let activityTimeout: any = null;
+(window as any).activityTimeout = null;
 
 export const getNodeWithAction = (nodes: RenderNodeMap, actionUUID: string): RenderNode => {
   for (const nodeUUID of Object.keys(nodes)) {
@@ -242,7 +242,8 @@ export const getCurrentDefinition = (
       nodes: uiNodes,
       stickies: definition._ui.stickies,
       languages: definition._ui.languages,
-      translation_filters: definition._ui.translation_filters
+      translation_filters: definition._ui.translation_filters,
+      auto_translations: definition._ui.auto_translations
     } as UIMetaData;
   }
 
@@ -695,35 +696,39 @@ export const fetchFlowActivity = (
   } = getState();
 
   if (visible) {
-    getActivity(endpoint, uuid).then((activity: Activity) => {
-      // every interval we back off a bit up to 5 minutes
-      if (activity) {
-        const updates: Partial<EditorState> = {
-          liveActivity: activity,
-          activityInterval: Math.min(60000 * 5, activityInterval + 200)
-        };
+    getActivity(endpoint, uuid)
+      .then((activity: Activity) => {
+        // every interval we back off a bit up to 5 minutes
+        if (activity) {
+          const updates: Partial<EditorState> = {
+            liveActivity: activity,
+            activityInterval: Math.min(60000 * 5, activityInterval + 200)
+          };
 
-        if (!simulating) {
-          updates.activity = activity;
+          if (!simulating) {
+            updates.activity = activity;
+          }
+
+          dispatch(mergeEditorState(updates));
+
+          if ((window as any).activityTimeout) {
+            window.clearTimeout((window as any).activityTimeout);
+          }
+
+          (window as any).activityTimeout = window.setTimeout(() => {
+            fetchFlowActivity(endpoint, dispatch, getState, uuid);
+          }, activityInterval);
         }
-
-        dispatch(mergeEditorState(updates));
-
-        if (activityTimeout) {
-          window.clearTimeout(activityTimeout);
-        }
-
-        activityTimeout = window.setTimeout(() => {
-          fetchFlowActivity(endpoint, dispatch, getState, uuid);
-        }, activityInterval);
-      }
-    });
+      })
+      .catch(() => {
+        // failure fetching activity, if this happens we stop trying to fetch more
+      });
   } else {
-    if (activityTimeout) {
-      window.clearTimeout(activityTimeout);
+    if ((window as any).activityTimeout) {
+      window.clearTimeout((window as any).activityTimeout);
     }
 
-    activityTimeout = window.setTimeout(() => {
+    (window as any).activityTimeout = window.setTimeout(() => {
       fetchFlowActivity(endpoint, dispatch, getState, uuid);
     }, 1000);
   }

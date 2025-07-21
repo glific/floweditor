@@ -14,6 +14,7 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Roboto+Mono:300|Roboto:200,300,400,500"
     />
+    <script src="./static/temba-components/temba-components.js"></script>
 
     <!--
       Notice the use of %PUBLIC_URL% in the tags above.
@@ -292,6 +293,7 @@
     const frontendUrl = window.location.origin;
 
     var uuid = '3fa22108-f464-41e5-81d9-d8a298854429';
+
     var config = {
       flow: uuid,
       flowType: 'messaging',
@@ -305,17 +307,12 @@
       excludeTypes: [
         'add_contact_urn',
         'send_email',
-        'set_run_result',
         'call_resthook',
         'transfer_airtime',
-        'split_by_contact_field',
-        'split_by_random',
-        'split_by_groups',
         'split_by_scheme'
       ],
 
       excludeOperators: [
-        'has_beginning',
         'has_text',
         'has_number_lt',
         'has_number_lte',
@@ -327,9 +324,6 @@
         'has_number_lte',
         'has_number_gte',
         'has_number_gt',
-        'has_date',
-        'has_date_category',
-        'has_date_lt',
         'has_date_eq',
         'has_date_gt',
         'has_time',
@@ -340,8 +334,7 @@
         'has_district',
         'has_ward',
         'has_error',
-        'has_value',
-        'has_pattern'
+        'has_value'
       ],
       help: {
         legacy_extra: 'help.html',

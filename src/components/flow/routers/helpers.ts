@@ -14,15 +14,16 @@ import {
   SwitchRouter,
   TransferAirtime,
   UIConfig,
-  WebhookExitNames,
+  ServiceCallExitNames,
   CallClassifier,
   OpenTicket,
   Delay,
   SetContactProfile,
-  LinkSheets
+  LinkSheets,
+  CallLLM
 } from 'flowTypes';
 import { RenderNode } from 'store/flowContext';
-import { createUUID, snakify } from 'utils';
+import { createUUID } from 'utils';
 
 export interface CategorizedCases {
   cases: Case[];
@@ -334,19 +335,23 @@ export const resolveRoutes = (
   return results;
 };
 
-export const createWebhookBasedNode = (
+export const createServiceCallSplitNode = (
   action:
     | CallWebhook
     | CallResthook
     | OpenTicket
     | TransferAirtime
     | SetContactProfile
-    | LinkSheets,
+    | LinkSheets
+    | CallLLM,
   originalNode: RenderNode,
-  useCategoryTest: boolean
+  operand: string,
+  test: Operators,
+  args: string[],
+  result_name: string = '',
+  is_failure_test: boolean = false
 ): RenderNode => {
   const exits: Exit[] = [];
-  let cases: Case[] = [];
   let categories: Category[] = [];
 
   // see if we are editing an existing router so we reuse exits
@@ -355,9 +360,7 @@ export const createWebhookBasedNode = (
     originalNode.node.actions.length === 1 &&
     originalNode.node.actions[0].type === action.type
   ) {
-    const previousRouter = getSwitchRouter(originalNode.node);
-    originalNode.node.exits.forEach((exit: any) => exits.push(exit));
-    previousRouter.cases.forEach(kase => cases.push(kase));
+    originalNode.node.exits.forEach((exit: Exit) => exits.push(exit));
     originalNode.node.router.categories.forEach(category => categories.push(category));
   } else {
     // Otherwise, let's create some new ones
@@ -375,37 +378,33 @@ export const createWebhookBasedNode = (
     categories = [
       {
         uuid: createUUID(),
-        name: WebhookExitNames.Success,
+        name: ServiceCallExitNames.Success,
         exit_uuid: exits[0].uuid
       },
       {
         uuid: createUUID(),
-        name: WebhookExitNames.Failure,
+        name: ServiceCallExitNames.Failure,
         exit_uuid: exits[1].uuid
       }
     ];
-
-    cases = [
-      {
-        uuid: createUUID(),
-        type: useCategoryTest ? Operators.has_category : Operators.has_only_text,
-        arguments: [WebhookExitNames.Success],
-        category_uuid: categories[0].uuid
-      }
-    ];
   }
 
-  let operand = '@results.' + snakify(action.result_name);
-  if (!useCategoryTest) {
-    operand += '.category';
-  }
+  const cases = [
+    {
+      uuid: createUUID(),
+      type: test,
+      arguments: args,
+      category_uuid: categories[is_failure_test ? 1 : 0].uuid
+    }
+  ];
 
   const router: SwitchRouter = {
     type: RouterTypes.switch,
     operand: operand,
     cases,
     categories,
-    default_category_uuid: categories[categories.length - 1].uuid
+    default_category_uuid: categories[is_failure_test ? 0 : 1].uuid,
+    result_name: result_name
   };
 
   let splitType = Types.split_by_webhook;
@@ -415,6 +414,8 @@ export const createWebhookBasedNode = (
     splitType = Types.split_by_ticket;
   } else if (action.type === Types.transfer_airtime) {
     splitType = Types.split_by_airtime;
+  } else if (action.type === Types.call_llm) {
+    splitType = Types.split_by_llm;
   } else if (action.type === Types.set_contact_profile) {
     splitType = Types.set_contact_profile;
   }

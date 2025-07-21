@@ -38,22 +38,8 @@ exports[`SubflowRouterForm ivr render should render 1`] = `
     }
     onChange={[MockFunction]}
   />
-  <AssetSelector
-    additionalOptions={
-      Array [
-        Object {
-          "id": "expression",
-          "name": "Expression",
-          "type": "message",
-        },
-      ]
-    }
-    assets={
-      Object {
-        "items": Object {},
-        "type": "flow",
-      }
-    }
+  <TembaSelectElement
+    endpoint="/assets/flows.json"
     entry={
       Object {
         "value": Object {
@@ -64,9 +50,19 @@ exports[`SubflowRouterForm ivr render should render 1`] = `
     }
     name="Flow"
     onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "id": "expression",
+          "name": "Expression",
+          "type": "message",
+        },
+      ]
+    }
     placeholder="Select the flow to start"
     searchable={true}
     shouldExclude={[Function]}
+    valueKey="uuid"
   />
 </Dialog>
 `;
@@ -294,22 +290,8 @@ exports[`SubflowRouterForm msg render should render 1`] = `
     }
     onChange={[MockFunction]}
   />
-  <AssetSelector
-    additionalOptions={
-      Array [
-        Object {
-          "id": "expression",
-          "name": "Expression",
-          "type": "message",
-        },
-      ]
-    }
-    assets={
-      Object {
-        "items": Object {},
-        "type": "flow",
-      }
-    }
+  <TembaSelectElement
+    endpoint="/assets/flows.json"
     entry={
       Object {
         "value": Object {
@@ -320,9 +302,19 @@ exports[`SubflowRouterForm msg render should render 1`] = `
     }
     name="Flow"
     onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "id": "expression",
+          "name": "Expression",
+          "type": "message",
+        },
+      ]
+    }
     placeholder="Select the flow to start"
     searchable={true}
     shouldExclude={[Function]}
+    valueKey="uuid"
   />
 </Dialog>
 `;

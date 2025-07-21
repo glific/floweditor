@@ -11,8 +11,8 @@ import { nodeToState, stateToNode } from './helpers';
 import styles from './ContactProfileRouterForm.module.scss';
 import i18n from 'config/i18n';
 import TextInputElement from 'components/form/textinput/TextInputElement';
-import AssetSelector from 'components/form/assetselector/AssetSelector';
 import { AssetType } from 'store/flowContext';
+import TembaSelectElement from 'temba/TembaSelectElement';
 
 export interface ContactProfileRouterFormState extends FormState {
   optionType: FormEntry;
@@ -25,6 +25,13 @@ export const profileOptions = {
   '2': { id: '2', name: 'Switch Profile', type: AssetType.ContactProfile },
   '3': { id: '3', name: 'Deactivate Profile', type: AssetType.ContactProfile }
 };
+
+export const profileOptionsList = Object.values(profileOptions).map(profile => ({
+  id: profile.id,
+  name: profile.name,
+  type: AssetType.ContactProfile,
+  value: profile.name
+}));
 
 export default class ContactProfileRouterForm extends React.Component<
   RouterFormProps,
@@ -40,11 +47,12 @@ export default class ContactProfileRouterForm extends React.Component<
     });
   }
 
-  private handleTypeChange(value: any): void {
-    const selection = value[0];
-    this.setState({
-      optionType: { value: selection }
-    });
+  private handleTypeChange(selection: any): void {
+    if (this.state.optionType.value.id !== selection.id) {
+      this.setState({
+        optionType: { value: selection }
+      });
+    }
   }
 
   private handleSave(): void {
@@ -80,12 +88,9 @@ export default class ContactProfileRouterForm extends React.Component<
         <TypeList __className="" initialType={typeConfig} onChange={this.props.onTypeChange} />
 
         <p>{i18n.t('forms.select_what_to_update', 'Select what to update')}</p>
-        <AssetSelector
+        <TembaSelectElement
           name={i18n.t('forms.contact_field', 'Contact profile')}
-          assets={{
-            type: AssetType.ContactProfile,
-            items: profileOptions
-          }}
+          options={profileOptionsList}
           entry={this.state.optionType}
           searchable={true}
           onChange={this.handleTypeChange}

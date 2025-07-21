@@ -2,9 +2,7 @@ import { react as bindCallbacks } from 'auto-bind';
 import Dialog, { ButtonSet, Tab } from 'components/dialog/Dialog';
 import { initializeForm, stateToAction } from 'components/flow/actions/sendbroadcast/helpers';
 import { ActionFormProps } from 'components/flow/props';
-import AssetSelector from 'components/form/assetselector/AssetSelector';
 import TypeList from 'components/nodeeditor/TypeList';
-import { hasUseableTranslation } from 'components/form/assetselector/helpers';
 import { fakePropType } from 'config/ConfigProvider';
 import mutate from 'immutability-helper';
 import * as React from 'react';
@@ -25,6 +23,7 @@ import { shouldRequireIf, validate } from 'store/validators';
 import i18n from 'config/i18n';
 import { renderIssues } from '../helpers';
 import TextInputElement from 'components/form/textinput/TextInputElement';
+import TembaSelectElement from 'temba/TembaSelectElement';
 
 export interface SendBroadcastFormState extends FormState {
   template: FormEntry;
@@ -45,9 +44,7 @@ export default class SendBroadcastForm extends React.Component<
   SendBroadcastFormState
 > {
   public static contextTypes = {
-    config: fakePropType,
-    endpoints: fakePropType,
-    assetService: fakePropType
+    config: fakePropType
   };
   private timeout: any;
 
@@ -75,6 +72,12 @@ export default class SendBroadcastForm extends React.Component<
   public handleComposeChanged(compose: string): boolean {
     return this.handleUpdate({ compose });
   }
+
+  private hasUseableTranslation = (template: Template) => {
+    return !!template.translations.find(
+      translation => translation.status === 'pending' || translation.status === 'approved'
+    );
+  };
 
   private handleUpdate(
     keys: { compose?: string; recipients?: Asset[]; template?: string },
@@ -226,7 +229,7 @@ export default class SendBroadcastForm extends React.Component<
   }
 
   private handleShouldExcludeTemplate(template: any): boolean {
-    return !hasUseableTranslation(template as Template);
+    return !this.hasUseableTranslation(template as Template);
   }
 
   private getButtons(): ButtonSet {
@@ -285,15 +288,15 @@ export default class SendBroadcastForm extends React.Component<
             'Sending messages over a WhatsApp channel requires that a template be used if you have not received a message from a contact in the last 24 hours. Setting a template to use over WhatsApp is especially important for the first message in your flow.'
           )}
         </p>
-        <AssetSelector
+        <TembaSelectElement
+          key="template_select"
           name={i18n.t('forms.template', 'template')}
-          noOptionsMessage="No templates found"
-          assets={this.props.assetStore.templates}
+          endpoint={this.context.config.endpoints.templates}
           entry={this.state.template}
           onChange={this.handleTemplateChanged}
           shouldExclude={this.handleShouldExcludeTemplate}
           searchable={true}
-          formClearable={true}
+          clearable={true}
         />
         {this.state.templateTranslation ? (
           <>
@@ -467,17 +470,20 @@ export default class SendBroadcastForm extends React.Component<
           customTitle={'Step 1: When a contact arrives at this point in your flow...'}
         />
 
-        <AssetSelector
+        <TembaSelectElement
+          key="recipient_select"
           name={i18n.t('forms.recipients', 'Recipients')}
           placeholder={i18n.t('forms.select_contacts', 'Select Contacts')}
-          assets={this.props.assetStore.recipients}
+          endpoint={this.context.config.endpoints.recipients}
           entry={this.state.recipients}
           searchable={true}
           multi={true}
           shouldExclude={shouldExclude}
           expressions={true}
+          queryParam="search"
           onChange={this.handleRecipientsChanged}
         />
+
         <p />
 
         {/* 
@@ -487,6 +493,8 @@ export default class SendBroadcastForm extends React.Component<
           chatbox
           counter
           entry={this.state.compose}
+          maxlength={MAX_TEXT_LEN}
+          maxattachments={MAX_ATTACHMENTS}
           onChange={this.handleComposeChanged}
         ></ComposeElement> */}
         <p>Step 2: Select a template on the WhatsApp tab</p>

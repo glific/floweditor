@@ -51,7 +51,7 @@ import {
   UINode,
   Wait,
   WaitTypes,
-  WebhookExitNames,
+  ServiceCallExitNames,
   HintTypes,
   CallClassifier,
   ComposeAttachment
@@ -387,15 +387,15 @@ export const createWebhookNode = (
   useCategoryTest: boolean
 ) => {
   const { categories, exits } = createCategories([
-    WebhookExitNames.Success,
-    WebhookExitNames.Failure
+    ServiceCallExitNames.Success,
+    ServiceCallExitNames.Failure
   ]);
 
   const cases: Case[] = [
     {
       uuid: utils.createUUID(),
       type: useCategoryTest ? Operators.has_category : Operators.has_only_text,
-      arguments: [WebhookExitNames.Success],
+      arguments: [ServiceCallExitNames.Success],
       category_uuid: categories[0].uuid
     }
   ];
@@ -437,7 +437,7 @@ export const createOpenTicketNode = (subject: string, body: string): FlowNode =>
     type: Types.open_ticket,
     subject: subject,
     body: body,
-    result_name: 'Result'
+    result_name: ''
   };
   return createWebhookNode(action, true);
 };
@@ -483,6 +483,9 @@ export const getActionFormProps = (action: AnyAction): ActionFormProps => ({
     recipients: { items: {}, type: AssetType.Contact || AssetType.Group || AssetType.URN }
   },
   helpArticles: {},
+  language: null,
+  removeLocalizations: jest.fn(),
+
   addAsset: jest.fn(),
   updateAction: jest.fn(),
   onClose: jest.fn(),

@@ -65,8 +65,9 @@ exports[`AddLabelsForm render allows expressions 1`] = `
             class="normal "
           >
             <temba-select
-              cachekey="0"
+              allowcreate="true"
               data-testid="temba_select_labels"
+              endpoint="/assets/labels.json"
               errors="[]"
               expressions="session"
               multi="true"
@@ -196,8 +197,9 @@ exports[`AddLabelsForm render should render 1`] = `
             class="normal "
           >
             <temba-select
-              cachekey="0"
+              allowcreate="true"
               data-testid="temba_select_labels"
+              endpoint="/assets/labels.json"
               errors="[]"
               expressions="session"
               multi="true"

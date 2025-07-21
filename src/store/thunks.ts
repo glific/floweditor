@@ -84,10 +84,7 @@ export type OnAddToNode = (node: FlowNode) => Thunk<void>;
 
 export type HandleTypeConfigChange = (typeConfig: Type) => Thunk<void>;
 
-export type UpdateTranslationFilters = (translationFilters: {
-  categories: boolean;
-  rules: boolean;
-}) => Thunk<void>;
+export type UpdateTranslationFilters = (translationFilters: { categories: boolean }) => Thunk<void>;
 
 export type OnOpenNodeEditor = (settings: NodeEditorSettings) => Thunk<void>;
 
@@ -121,6 +118,7 @@ export type OnConnectionDrag = (event: ConnectionEvent, flowType: FlowTypes) => 
 
 export type OnUpdateLocalizations = (
   language: string,
+  autoTranslated: boolean,
   changes: LocalizationUpdates
 ) => Thunk<FlowDefinition>;
 
@@ -236,53 +234,72 @@ export const createDirty = (
 
   lastDirtyAttemptTimeout = window.setTimeout(() => {
     postingRevision = true;
-    saveRevision(revisionsEndpoint, newDefinition).then(
-      (result: SaveResult) => {
-        const revision = result.revision;
-        definition.revision = revision.revision;
-        dispatch(updateDefinition(definition));
-        dispatch(updateIssues(createFlowIssueMap(issues, result.issues)));
+    saveRevision(revisionsEndpoint, newDefinition)
+      .then(
+        (result: SaveResult) => {
+          const revision = result.revision;
+          definition.revision = revision.revision;
+          dispatch(updateDefinition(definition));
+          dispatch(updateIssues(createFlowIssueMap(issues, result.issues)));
 
-        if (result.metadata) {
-          dispatch(updateMetadata(result.metadata));
+          if (result.metadata) {
+            dispatch(updateMetadata(result.metadata));
+          }
+
+          const updatedAssets = mutators.addRevision(assetStore, revision);
+          dispatch(updateAssets(updatedAssets));
+          dispatch(
+            mergeEditorState({
+              currentRevision: revision.revision,
+              saving: false,
+              activityInterval: ACTIVITY_INTERVAL
+            })
+          );
+
+          lastSuccessfulMillis = new Date().getTime();
+          postingRevision = false;
+        },
+        (error: AxiosError) => {
+          let body = NETWORK_ERROR;
+
+          if (error.response && error.response.status === 500) {
+            body = SERVER_ERROR;
+          }
+
+          if (
+            error.response &&
+            error.response.data &&
+            typeof error.response.data === 'object' &&
+            'description' in error.response.data
+          ) {
+            const data = error.response.data as { description: string };
+            body = data.description;
+          }
+
+          dispatch(
+            mergeEditorState({
+              modalMessage: {
+                title: "Uh oh, we couldn't save your changes",
+                body
+              },
+              saving: false
+            })
+          );
+          postingRevision = false;
         }
-
-        const updatedAssets = mutators.addRevision(assetStore, revision);
-        dispatch(updateAssets(updatedAssets));
-        dispatch(
-          mergeEditorState({
-            currentRevision: revision.revision,
-            saving: false,
-            activityInterval: ACTIVITY_INTERVAL
-          })
-        );
-
-        lastSuccessfulMillis = new Date().getTime();
-        postingRevision = false;
-      },
-      (error: AxiosError) => {
-        let body = NETWORK_ERROR;
-
-        if (error.response && error.response.status === 500) {
-          body = SERVER_ERROR;
-        }
-
-        if (error.response && error.response.data && error.response.data.description) {
-          body = error.response.data.description;
-        }
-
+      )
+      .catch(() => {
         dispatch(
           mergeEditorState({
             modalMessage: {
-              title: "Uh oh, we couldn't save your changes",
-              body
+              title: 'Uh oh',
+              body: "We couldn't save your changes, please try again or refresh the page."
             },
             saving: false
           })
         );
         postingRevision = false;
-      }
-    );
+      });
   }, quiet);
 };
 
@@ -480,14 +497,16 @@ export const handleLanguageChange: HandleLanguageChange = language => (dispatch,
   }
 };
 
-export const onUpdateLocalizations = (language: string, changes: LocalizationUpdates) => (
-  dispatch: DispatchWithState,
-  getState: GetState
-): FlowDefinition => {
+export const onUpdateLocalizations = (
+  language: string,
+  autoTranslated: boolean,
+  changes: LocalizationUpdates
+) => (dispatch: DispatchWithState, getState: GetState): FlowDefinition => {
   const {
     flowContext: { definition }
   } = getState();
-  const updated = mutators.updateLocalization(definition, language, changes);
+
+  const updated = mutators.updateLocalization(definition, language, changes, autoTranslated);
   dispatch(updateDefinition(updated));
 
   markDirty();
@@ -1165,10 +1184,10 @@ export const onOpenNodeEditor = (settings: NodeEditorSettings) => (
   dispatch(mergeEditorState(EMPTY_DRAG_STATE));
 };
 
-export const updateTranslationFilters = (translationFilters: {
-  categories: boolean;
-  rules: boolean;
-}) => (dispatch: DispatchWithState, getState: GetState): void => {
+export const updateTranslationFilters = (translationFilters: { categories: boolean }) => (
+  dispatch: DispatchWithState,
+  getState: GetState
+): void => {
   const {
     flowContext: { definition }
   } = getState();

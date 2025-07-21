@@ -33,15 +33,8 @@ exports[`SetRunResultForm render should render 1`] = `
   <div
     className="form"
   >
-    <AssetSelector
-      additionalOptions={Array []}
-      assets={
-        Object {
-          "items": Object {},
-          "type": "result",
-        }
-      }
-      createAssetFromInput={[Function]}
+    <TembaSelectElement
+      createArbitraryOption={[Function]}
       createPrefix="New: "
       entry={
         Object {
@@ -52,7 +45,6 @@ exports[`SetRunResultForm render should render 1`] = `
           },
         }
       }
-      formClearable={true}
       helpText={
         <Trans
           i18nKey="forms.result_name_help"
@@ -68,6 +60,8 @@ exports[`SetRunResultForm render should render 1`] = `
       name="Result"
       nameKey="name"
       onChange={[Function]}
+      options={Array []}
+      placeholder="Select a result"
       searchable={true}
       showLabel={true}
       valueKey="value"
@@ -94,6 +88,7 @@ exports[`SetRunResultForm render should render 1`] = `
         }
       }
       helpText="An optional category for your result. For age, the value might be 17, but the category might be 'Young Adult'"
+      maxLength={36}
       name="Category"
       onChange={[Function]}
       placeholder="Optional"

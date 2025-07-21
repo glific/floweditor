@@ -1,13 +1,13 @@
 import { react as bindCallbacks } from 'auto-bind';
 import Dialog, { ButtonSet } from 'components/dialog/Dialog';
-import { renderIssues } from 'components/flow/actions/helpers';
+import { hasErrors, renderIssues } from 'components/flow/actions/helpers';
 import { RouterFormProps } from 'components/flow/props';
-import { nodeToState, stateToNode } from './helpers';
+import { getUserName, nodeToState, stateToNode } from './helpers';
 // import { createResultNameInput } from 'components/flow/routers/widgets';
 import TypeList from 'components/nodeeditor/TypeList';
 import * as React from 'react';
 import { FormState, mergeForm, StringEntry, FormEntry } from 'store/nodeEditor';
-import { shouldRequireIf, validate } from 'store/validators';
+import { Alphanumeric, shouldRequireIf, StartIsNonNumeric, validate } from 'store/validators';
 import styles from './TicketRouterForm.module.scss';
 import i18n from 'config/i18n';
 import TextInputElement from 'components/form/textinput/TextInputElement';
@@ -40,6 +40,14 @@ export default class TicketRouterForm extends React.Component<
       include: [/^handle/]
     });
   }
+
+  componentDidMount(): void {
+    // set our default topic if we don't have one
+    if (!this.state.topic.value) {
+      this.handleTopicUpdate(this.context.config.defaultTopic);
+    }
+  }
+
   private handleUpdate(
     keys: {
       assignee?: User;
@@ -73,9 +81,11 @@ export default class TicketRouterForm extends React.Component<
     }
 
     // if (keys.hasOwnProperty('resultName')) {
-    //   updates.resultName = validate(i18n.t('forms.result_name', 'Result Name'), keys.resultName, [
-    //     shouldRequireIf(submitting)
-    //   ]);
+    //   updates.resultName = validate(
+    // i18n.t('forms.result_name', 'Result Name'),
+    // keys.resultName,
+    //     []
+    //   );
     // }
 
     const updated = mergeForm(this.state, updates);
@@ -97,11 +107,28 @@ export default class TicketRouterForm extends React.Component<
     return this.handleUpdate({ subject }, submitting);
   }
 
+  private handleResultNameUpdate(value: string): void {
+    const resultName = validate(i18n.t('forms.result_name', 'Result Name'), value, [
+      Alphanumeric,
+      StartIsNonNumeric
+    ]);
+    this.setState({
+      resultName,
+      valid: this.state.valid && !hasErrors(resultName)
+    });
+  }
   private handleBodyUpdate(body: string): boolean {
     return this.handleUpdate({ body });
   }
 
   private handleSave(): void {
+    // force our default topic if it's not set
+    // we have to do it here, because setState is async
+    // if (this.state.topic.value === null) {
+    // eslint-disable-next-line react/no-direct-mutation-state
+    // this.state.topic.value = this.context.config.defaultTopic;
+    // }
+
     // validate all fields in case they haven't interacted
     const valid = this.handleUpdate(
       {
@@ -139,6 +166,7 @@ export default class TicketRouterForm extends React.Component<
           <div style={{ flexBasis: 250 }}>
             <TembaSelect
               key="select_topic"
+              valueKey="uuid"
               name={i18n.t('forms.topic', 'Topic')}
               placeholder={i18n.t('Select')}
               endpoint={this.context.config.endpoints.topics}
@@ -146,6 +174,7 @@ export default class TicketRouterForm extends React.Component<
               value={this.state.topic.value}
               createPrefix={i18n.t('forms.topic_prefix', 'Create Topic: ')}
               searchable={true}
+              errors={(this.state.topic.validationFailures || []).map(failure => failure.message)}
             />
           </div>
 
@@ -159,12 +188,7 @@ export default class TicketRouterForm extends React.Component<
               onChange={this.handleAssigneeUpdate}
               clearable={true}
               value={this.state.assignee.value}
-              getName={(user: User) => {
-                if (!user.first_name && !user.last_name) {
-                  return user.email || '';
-                }
-                return `${user.first_name} ${user.last_name}`;
-              }}
+              getName={getUserName}
             />
           </div>
         </div>

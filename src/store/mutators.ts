@@ -610,7 +610,8 @@ export const pruneDefinition = (definition: FlowDefinition): FlowDefinition =>
 export const updateLocalization = (
   definition: FlowDefinition,
   language: string,
-  changes: LocalizationUpdates
+  changes: LocalizationUpdates,
+  autoTranslated: boolean = false
 ) => {
   let newDef = definition;
 
@@ -625,10 +626,12 @@ export const updateLocalization = (
 
   // Apply changes
   changes.forEach(({ translations, uuid }) => {
+    // adding translations
     if (translations) {
       // normalize our translations so all are treated as arrays
-      const normalizedTranslations: { [uuid: string]: string[] } = {};
-      for (const key of Object.keys(translations)) {
+      let normalizedTranslations: { [attribute: string]: any } = {};
+      const attributes = Object.keys(translations);
+      for (const key of attributes) {
         const prev = translations[key];
         if (Array.isArray(prev)) {
           normalizedTranslations[key] = prev;
@@ -637,7 +640,43 @@ export const updateLocalization = (
         }
       }
 
-      // adding localization
+      if (autoTranslated) {
+        // first get our existing auto translations for this uuid if we have any
+        let autoTranslations = [];
+
+        if (
+          newDef &&
+          newDef.localization &&
+          newDef.localization[language] &&
+          newDef.localization[language][uuid] &&
+          newDef.localization[language][uuid]._ui &&
+          newDef.localization[language][uuid]._ui.auto_translations
+        ) {
+          autoTranslations = newDef.localization[language][uuid]._ui.auto_translations;
+        }
+
+        // add our new attribute if it isn't there already
+        autoTranslations = [...new Set([...autoTranslations, ...attributes])];
+
+        normalizedTranslations['_ui'] = {
+          auto_translated: autoTranslations
+        };
+
+        // if we are auto translating, we need to merge our new translations with the previous ones
+        let existingTranslations = {};
+
+        if (
+          newDef &&
+          newDef.localization &&
+          newDef.localization[language] &&
+          newDef.localization[language][uuid]
+        ) {
+          existingTranslations = newDef.localization[language][uuid];
+        }
+        normalizedTranslations = { ...existingTranslations, ...normalizedTranslations };
+      }
+
+      // should have attomic set of translations now, set them
       newDef = mutate(newDef, {
         localization: { [language]: { [uuid]: set(normalizedTranslations) } }
       });
