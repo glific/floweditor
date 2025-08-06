@@ -9,10 +9,10 @@ let dbInstance: IDBDatabase | null = null;
 let saveTimeout: NodeJS.Timeout | null;
 let lastSaveTime = 0;
 const SAVE_INTERVAL = 2000;
+const DEBOUNCE_DELAY = 500;
 
 // Initialize and open the database
 async function initDB(): Promise<IDBDatabase> {
-  console.log('Initializing IndexedDB...');
   if (dbInstance) {
     return dbInstance;
   }
@@ -25,7 +25,6 @@ async function initDB(): Promise<IDBDatabase> {
     };
 
     request.onsuccess = () => {
-      console.log('IndexedDB Initialised...');
       dbInstance = request.result;
       resolve(dbInstance);
     };
@@ -79,14 +78,23 @@ const middlewareFunction = async (currentState: any) => {
 
   if (definition && nodes) {
     const now = Date.now();
-    if (now - lastSaveTime > SAVE_INTERVAL) {
+    if (saveTimeout) {
       clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(async () => {
-        const newDefinition = getCurrentDefinition(definition, nodes, true);
-        await saveFlowDefinition(definition.uuid, newDefinition);
-        lastSaveTime = Date.now();
-      }, 500);
     }
+
+    saveTimeout = setTimeout(async () => {
+      const saveTime = Date.now();
+      if (saveTime - lastSaveTime >= SAVE_INTERVAL) {
+        try {
+          const newDefinition = getCurrentDefinition(definition, nodes, true);
+          await saveFlowDefinition(definition.uuid, newDefinition);
+          lastSaveTime = saveTime;
+        } catch (error) {
+          console.error('Error saving flow definition:', error);
+        }
+      }
+      saveTimeout = null;
+    }, DEBOUNCE_DELAY);
   }
 };
 
