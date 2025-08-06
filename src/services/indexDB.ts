@@ -77,7 +77,6 @@ const middlewareFunction = async (currentState: any) => {
   const { definition, nodes } = currentState.flowContext;
 
   if (definition && nodes) {
-    const now = Date.now();
     if (saveTimeout) {
       clearTimeout(saveTimeout);
     }
