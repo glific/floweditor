@@ -119,14 +119,6 @@ exports[`SubflowRouterForm should init parameter tab 1`] = `
                 Parameters
               </div>
             </div>
-            <div
-              class="tab "
-              style="display: flex;"
-            >
-              <div>
-                Home
-              </div>
-            </div>
           </div>
         </div>
       </div>

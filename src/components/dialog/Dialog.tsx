@@ -42,10 +42,12 @@ export interface DialogProps {
   tabs?: Tab[];
   className?: string;
   defaultTab?: number;
+  showHomeTab?: boolean;
 }
 
 export interface DialogState {
   activeTab: number;
+  showHomeTab?: boolean;
 }
 
 /**
@@ -59,8 +61,14 @@ export default class Dialog extends React.Component<DialogProps, DialogState> {
     super(props);
 
     if (this.props.tabs && this.props.tabs.length > 0) {
+      const activeTab =
+        this.props.defaultTab !== null && this.props.defaultTab !== undefined
+          ? this.props.defaultTab
+          : this.props.tabs.length;
+
       this.state = {
-        activeTab: this.props.tabs.length
+        activeTab: activeTab,
+        showHomeTab: this.props.showHomeTab !== false
       };
     } else {
       this.state = {
@@ -173,8 +181,9 @@ export default class Dialog extends React.Component<DialogProps, DialogState> {
       name: 'Home',
       body: <>{this.props.children}</>
     };
+
     let allTabs = [...(this.props.tabs || [])];
-    if (this.props.tabs && this.props.tabs.length > 0) {
+    if (this.props.tabs && this.props.tabs.length > 0 && this.state.showHomeTab) {
       allTabs = [...allTabs, homeTab];
     }
 
@@ -247,7 +256,8 @@ export default class Dialog extends React.Component<DialogProps, DialogState> {
         </div>
 
         <div className={this.props.noPadding ? '' : styles.content}>
-          {this.state.activeTab > -1 ? allTabs[this.state.activeTab].body : homeTab.body}
+          {this.props.defaultTab ||
+            (this.state.activeTab > -1 ? allTabs[this.state.activeTab].body : homeTab.body)}
         </div>
 
         <div className={styles.footer}>
