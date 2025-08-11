@@ -14,5 +14,8 @@ declare namespace JSX {
     'temba-compose': any;
     'temba-icon': any;
     'temba-sortable-list': any;
+    'temba-template-editor': any;
+    'temba-alert': any;
+    'temba-dialog': any;
   }
 }

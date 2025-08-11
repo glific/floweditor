@@ -1,10 +1,11 @@
 import { Methods } from 'components/flow/routers/webhook/helpers';
 import { FlowTypes, Operators, Types, ContactStatus } from 'config/interfaces';
+import { Component } from 'react';
 import { AssetStore } from 'store/flowContext';
 import { ExclusionsCheckboxEntry } from 'store/nodeEditor';
 
 // we don't concern ourselves with patch versions
-export const SPEC_VERSION = '13.2';
+export const SPEC_VERSION = '14.3';
 
 export interface Languages {
   [iso: string]: string;
@@ -36,6 +37,7 @@ export interface Endpoints {
   revisions: string;
   activity: string;
   labels: string;
+  llms: string;
   optins: string;
   channels: string;
   classifiers: string;
@@ -67,6 +69,7 @@ export interface FlowEditorConfig {
   path?: string;
   headers?: any;
   brand: string;
+  defaultTopic: { uuid: string; name: string };
 
   onLoad?: () => void;
   onActivityClicked?: (uuid: string) => void;
@@ -121,7 +124,6 @@ export interface Dependency {
 
 export interface FlowMetadata {
   dependencies: Dependency[];
-  waiting_exit_uuids: string[];
   results: Result[];
   parent_refs: string[];
 }
@@ -138,12 +140,18 @@ export interface User {
   last_name?: string;
   role?: string;
   created_on?: string;
+  name?: string;
 }
 
 export interface Topic {
   uuid: string;
   name: string;
   created_on?: string;
+}
+
+export interface LLM {
+  uuid: string;
+  name: string;
 }
 
 export interface FlowIssue {
@@ -371,6 +379,8 @@ export interface TemplateTranslation {
   content: string;
   language: string;
   status: string;
+  variables: { type: string }[];
+  components: Component[];
   variable_count: number;
 }
 
@@ -399,6 +409,8 @@ export interface SendMsg extends Action {
   templating?: MsgTemplating;
   labels?: Label[];
   skipValidation?: boolean;
+
+  template_variables?: string[];
 }
 
 export interface SendInteractiveMsg extends Action {
@@ -503,7 +515,7 @@ export interface Classifier {
 
 export interface TransferAirtime extends Action {
   amounts: { [name: string]: number };
-  result_name: string;
+  result_name?: string;
 }
 
 export interface CallClassifier extends Action {
@@ -514,20 +526,27 @@ export interface CallClassifier extends Action {
 
 export interface CallResthook extends Action {
   resthook: string;
-  result_name: string;
+  result_name?: string;
 }
 
 export interface CallWebhook extends Action {
   url: string;
   method: Methods;
-  result_name: string;
   body?: string;
   headers?: Headers;
+  result_name?: string;
+}
+
+export interface CallLLM extends Action {
+  llm: LLM;
+  instructions: string;
+  input: string;
+  output_local: string;
 }
 
 export interface OpenTicket extends Action {
-  subject?: string;
   topic?: Topic;
+  subject?: string;
   body?: string;
   result_name: string;
   assignee?: User;
@@ -547,7 +566,8 @@ export interface StartSession extends RecipientsAction {
 export interface UIMetaData {
   nodes: { [key: string]: UINode };
   languages: { [iso: string]: string }[];
-  translation_filters?: { categories: boolean; rules: boolean };
+  translation_filters?: { categories: boolean };
+  auto_translations?: { [language: string]: { [uuid: string]: string[] } };
 }
 
 export interface FlowPosition {
@@ -645,14 +665,9 @@ export enum StartFlowExitNames {
   Expired = 'Expired'
 }
 
-export enum WebhookExitNames {
+export enum ServiceCallExitNames {
   Success = 'Success',
   Failure = 'Failure'
-}
-
-export enum TransferAirtimeExitNames {
-  Success = 'Success',
-  Failure = 'Failed'
 }
 
 export enum DialCategoryNames {

@@ -7,7 +7,6 @@ import { FormEntry, FormState, mergeForm } from 'store/nodeEditor';
 import i18n from 'config/i18n';
 import TextInputElement, { TextInputStyle } from 'components/form/textinput/TextInputElement';
 import styles from 'components/flow/routers/sheet/SheetForm.module.scss';
-import AssetSelector from 'components/form/assetselector/AssetSelector';
 import { ACTION_OPTIONS, nodeToState, stateToNode } from './helpers';
 import { LowerCaseAlphaNumeric, Required, StartIsNonNumeric, validate } from 'store/validators';
 import { hasErrors } from 'components/flow/actions/helpers';
@@ -16,6 +15,7 @@ import { snakify } from 'utils';
 import SelectElement, { SelectOption } from 'components/form/select/SelectElement';
 import { SelectOptionEntry } from 'store/nodeEditor';
 import mutate from 'immutability-helper';
+import TembaSelectElement from 'temba/TembaSelectElement';
 
 export interface SheetFormState extends FormState {
   sheet: FormEntry;
@@ -222,10 +222,10 @@ export default class SheetForm extends React.Component<RouterFormProps, SheetFor
             <>
               <div className={styles.read_container}>
                 <div className={styles.delay_container}>
-                  <AssetSelector
+                  <TembaSelectElement
                     name={i18n.t('forms.sheet', 'Sheet')}
                     placeholder={i18n.t('forms.select_sheet', 'Select sheet')}
-                    assets={this.props.assetStore.sheets}
+                    endpoint={this.context.config.endpoints.sheets}
                     entry={sheet}
                     expressions={true}
                     searchable={true}
@@ -279,10 +279,10 @@ export default class SheetForm extends React.Component<RouterFormProps, SheetFor
             <>
               <div className={styles.read_container}>
                 <div className={styles.delay_container}>
-                  <AssetSelector
+                  <TembaSelectElement
                     name={i18n.t('forms.sheet', 'Sheet')}
                     placeholder={i18n.t('forms.select_sheet', 'Select sheet')}
-                    assets={this.props.assetStore.sheets}
+                    endpoint={this.context.config.endpoints.sheets}
                     entry={sheet}
                     searchable={true}
                     shouldExclude={this.handleExcludeSheets}

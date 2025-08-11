@@ -19,7 +19,6 @@ import styles from './SendInteractiveMsg.module.scss';
 
 import i18n from 'config/i18n';
 
-import AssetSelector from 'components/form/assetselector/AssetSelector';
 import { Asset } from 'store/flowContext';
 import { AddLabelsFormState } from '../addlabels/AddLabelsForm';
 import { getAsset } from 'external';
@@ -27,6 +26,7 @@ import TextInputElement, { TextInputStyle } from 'components/form/textinput/Text
 import mutate from 'immutability-helper';
 import CheckboxElement from 'components/form/checkbox/CheckboxElement';
 import { FormProps } from 'components/nodeeditor/NodeEditor';
+import TembaSelectElement from 'temba/TembaSelectElement';
 
 // const MAX_ATTACHMENTS = 10;
 export interface SendInteractiveMsgFormState extends FormState {
@@ -61,9 +61,9 @@ export default class SendMsgForm extends React.Component<
     config: fakePropType
   };
 
-  private handleInteractivesChanged(selected: any[]): void {
+  private handleInteractivesChanged(selected: Asset): void {
     const { endpoint, type } = this.props.assetStore.interactives;
-    const interactiveMsg = selected ? selected[0] : null;
+    const interactiveMsg = selected || null;
     if (interactiveMsg) {
       if (interactiveMsg.name === 'Expression') {
         this.setState({
@@ -190,21 +190,20 @@ export default class SendMsgForm extends React.Component<
       <div className={styles.label_container}>
         <p>Select the labels to apply to the interactive message.</p>
 
-        <AssetSelector
+        <TembaSelectElement
           name={i18n.t('forms.labels', 'Labels')}
           placeholder={i18n.t(
             'enter_to_create_label',
             'Enter the name of an existing label or create a new one'
           )}
-          assets={this.props.assetStore.labels}
+          endpoint={this.context.config.endpoints.labels}
           entry={this.state.labels}
           searchable={true}
           multi={true}
           expressions={true}
           onChange={this.handleLabelsChanged}
           createPrefix={i18n.t('create_label', 'Create Label') + ': '}
-          createAssetFromInput={this.handleCreateAssetFromInput}
-          onAssetCreated={this.handleLabelCreated}
+          createArbitraryOption={this.handleCreateAssetFromInput}
         />
       </div>
     );
@@ -340,7 +339,7 @@ export default class SendMsgForm extends React.Component<
       const message = currentMessage.interactive_content;
       body = getMsgBody(message);
     }
-
+    console.log(additionalOption, this.state.interactives);
     return (
       <Dialog
         title={typeConfig.name}
@@ -349,16 +348,16 @@ export default class SendMsgForm extends React.Component<
         tabs={[]}
       >
         <TypeList __className="" initialType={typeConfig} onChange={this.props.onTypeChange} />
-        <AssetSelector
-          additionalOptions={[additionalOption]}
+        <TembaSelectElement
+          options={[additionalOption]}
           name={i18n.t('forms.interactive', 'interactive')}
-          noOptionsMessage="No interactive messages found"
+          // noOptionsMessage="No interactive messages found"
           placeholder={'Select interactive message'}
-          assets={this.props.assetStore.interactives}
+          endpoint={this.context.config.endpoints.interactives}
           entry={this.state.interactives}
           onChange={this.handleInteractivesChanged}
           searchable={true}
-          formClearable={true}
+          clearable={true}
         />
         {this.state.expression && (
           <div className={styles.expression}>

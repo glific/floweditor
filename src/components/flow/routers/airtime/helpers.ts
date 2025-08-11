@@ -2,16 +2,19 @@ import {
   AirtimeRouterFormState,
   AirtimeTransferEntry
 } from 'components/flow/routers/airtime/AirtimeRouterForm';
-import { createWebhookBasedNode } from 'components/flow/routers/helpers';
-import { Types } from 'config/interfaces';
-import { TransferAirtime } from 'flowTypes';
+import { createServiceCallSplitNode } from 'components/flow/routers/helpers';
+
+import { Operators, Types } from 'config/interfaces';
+import { SwitchRouter, TransferAirtime } from 'flowTypes';
 import { RenderNode } from 'store/flowContext';
 import { NodeEditorSettings } from 'store/nodeEditor';
 import { createUUID } from 'utils';
 
 export const nodeToState = (settings: NodeEditorSettings): AirtimeRouterFormState => {
   const originalAction = getOriginalAction(settings);
-  let resultName = { value: 'Result' };
+  const router = settings.originalNode.node.router as SwitchRouter;
+
+  let resultName = { value: '' };
   let valid = false;
 
   const amounts: AirtimeTransferEntry[] = [];
@@ -21,7 +24,7 @@ export const nodeToState = (settings: NodeEditorSettings): AirtimeRouterFormStat
         value: { code: key, amount: '' + originalAction.amounts[key] }
       });
     });
-    resultName = { value: originalAction.result_name };
+    resultName = { value: router.result_name || originalAction.result_name || '' };
     valid = true;
   }
 
@@ -52,11 +55,17 @@ export const stateToNode = (
   const newAction: TransferAirtime = {
     uuid,
     type: Types.transfer_airtime,
-    amounts,
-    result_name: state.resultName.value
+    amounts
   };
 
-  return createWebhookBasedNode(newAction, settings.originalNode, true);
+  return createServiceCallSplitNode(
+    newAction,
+    settings.originalNode,
+    '@locals._new_transfer',
+    Operators.has_text,
+    [],
+    state.resultName.value
+  );
 };
 
 export const getOriginalAction = (settings: NodeEditorSettings): TransferAirtime => {

@@ -1,7 +1,6 @@
 import { react as bindCallbacks } from 'auto-bind';
 import Dialog, { ButtonSet } from 'components/dialog/Dialog';
 import { ActionFormProps } from 'components/flow/props';
-import AssetSelector from 'components/form/assetselector/AssetSelector';
 import TypeList from 'components/nodeeditor/TypeList';
 import { ChangeGroups } from 'flowTypes';
 import * as React from 'react';
@@ -14,8 +13,14 @@ import { initializeForm, stateToAction } from './helpers';
 import i18n from 'config/i18n';
 import { Trans } from 'react-i18next';
 import { renderIssues } from '../../helpers';
+import TembaSelectElement from 'temba/TembaSelectElement';
+import { fakePropType } from 'config/ConfigProvider';
 
 export default class AddGroupsForm extends React.Component<ActionFormProps, ChangeGroupsFormState> {
+  public static contextTypes = {
+    config: fakePropType
+  };
+
   constructor(props: ActionFormProps) {
     super(props);
     this.state = initializeForm(this.props.nodeSettings) as ChangeGroupsFormState;
@@ -83,24 +88,21 @@ export default class AddGroupsForm extends React.Component<ActionFormProps, Chan
           </Trans>
         </p>
 
-        <AssetSelector
+        <TembaSelectElement
+          key="group_select"
           name={i18n.t('forms.groups', 'Collections')}
-          multi={true}
-          noOptionsMessage={i18n.t(
-            'enter_to_create_group',
-            'Enter a name to create a new collection'
-          )}
-          assets={this.props.assetStore.groups}
+          placeholder={i18n.t('enter_to_create_group', 'Enter a name to create a new collection')}
+          endpoint={this.context.config.endpoints.groups}
           entry={this.state.groups}
-          onChange={this.handleGroupsChanged}
-          searchable={true}
           shouldExclude={excludeDynamicGroups}
-          placeholder={i18n.t('select_groups', 'Select Collection')}
+          valueKey="uuid"
+          searchable={true}
+          multi={true}
           expressions={true}
-          // Groups can be created on the fly
+          onChange={this.handleGroupsChanged}
+          allowCreate={true}
           createPrefix={i18n.t('create_group', 'Create Collection') + ': '}
-          createAssetFromInput={this.handleCreateAssetFromInput}
-          onAssetCreated={this.handleGroupAdded}
+          createArbitraryOption={this.handleCreateAssetFromInput}
         />
 
         {renderIssues(this.props)}

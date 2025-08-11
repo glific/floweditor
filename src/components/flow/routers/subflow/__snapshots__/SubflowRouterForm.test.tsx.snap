@@ -163,8 +163,8 @@ exports[`SubflowRouterForm should init parameter tab 1`] = `
             class="normal "
           >
             <temba-select
-              cachekey="0"
               data-testid="temba_select_flow"
+              endpoint="/assets/flows.json"
               errors="[]"
               expressions=""
               name="Flow"
@@ -274,8 +274,8 @@ exports[`SubflowRouterForm should render 1`] = `
             class="normal "
           >
             <temba-select
-              cachekey="0"
               data-testid="temba_select_flow"
+              endpoint="/assets/flows.json"
               errors="[]"
               expressions=""
               name="Flow"

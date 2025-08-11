@@ -8,6 +8,7 @@ import { TembaSelectStyle } from 'temba/TembaSelect';
 import { createUUID, renderIf } from 'utils';
 import styles from './attachments.module.scss';
 import TextInputElement, { TextInputStyle } from 'components/form/textinput/TextInputElement';
+import { MAX_ATTACHMENTS } from 'config/interfaces';
 import { ValidationFailure } from 'store/nodeEditor';
 import { ImCross } from 'react-icons/im';
 import Loading from 'components/loading/Loading';
@@ -19,9 +20,6 @@ export interface Attachment {
   validationFailures?: ValidationFailure[];
   valid?: boolean;
 }
-
-const MAX_ATTACHMENTS = 1;
-
 export const TYPE_OPTIONS: SelectOption[] = [
   { value: 'image', name: i18n.t('forms.image_url', 'Image URL') },
   { value: 'audio', name: i18n.t('forms.audio_url', 'Audio URL') },

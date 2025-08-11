@@ -11,6 +11,7 @@ import { renderIf } from 'utils';
 import styles from './RevisionExplorer.module.scss';
 import i18n from 'config/i18n';
 import { PopTabType } from 'config/interfaces';
+import { showError } from 'index';
 
 const cx: any = classNames.bind(styles);
 
@@ -72,22 +73,22 @@ export class RevisionExplorer extends React.Component<
   public handleUpdateRevisions(): Promise<void> {
     if (this.props.assetStore !== null) {
       const assets = this.props.assetStore.revisions;
-      return getAssets(
-        assets.endpoint + '?version=' + SPEC_VERSION,
-        assets.type,
-        assets.id || 'id'
-      ).then((remoteAssets: Asset[]) => {
-        if (remoteAssets.length > 0) {
-          const latestAsset = remoteAssets.reduce((latest, current) => {
-            return new Date(latest.content.created_on) > new Date(current.content.created_on)
-              ? latest
-              : current;
-          });
+      return getAssets(assets.endpoint + '?version=' + SPEC_VERSION, assets.type, assets.id || 'id')
+        .then((remoteAssets: Asset[]) => {
+          if (remoteAssets.length > 0) {
+            const latestAsset = remoteAssets.reduce((latest, current) => {
+              return new Date(latest.content.created_on) > new Date(current.content.created_on)
+                ? latest
+                : current;
+            });
 
-          latestAsset.content.current = true;
-        }
-        this.setState({ revisions: remoteAssets });
-      });
+            latestAsset.content.current = true;
+          }
+          this.setState({ revisions: remoteAssets });
+        })
+        .catch(error => {
+          showError();
+        });
     }
   }
 
@@ -121,10 +122,14 @@ export class RevisionExplorer extends React.Component<
     return (event: React.MouseEvent<HTMLDivElement>) => {
       event.stopPropagation();
       event.preventDefault();
-      getFlowDetails(this.props.assetStore.revisions, revision.id).then((details: FlowDetails) => {
-        this.props.loadFlowDefinition(details, this.props.assetStore);
-        this.setState({ revision });
-      });
+      getFlowDetails(this.props.assetStore.revisions, revision.id)
+        .then((details: FlowDetails) => {
+          this.props.loadFlowDefinition(details, this.props.assetStore);
+          this.setState({ revision });
+        })
+        .catch(error => {
+          showError();
+        });
     };
   };
 
