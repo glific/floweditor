@@ -217,22 +217,22 @@ export default class RouterLocalizationForm extends React.Component<
 
     if (hasCasesWithArguments) {
       tabs.push({
-        name: 'Rule Translations',
+        name: 'Category Translations',
         body: (
           <>
             <p data-spec="instructions">
-              Sometimes languages need special rules to route things properly. If a translation is
-              not provided, the original rule will be used.
+              When category names are referenced later in the flow, the appropriate language for the
+              category will be used. If no translation is provided, the original text will be used.
             </p>
             <div
               className={
                 styles.translating_list_container +
                 ' ' +
-                (this.state.cases.length > 5 ? styles.scrolling : '')
+                (this.state.categories.length > 5 ? styles.scrolling : '')
               }
               tabIndex={0}
             >
-              <div className={styles.translating_item_list}>{this.renderCases()}</div>
+              <div className={styles.translating_item_list}>{this.renderCategories()}</div>
             </div>
           </>
         )
@@ -246,23 +246,23 @@ export default class RouterLocalizationForm extends React.Component<
         headerClass={typeConfig.type}
         buttons={this.getButtons()}
         tabs={tabs}
-        defaultTab={defaultTab}
-        showHomeTab={false}
+        homeTabName="Rule Translations"
       >
         <p data-spec="instructions">
-          When category names are referenced later in the flow, the appropriate language for the
-          category will be used. If no translation is provided, the original text will be used.
+          Sometimes languages need special rules to route things properly. If a translation is not
+          provided, the original rule will be used.
         </p>
         <div
           className={
             styles.translating_list_container +
             ' ' +
-            (this.state.categories.length > 5 ? styles.scrolling : '')
+            (this.state.cases.length > 5 ? styles.scrolling : '')
           }
           tabIndex={0}
         >
-          <div className={styles.translating_item_list}>{this.renderCategories()}</div>
+          <div className={styles.translating_item_list}>{this.renderCases()}</div>
         </div>
+
         {renderIssues(this.props)}
       </Dialog>
     );
