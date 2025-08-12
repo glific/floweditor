@@ -42,6 +42,7 @@ export interface DialogProps {
   tabs?: Tab[];
   className?: string;
   defaultTab?: number;
+  homeTabName?: string;
 }
 
 export interface DialogState {
@@ -170,7 +171,7 @@ export default class Dialog extends React.Component<DialogProps, DialogState> {
 
   public render(): JSX.Element {
     const homeTab: Tab = {
-      name: 'Home',
+      name: this.props.homeTabName || 'Home',
       body: <>{this.props.children}</>
     };
     let allTabs = [...(this.props.tabs || [])];

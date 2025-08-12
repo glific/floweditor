@@ -204,50 +204,27 @@ export default class RouterLocalizationForm extends React.Component<
 
     const tabs: Tab[] = [];
 
-    const hasCasesWithArguments = !!this.state.cases.find((kase: Case) => {
-      const orginalCase = getOriginalCase(this.props.nodeSettings, kase.uuid) as Case;
-      return (
-        orginalCase.arguments &&
-        orginalCase.arguments.length > 0 &&
-        orginalCase.type !== Operators.has_number_between
-      );
-    });
+    const ruleTranslationsTab = (
+      <>
+        <p data-spec="instructions">
+          Sometimes languages need special rules to route things properly. If a translation is not
+          provided, the original rule will be used.
+        </p>
+        <div
+          className={
+            styles.translating_list_container +
+            ' ' +
+            (this.state.cases.length > 5 ? styles.scrolling : '')
+          }
+          tabIndex={0}
+        >
+          <div className={styles.translating_item_list}>{this.renderCases()}</div>
+        </div>
+      </>
+    );
 
-    let defaultTab;
-
-    if (hasCasesWithArguments) {
-      tabs.push({
-        name: 'Rule Translations',
-        body: (
-          <>
-            <p data-spec="instructions">
-              Sometimes languages need special rules to route things properly. If a translation is
-              not provided, the original rule will be used.
-            </p>
-            <div
-              className={
-                styles.translating_list_container +
-                ' ' +
-                (this.state.cases.length > 5 ? styles.scrolling : '')
-              }
-              tabIndex={0}
-            >
-              <div className={styles.translating_item_list}>{this.renderCases()}</div>
-            </div>
-          </>
-        )
-      });
-      defaultTab = 0;
-    }
-
-    const categories = (
-      <Dialog
-        title={`${this.props.language.name} Category Names`}
-        headerClass={typeConfig.type}
-        buttons={this.getButtons()}
-        tabs={tabs}
-        defaultTab={defaultTab}
-      >
+    const categoryTranslationsTab = (
+      <>
         <p data-spec="instructions">
           When category names are referenced later in the flow, the appropriate language for the
           category will be used. If no translation is provided, the original text will be used.
@@ -262,6 +239,36 @@ export default class RouterLocalizationForm extends React.Component<
         >
           <div className={styles.translating_item_list}>{this.renderCategories()}</div>
         </div>
+      </>
+    );
+
+    const hasCasesWithArguments = !!this.state.cases.find((kase: Case) => {
+      const orginalCase = getOriginalCase(this.props.nodeSettings, kase.uuid) as Case;
+      return (
+        orginalCase.arguments &&
+        orginalCase.arguments.length > 0 &&
+        orginalCase.type !== Operators.has_number_between
+      );
+    });
+
+    if (hasCasesWithArguments) {
+      tabs.push({
+        name: 'Category Translations',
+        body: categoryTranslationsTab
+      });
+    }
+
+    const defaultTabBody = hasCasesWithArguments ? ruleTranslationsTab : categoryTranslationsTab;
+
+    const categories = (
+      <Dialog
+        title={`${this.props.language.name} Category Names`}
+        headerClass={typeConfig.type}
+        buttons={this.getButtons()}
+        tabs={tabs}
+        homeTabName="Rule Translations"
+      >
+        {defaultTabBody}
         {renderIssues(this.props)}
       </Dialog>
     );
