@@ -8,7 +8,13 @@ import i18n from 'config/i18n';
 import TextInputElement, { TextInputStyle } from 'components/form/textinput/TextInputElement';
 import styles from 'components/flow/routers/sheet/SheetForm.module.scss';
 import { ACTION_OPTIONS, nodeToState, stateToNode } from './helpers';
-import { LowerCaseAlphaNumeric, Required, StartIsNonNumeric, validate } from 'store/validators';
+import {
+  LowerCaseAlphaNumeric,
+  Required,
+  shouldRequireIf,
+  StartIsNonNumeric,
+  validate
+} from 'store/validators';
 import { hasErrors } from 'components/flow/actions/helpers';
 import { Trans } from 'react-i18next';
 import { snakify } from 'utils';
@@ -16,6 +22,7 @@ import SelectElement, { SelectOption } from 'components/form/select/SelectElemen
 import { SelectOptionEntry } from 'store/nodeEditor';
 import mutate from 'immutability-helper';
 import TembaSelectElement from 'temba/TembaSelectElement';
+import { fakePropType } from 'config/ConfigProvider';
 
 export interface SheetFormState extends FormState {
   sheet: FormEntry;
@@ -87,6 +94,10 @@ const RenderRowData = ({ rowDataArray, onRowDataChanged, onRowDataRemoved }: any
 };
 
 export default class SheetForm extends React.Component<RouterFormProps, SheetFormState> {
+  public static contextTypes = {
+    config: fakePropType
+  };
+
   constructor(props: RouterFormProps) {
     super(props);
 
@@ -163,12 +174,18 @@ export default class SheetForm extends React.Component<RouterFormProps, SheetFor
     });
   }
 
-  private handleSheetChanged(value: any) {
-    const sheetValue = value.length > 0 ? value[0] : { id: '', name: '', url: '' };
+  private handleSheetChanged(value: any, submitting: boolean = false) {
+    console.log(value);
 
-    this.setState({
-      sheet: { value: sheetValue }
-    });
+    const updates: Partial<SheetFormState> = {
+      sheet: validate(i18n.t('forms.sheet', 'Sheet'), value, [shouldRequireIf(submitting)])
+    };
+
+    // console.log(sheetValue);
+
+    const updated = mergeForm(this.state, updates);
+
+    this.setState(updated);
   }
 
   private handleExcludeSheets(sheet: any) {
@@ -201,7 +218,6 @@ export default class SheetForm extends React.Component<RouterFormProps, SheetFor
 
     const snaked =
       !hasErrors(result_name) && result_name.value ? '.' + snakify(result_name.value) : '';
-
     return (
       <Dialog title={typeConfig.name} headerClass={typeConfig.type} buttons={this.getButtons()}>
         <TypeList __className="" initialType={typeConfig} onChange={this.props.onTypeChange} />
@@ -223,6 +239,7 @@ export default class SheetForm extends React.Component<RouterFormProps, SheetFor
               <div className={styles.read_container}>
                 <div className={styles.delay_container}>
                   <TembaSelectElement
+                    key="sheet_select"
                     name={i18n.t('forms.sheet', 'Sheet')}
                     placeholder={i18n.t('forms.select_sheet', 'Select sheet')}
                     endpoint={this.context.config.endpoints.sheets}

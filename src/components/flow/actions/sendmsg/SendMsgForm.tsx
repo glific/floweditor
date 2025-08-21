@@ -280,8 +280,17 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
       }
     };
   }
-  private handleTemplateChanged(selected: any[]): void {
+  private handleTemplateChanged(selected: any[], submitting: boolean = false): void {
     const template = selected ? selected[0] : null;
+    console.log(selected);
+
+    const updates: Partial<SendMsgFormState> = {
+      labels: validate(i18n.t('forms.template', 'template'), selected, [
+        shouldRequireIf(submitting)
+      ])
+    };
+
+    const updated = mergeForm(this.state, updates);
 
     if (!template) {
       this.setState({
@@ -302,16 +311,11 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
             })
           : this.state.templateVariables;
 
-      this.setState({
-        expression: null,
-        template: { value: template },
-        templateTranslation,
-        templateVariables
-      });
+      this.setState(updated);
     }
-    if (template.name === 'Expression') {
-      this.setState({ expression: { value: this.state.expression } });
-    }
+    // if (template.name === 'Expression') {
+    //   this.setState({ expression: { value: this.state.expression } });
+    // }
   }
 
   private handleTemplateVariableChanged(updatedText: string, num: number): void {
@@ -393,7 +397,6 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
         <TembaSelectElement
           options={[additionalOption]}
           name={i18n.t('forms.template', 'template')}
-          //  noOptionsMessage="No templates found"
           endpoint={this.context.config.endpoints.templates}
           entry={this.state.template}
           onChange={this.handleTemplateChanged}

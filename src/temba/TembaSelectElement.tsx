@@ -19,7 +19,7 @@ export default class TembaSelectElement extends React.Component<TembaSelectEleme
         showLabel={this.props.showLabel}
         helpText={this.props.helpText}
       >
-        <TembaSelect {...this.props} value={this.props.entry?.value}></TembaSelect>
+        <TembaSelect {...this.props} value={this.props.entry.value}></TembaSelect>
       </FormElement>
     );
   }

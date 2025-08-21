@@ -93,7 +93,7 @@ export default class WebhookRouterForm extends React.Component<RouterFormProps, 
       {
         input: this.state.input.value,
         instructions: this.state.instructions.value,
-        llm: this.state.llm?.value
+        llm: this.state.llm.value
       },
       true
     );
@@ -129,7 +129,7 @@ export default class WebhookRouterForm extends React.Component<RouterFormProps, 
           nameKey="name"
           endpoint={this.context.config.endpoints.llms}
           onChange={this.handleLLMUpdate}
-          value={this.state.llm?.value ? this.state.llm.value : null}
+          value={this.state.llm.value ? this.state.llm.value : null}
           entry={this.state.llm}
         ></TembaSelectElement>
 

@@ -15,7 +15,6 @@ export enum Methods {
   PUT = 'PUT',
   DELETE = 'DELETE',
   HEAD = 'HEAD',
-  PATCH = 'PATCH',
   FUNCTION = 'FUNCTION'
 }
 
@@ -39,7 +38,7 @@ export const METHOD_OPTIONS: MethodOption[] = [
   // { value: Methods.PUT, name: Methods.PUT },
   // { value: Methods.DELETE, name: Methods.DELETE }, // These methods are not needed currently
   // { value: Methods.HEAD, name: Methods.HEAD },
-  { value: Methods.PATCH, name: Methods.PATCH },
+  // { value: Methods.PATCH, name: Methods.PATCH },
   { value: Methods.FUNCTION, name: Methods.FUNCTION }
 ];
 
@@ -133,7 +132,8 @@ export const stateToNode = (
     type: Types.call_webhook,
     url: state.url.value,
     body: state.body.value,
-    method: state.method.value.value as Methods
+    method: state.method.value.value as Methods,
+    result_name: state.resultName.value
   };
 
   // if the action had the result name, keep the result on the action rather than the router

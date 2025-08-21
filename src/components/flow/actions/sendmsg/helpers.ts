@@ -19,6 +19,7 @@ export const initializeForm = (
   settings: NodeEditorSettings,
   config: FlowEditorConfig
 ): SendMsgFormState => {
+  console.log(settings, config);
   let template: FormEntry = { value: null };
   let templateVariables: StringEntry[] = [];
   let skipValidation = false;
@@ -44,7 +45,7 @@ export const initializeForm = (
 
       attachments.push(attachment);
     });
-
+    console.log(action);
     if (action.templating) {
       const msgTemplate = action.templating.template;
       if (action.templating.expression) {
@@ -72,7 +73,7 @@ export const initializeForm = (
           return label;
         })
       : [];
-
+    console.log(template);
     return {
       expression: expressionValue,
       topic: { value: TOPIC_OPTIONS.find(option => option.value === action.topic) },
