@@ -242,9 +242,7 @@ export default class SendBroadcastForm extends React.Component<
     };
   }
 
-  private handleTemplateChanged(selected: any[]): void {
-    const template = selected ? selected[0] : null;
-
+  private handleTemplateChanged(template: any): void {
     if (!template) {
       this.setState({
         template: { value: null },

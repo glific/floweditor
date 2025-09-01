@@ -19,7 +19,6 @@ export const initializeForm = (
   settings: NodeEditorSettings,
   config: FlowEditorConfig
 ): SendMsgFormState => {
-  console.log(settings, config);
   let template: FormEntry = { value: null };
   let templateVariables: StringEntry[] = [];
   let skipValidation = false;
@@ -45,13 +44,12 @@ export const initializeForm = (
 
       attachments.push(attachment);
     });
-    console.log(action);
+
     if (action.templating) {
       const msgTemplate = action.templating.template;
       if (action.templating.expression) {
         expressionValue = { value: action.templating.expression };
       }
-
       template = {
         value: {
           uuid: msgTemplate.uuid,

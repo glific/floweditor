@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { react as bindCallbacks } from 'auto-bind';
@@ -47,7 +46,6 @@ import { FeatureFilter } from 'config/interfaces';
 import i18n from 'config/i18n';
 import { Attachment, renderAttachments, validateURL } from './attachments';
 import { AddLabelsFormState } from '../addlabels/AddLabelsForm';
-import { MAX_TEXT_LEN } from 'config/interfaces';
 import TembaSelectElement from 'temba/TembaSelectElement';
 
 export interface SendMsgFormState extends FormState {
@@ -92,21 +90,16 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
       include: [/^handle/, /^on/]
     });
 
-    // intialize our templates if we have them
-    if (this.state.template.value !== null && this.state.template.value.name !== 'Expression') {
-      fetchAsset(this.props.assetStore.templates, this.state.template.value.uuid).then(
-        (asset: Asset) => {
-          if (asset !== null) {
-            this.handleTemplateChanged([
-              {
-                ...this.state.template.value,
-                ...asset.content
-              }
-            ]);
-          }
-        }
-      );
-    }
+    // // intialize our templates if we have them
+    // if (this.state.template.value !== null && this.state.template.value.name !== 'Expression') {
+    //   fetchAsset(this.props.assetStore.templates, this.state.template.value.uuid).then(
+    //     (asset: Asset) => {
+    //       if (asset !== null) {
+    //         this.handleTemplateChanged([{ ...this.state.template.value, ...asset.content }]);
+    //       }
+    //     }
+    //   );
+    // }
   }
 
   public static contextTypes = {
@@ -125,7 +118,9 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     const updates: Partial<SendMsgFormState> = {};
     if (keys.hasOwnProperty('text')) {
       let validatorFuncs = [
-        shouldRequireIf(submitting && !this.state.template && this.state.attachments.length === 0),
+        shouldRequireIf(
+          submitting && !this.state.template.value && this.state.attachments.length === 0
+        ),
         CharactersLessThan(4096, '4096 characters')
       ];
 
@@ -165,12 +160,6 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     return updated.valid;
   }
 
-  private hasUseableTranslation = (template: Template) => {
-    return !!template.translations.find(
-      translation => translation.status === 'pending' || translation.status === 'approved'
-    );
-  };
-
   public handleMessageInput(event: React.KeyboardEvent) {
     return this.handleUpdate({ text: (event.target as any).value }, false);
   }
@@ -191,36 +180,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     return this.handleUpdate({ sendAll });
   }
 
-  // TODO: refacctor
-  private hasTemplateErrors(): boolean {
-    // if there is an attachment variable, make sure it's not empty
-    const { templateVariables, templateTranslation } = this.state;
-    if (templateTranslation && templateVariables && templateTranslation.variables.length > 0) {
-      const hasMissingAttachment = !!templateTranslation.variables.find(
-        (variable: any, index: number) => {
-          if (
-            variable.type === 'image' ||
-            variable.type === 'document' ||
-            variable.type === 'video' ||
-            variable.type === 'audio'
-          ) {
-            if (templateVariables[index].value === '') {
-              return true;
-            }
-          }
-          return false;
-        }
-      );
-      if (hasMissingAttachment) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   private handleSave(): void {
-    this.saveAttempted = true;
-
     if (this.state.attachments.length > 0 && this.state.attachments[0].valid) {
       return;
     }
@@ -248,22 +208,6 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
 
     if (valid) {
       this.props.updateAction(stateToAction(this.props.nodeSettings, this.state));
-
-      // if we had a template and it doen't match our new template
-      if (this.props.nodeSettings.originalAction) {
-        const originalTemplate = (this.props.nodeSettings.originalAction as any).template;
-        if (originalTemplate) {
-          if (
-            (this.state.template && this.state.template.value.uuid !== originalTemplate.uuid) ||
-            !this.state.template
-          ) {
-            this.props.removeLocalizations(this.props.nodeSettings.originalAction.uuid, [
-              'template_variables'
-            ]);
-          }
-        }
-      }
-
       // notify our modal we are done
       this.props.onClose(false);
     } else {
@@ -280,43 +224,38 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
       }
     };
   }
-  private handleTemplateChanged(selected: any[], submitting: boolean = false): void {
-    const template = selected ? selected[0] : null;
-    console.log(selected);
 
-    const updates: Partial<SendMsgFormState> = {
-      labels: validate(i18n.t('forms.template', 'template'), selected, [
-        shouldRequireIf(submitting)
-      ])
-    };
+  private handleTemplateChanged(template: any, submitting: boolean = false): void {
+    let updates: Partial<SendMsgFormState>;
+    console.log(template);
+    if (template) {
+      // const templateTranslation = template.translations[0];
+      const templateVariables = this.state.templateVariables;
+
+      updates = {
+        expression: null,
+        template: validate(i18n.t('forms.template', 'template'), template, [
+          shouldRequireIf(submitting)
+        ]),
+        // templateTranslation,
+        templateVariables
+      };
+    }
+    console.log(template);
+    if (template.name === 'Expression') {
+      this.setState({ expression: { value: this.state.expression } });
+    }
 
     const updated = mergeForm(this.state, updates);
 
-    if (!template) {
-      this.setState({
-        expression: null,
-        template: { value: null },
-        templateTranslation: null,
-        templateVariables: []
-      });
-    } else {
-      const templateTranslation = template.translations[0];
-      const templateVariables =
-        this.state.templateVariables.length === 0 ||
-        (this.state.template.value && this.state.template.value.uuid !== template.uuid)
-          ? range(0, templateTranslation.variable_count).map(() => {
-              return {
-                value: ''
-              };
-            })
-          : this.state.templateVariables;
-
-      this.setState(updated);
-    }
-    // if (template.name === 'Expression') {
-    //   this.setState({ expression: { value: this.state.expression } });
-    // }
+    this.setState(updated);
   }
+
+  private hasUseableTranslation = (template: Template) => {
+    return !!template.translations.find(
+      translation => translation.status === 'pending' || translation.status === 'approved'
+    );
+  };
 
   private handleTemplateVariableChanged(updatedText: string, num: number): void {
     const entry = validate(`Variable ${num + 1}`, updatedText, [Required]);
@@ -334,12 +273,10 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     return (
       <>
         <p>
-          <temba-alert level="error">
-            {i18n.t(
-              'forms.send_msg_facebook_warning',
-              'Sending bulk messages over a Facebook channel requires that a topic be specified if the user has not sent a message in the last 24 hours. Setting a topic to use over Facebook is especially important for the first message in your flow.'
-            )}
-          </temba-alert>
+          {i18n.t(
+            'forms.send_msg_facebook_warning',
+            'Sending bulk messages over a Facebook channel requires that a topic be specified if the user has not sent a message in the last 24 hours. Setting a topic to use over Facebook is especially important for the first message in your flow.'
+          )}
         </p>
         <SelectElement
           key={'fb_method_select'}
@@ -379,12 +316,14 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
           onChange={this.handleLabelsChanged}
           createPrefix={i18n.t('create_label', 'Create Label') + ': '}
           createArbitraryOption={this.handleCreateAssetFromInput}
+          // onAssetCreated={this.handleLabelCreated}
         />
       </div>
     );
   }
-
   private renderTemplateConfig(): JSX.Element {
+    console.log(this.state);
+
     return (
       <>
         <p>
@@ -393,13 +332,16 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
             'Sending messages over a WhatsApp channel requires that a template be used if you have not received a message from a contact in the last 24 hours. Setting a template to use over WhatsApp is especially important for the first message in your flow.'
           )}
         </p>
-
         <TembaSelectElement
           options={[additionalOption]}
           name={i18n.t('forms.template', 'template')}
+          //  noOptionsMessage="No templates found"
           endpoint={this.context.config.endpoints.templates}
           entry={this.state.template}
-          onChange={this.handleTemplateChanged}
+          onChange={e => {
+            console.log('template changed');
+            this.handleTemplateChanged(e);
+          }}
           shouldExclude={this.handleShouldExcludeTemplate}
           searchable={true}
           clearable={true}
@@ -569,34 +511,6 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
   public render(): JSX.Element {
     const typeConfig = this.props.typeConfig;
 
-    // const quickReplies: Tab = {
-    //   name: i18n.t('forms.quick_replies', 'Quick Replies'),
-    //   body: (
-    //     <>
-    //       <p>
-    //         {i18n.t(
-    //           'forms.quick_replies_summary',
-    //           'Quick Replies are made into buttons for supported channels. For example, when asking a question, you might add a Quick Reply for "Yes" and one for "No".'
-    //         )}
-    //       </p>
-
-    //       <MultiChoiceInput
-    //         name={i18n.t('forms.quick_reply', 'quick_reply')}
-    //         helpText={
-    //           <Trans i18nKey="forms.add_quick_reply">Add a new Quick Reply and press enter.</Trans>
-    //         }
-    //         items={this.state.quickReplies}
-    //         entry={this.state.quickReplyEntry}
-    //         onChange={this.handleQuickRepliesUpdate}
-    //         maxItems={10}
-    //         maxItemsText="You can only add 10 Quick Replies"
-    //       />
-    //     </>
-    //   ),
-    //   checked: this.state.quickReplies.value.length > 0,
-    //   hasErrors: hasErrors(this.state.quickReplyEntry)
-    // };
-
     const attachments: Tab = {
       name: i18n.t('forms.attachments', 'Attachments'),
       body: renderAttachments(
@@ -634,23 +548,15 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     // };
 
     const tabs = [attachments];
+
     if (hasFeature(this.context.config, FeatureFilter.HAS_WHATSAPP)) {
       const templates: Tab = {
         name: 'HSM Templates',
         body: this.renderTemplateConfig(),
-        checked: this.state.template !== null,
+        checked: this.state.template.value != null,
         hasErrors:
           !!this.state.templateVariables.find((entry: StringEntry) => hasErrors(entry)) ||
           hasErrors(this.state.template)
-      };
-      tabs.splice(0, 0, templates);
-    }
-
-    if (hasFeature(this.context.config, FeatureFilter.HAS_FACEBOOK)) {
-      const templates: Tab = {
-        name: 'Facebook',
-        body: this.renderTopicConfig(),
-        checked: this.state.topic.value != null
       };
       tabs.splice(0, 0, templates);
     }
@@ -673,7 +579,6 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
           autocomplete={true}
           focus={true}
           textarea={true}
-          maxLength={MAX_TEXT_LEN}
         />
         <temba-charcount class={`sms-counter ${styles.counter}`}></temba-charcount>
         {this.renderLabelOption()}

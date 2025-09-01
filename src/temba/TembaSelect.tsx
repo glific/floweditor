@@ -118,6 +118,7 @@ export default class TembaSelect extends React.Component<TembaSelectProps, Temba
             const name = select.getName(option);
             return !!(name.toLowerCase().trim() === input.toLowerCase().trim());
           });
+          this.handleCreateAsset(input);
           if (!existing) {
             if (this.props.createArbitraryOption) {
               return this.props.createArbitraryOption(input);
@@ -183,6 +184,10 @@ export default class TembaSelect extends React.Component<TembaSelectProps, Temba
   public isFocused(): boolean {
     return (this.selectbox as any).focused;
   }
+
+  public handleCreateAsset = (asset: any): void => {
+    console.log('Create asset', asset);
+  };
 
   public render(): JSX.Element {
     let selectedArray: any[] = [];

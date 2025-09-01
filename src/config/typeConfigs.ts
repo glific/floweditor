@@ -460,7 +460,8 @@ export const typeConfigList: Type[] = [
     localization: RouterLocalizationForm,
     localizeableKeys: ['exits'],
     form: StartSessionForm,
-    component: StartSessionComp
+    component: StartSessionComp,
+    filter: FeatureFilter.HAS_START_SESSION
   },
   {
     type: Types.open_ticket,
