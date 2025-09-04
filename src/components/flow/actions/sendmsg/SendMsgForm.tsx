@@ -81,25 +81,22 @@ const additionalOption = {
 export default class SendMsgForm extends React.Component<ActionFormProps, SendMsgFormState> {
   private timeout: any;
 
-  saveAttempted = false;
-
   constructor(props: ActionFormProps, context: any) {
     super(props);
     this.state = stateToForm(this.props.nodeSettings, context.config);
     bindCallbacks(this, {
       include: [/^handle/, /^on/]
     });
-
-    // // intialize our templates if we have them
-    // if (this.state.template.value !== null && this.state.template.value.name !== 'Expression') {
-    //   fetchAsset(this.props.assetStore.templates, this.state.template.value.uuid).then(
-    //     (asset: Asset) => {
-    //       if (asset !== null) {
-    //         this.handleTemplateChanged([{ ...this.state.template.value, ...asset.content }]);
-    //       }
-    //     }
-    //   );
-    // }
+    // intialize our templates if we have them
+    if (this.state.template.value !== null && this.state.template.value.name !== 'Expression') {
+      fetchAsset(this.props.assetStore.templates, this.state.template.value.uuid).then(
+        (asset: Asset) => {
+          if (asset !== null) {
+            this.handleTemplateChanged({ ...this.state.template.value, ...asset.content });
+          }
+        }
+      );
+    }
   }
 
   public static contextTypes = {
@@ -225,37 +222,25 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     };
   }
 
-  private handleTemplateChanged(template: any, submitting: boolean = false): void {
-    let updates: Partial<SendMsgFormState>;
-    console.log(template);
-    if (template) {
-      // const templateTranslation = template.translations[0];
-      const templateVariables = this.state.templateVariables;
+  private handleTemplateChanged(template: any): void {
+    const templateTranslation = template.translations[0];
+    const templateVariables =
+      this.state.templateVariables.length === 0 ||
+      (this.state.template.value && this.state.template.value.uuid !== template.uuid)
+        ? range(0, templateTranslation.variable_count).map(() => {
+            return {
+              value: ''
+            };
+          })
+        : this.state.templateVariables;
 
-      updates = {
-        expression: null,
-        template: validate(i18n.t('forms.template', 'template'), template, [
-          shouldRequireIf(submitting)
-        ]),
-        // templateTranslation,
-        templateVariables
-      };
-    }
-    console.log(template);
-    if (template.name === 'Expression') {
-      this.setState({ expression: { value: this.state.expression } });
-    }
-
-    const updated = mergeForm(this.state, updates);
-
-    this.setState(updated);
+    this.setState({
+      expression: null,
+      template: { value: template },
+      templateTranslation,
+      templateVariables
+    });
   }
-
-  private hasUseableTranslation = (template: Template) => {
-    return !!template.translations.find(
-      translation => translation.status === 'pending' || translation.status === 'approved'
-    );
-  };
 
   private handleTemplateVariableChanged(updatedText: string, num: number): void {
     const entry = validate(`Variable ${num + 1}`, updatedText, [Required]);
@@ -264,6 +249,12 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
     }) as StringEntry[];
     this.setState({ templateVariables });
   }
+
+  private hasUseableTranslation = (template: Template) => {
+    return !!template.translations.find(
+      translation => translation.status === 'pending' || translation.status === 'approved'
+    );
+  };
 
   private handleShouldExcludeTemplate(template: any): boolean {
     return !this.hasUseableTranslation(template as Template);
@@ -303,6 +294,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
         <p>Select the labels to apply to the outgoing message.</p>
 
         <TembaSelectElement
+          key="label_select"
           name={i18n.t('forms.labels', 'Labels')}
           placeholder={i18n.t(
             'enter_to_create_label',
@@ -310,20 +302,20 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
           )}
           endpoint={this.context.config.endpoints.labels}
           entry={this.state.labels}
+          valueKey="uuid"
           searchable={true}
           multi={true}
           expressions={true}
           onChange={this.handleLabelsChanged}
+          allowCreate={true}
           createPrefix={i18n.t('create_label', 'Create Label') + ': '}
           createArbitraryOption={this.handleCreateAssetFromInput}
-          // onAssetCreated={this.handleLabelCreated}
         />
       </div>
     );
   }
-  private renderTemplateConfig(): JSX.Element {
-    console.log(this.state);
 
+  private renderTemplateConfig(): JSX.Element {
     return (
       <>
         <p>
@@ -335,13 +327,10 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
         <TembaSelectElement
           options={[additionalOption]}
           name={i18n.t('forms.template', 'template')}
-          //  noOptionsMessage="No templates found"
+          // noOptionsMessage="No templates found"
           endpoint={this.context.config.endpoints.templates}
           entry={this.state.template}
-          onChange={e => {
-            console.log('template changed');
-            this.handleTemplateChanged(e);
-          }}
+          onChange={this.handleTemplateChanged}
           shouldExclude={this.handleShouldExcludeTemplate}
           searchable={true}
           clearable={true}

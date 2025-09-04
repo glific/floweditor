@@ -71,7 +71,7 @@ export const initializeForm = (
           return label;
         })
       : [];
-    console.log(template);
+
     return {
       expression: expressionValue,
       topic: { value: TOPIC_OPTIONS.find(option => option.value === action.topic) },
@@ -142,6 +142,7 @@ export const stateToAction = (settings: NodeEditorSettings, state: SendMsgFormSt
       templating.expression = state.expression.value;
     }
   }
+
   const result: SendMsg = {
     attachments,
     text: state.message.value,

@@ -175,16 +175,11 @@ export default class SheetForm extends React.Component<RouterFormProps, SheetFor
   }
 
   private handleSheetChanged(value: any, submitting: boolean = false) {
-    console.log(value);
-
     const updates: Partial<SheetFormState> = {
       sheet: validate(i18n.t('forms.sheet', 'Sheet'), value, [shouldRequireIf(submitting)])
     };
 
-    // console.log(sheetValue);
-
     const updated = mergeForm(this.state, updates);
-
     this.setState(updated);
   }
 

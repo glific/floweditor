@@ -55,7 +55,6 @@ export const nodeToState = (
   settings: NodeEditorSettings,
   assetStore: AssetStore
 ): ResultRouterFormState => {
-  console.log(settings, assetStore);
   let initialCases: CaseProps[] = [];
 
   // TODO: work out an incremental result name
@@ -127,10 +126,9 @@ export const stateToNode = (
   let nodeType = Types.split_by_run_result;
 
   const result = state.result.value;
-  console.log(result, state.result);
   let resultValue = result.id || result.value || result.name;
   let operand = `@results.${resultValue}`;
-  console.log(result);
+
   const config: any = {
     operand: {
       name: result.name,

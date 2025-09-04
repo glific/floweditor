@@ -53,7 +53,6 @@ export default class AddLabelsForm extends React.PureComponent<
     };
 
     const updated = mergeForm(this.state, updates);
-    console.log(updated);
     this.setState(updated);
     return updated.valid;
   }
@@ -81,7 +80,7 @@ export default class AddLabelsForm extends React.PureComponent<
 
   public render(): JSX.Element {
     const typeConfig = this.props.typeConfig;
-    console.log(this.context);
+
     return (
       <Dialog title={typeConfig.name} headerClass={typeConfig.type} buttons={this.getButtons()}>
         <TypeList __className="" initialType={typeConfig} onChange={this.props.onTypeChange} />
