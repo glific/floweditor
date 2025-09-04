@@ -70,7 +70,7 @@ exports[`StartSessionForm render should render 1`] = `
                 namekey="description"
                 searchable="true"
                 valuekey="type"
-                values="[{\\"type\\":\\"start_session\\",\\"name\\":\\"Start Somebody Else\\",\\"description\\":\\"Start somebody else in a flow\\",\\"localizeableKeys\\":[\\"exits\\"]}]"
+                values="[{\\"type\\":\\"start_session\\",\\"name\\":\\"Start Somebody Else\\",\\"description\\":\\"Start somebody else in a flow\\",\\"localizeableKeys\\":[\\"exits\\"],\\"filter\\":\\"start_session\\"}]"
               />
             </div>
           </div>
@@ -245,6 +245,7 @@ exports[`StartSessionForm render should render an empty form with no action 2`] 
       Object {
         "component": [Function],
         "description": "Start somebody else in a flow",
+        "filter": "start_session",
         "form": [Function],
         "localization": [Function],
         "localizeableKeys": Array [
@@ -359,6 +360,7 @@ exports[`StartSessionForm render should render self, children with base props 1`
       Object {
         "component": [Function],
         "description": "Start somebody else in a flow",
+        "filter": "start_session",
         "form": [Function],
         "localization": [Function],
         "localizeableKeys": Array [
