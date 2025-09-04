@@ -54,14 +54,16 @@ const SendInteractiveMsgComp: React.SFC<SendInteractiveMsg> = ({
     } else if (expression || expression === '') {
       setBody('Expressions used here');
     } else {
-      getAsset(endpoint, type, id.toString()).then(response => {
-        if (response.error) {
-          setBody(PLACEHOLDER);
-        } else {
-          addAsset('interactives', response);
-          setNode(response);
-        }
-      });
+      if (id) {
+        getAsset(endpoint, type, id.toString()).then(response => {
+          if (response.error) {
+            setBody(PLACEHOLDER);
+          } else {
+            addAsset('interactives', response);
+            setNode(response);
+          }
+        });
+      }
     }
   }, [addAsset, endpoint, expression, interactive, languageId, type, id]);
 

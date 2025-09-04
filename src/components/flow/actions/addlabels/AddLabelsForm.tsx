@@ -48,8 +48,6 @@ export default class AddLabelsForm extends React.PureComponent<
   }
 
   public handleLabelsChanged(selected: Asset[], submitting: boolean = false): boolean {
-    console.log(selected);
-
     const updates: Partial<AddLabelsFormState> = {
       labels: validate(i18n.t('forms.labels', 'Labels'), selected, [shouldRequireIf(submitting)])
     };

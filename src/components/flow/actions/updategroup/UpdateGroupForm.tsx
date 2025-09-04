@@ -62,12 +62,11 @@ export default class UpdateGroupForm extends React.Component<
     return updated.valid;
   }
 
-  private handlePropertyChange(selected: any[]): boolean {
-    const selection = selected[0];
-    if (selection) {
+  private handlePropertyChange(selected: any): boolean {
+    if (selected) {
       return this.handleUpdate({
         type: Types.set_wa_group_field,
-        field: selection
+        field: selected
       });
     }
   }
