@@ -52,6 +52,7 @@ export class LanguageSelector extends React.Component<LanguageSelectorProps> {
 
     const languages = Object.keys(this.props.languages.items)
       .map((iso: string) => this.props.languages.items[iso])
+      .filter((lang: Asset) => !lang.content?.default)
       .sort(this.handleLanguageSort);
 
     if (languages.length === 1) {
@@ -101,7 +102,4 @@ const mapDispatchToProps = (dispatch: DispatchWithState) =>
     dispatch
   );
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(LanguageSelector);
+export default connect(mapStateToProps, mapDispatchToProps)(LanguageSelector);
