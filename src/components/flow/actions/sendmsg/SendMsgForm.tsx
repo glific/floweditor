@@ -88,6 +88,7 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
       include: [/^handle/, /^on/]
     });
     // intialize our templates if we have them
+
     if (this.state.template.value !== null && this.state.template.value.name !== 'Expression') {
       fetchAsset(this.props.assetStore.templates, this.state.template.value.uuid).then(
         (asset: Asset) => {
@@ -223,23 +224,36 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
   }
 
   private handleTemplateChanged(template: any): void {
-    const templateTranslation = template.translations[0];
-    const templateVariables =
-      this.state.templateVariables.length === 0 ||
-      (this.state.template.value && this.state.template.value.uuid !== template.uuid)
-        ? range(0, templateTranslation.variable_count).map(() => {
-            return {
-              value: ''
-            };
-          })
-        : this.state.templateVariables;
+    if (template) {
+      if (template.name === 'Expression') {
+        this.setState({ expression: { value: this.state.expression.value } });
+      } else {
+        const templateTranslation = template.translations[0];
+        const templateVariables =
+          this.state.templateVariables.length === 0 ||
+          (this.state.template.value && this.state.template.value.uuid !== template.uuid)
+            ? range(0, templateTranslation.variable_count).map(() => {
+                return {
+                  value: ''
+                };
+              })
+            : this.state.templateVariables;
 
-    this.setState({
-      expression: null,
-      template: { value: template },
-      templateTranslation,
-      templateVariables
-    });
+        this.setState({
+          expression: null,
+          template: { value: template },
+          templateTranslation,
+          templateVariables
+        });
+      }
+    } else {
+      this.setState({
+        expression: null,
+        template: { value: null },
+        templateTranslation: null,
+        templateVariables: []
+      });
+    }
   }
 
   private handleTemplateVariableChanged(updatedText: string, num: number): void {
@@ -325,9 +339,10 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
           )}
         </p>
         <TembaSelectElement
+          key="template_select"
           options={[additionalOption]}
           name={i18n.t('forms.template', 'template')}
-          // noOptionsMessage="No templates found"
+          placeholder={'Select template message'}
           endpoint={this.context.config.endpoints.templates}
           entry={this.state.template}
           onChange={this.handleTemplateChanged}

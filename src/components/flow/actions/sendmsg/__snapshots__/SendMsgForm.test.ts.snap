@@ -116,6 +116,7 @@ exports[`SendMsgForm render should render 1`] = `
                 },
               ]
             }
+            placeholder="Select template message"
             searchable={true}
             shouldExclude={[Function]}
           />

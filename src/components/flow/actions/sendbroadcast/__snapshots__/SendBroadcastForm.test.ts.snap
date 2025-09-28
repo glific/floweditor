@@ -122,6 +122,7 @@ exports[`SendBroadcastForm render should render an empty form with no action 2`]
             }
             name="template"
             onChange={[Function]}
+            placeholder="Select template message"
             searchable={true}
             shouldExclude={[Function]}
           />
@@ -277,6 +278,7 @@ exports[`SendBroadcastForm render should render self, children with base props 1
             }
             name="template"
             onChange={[Function]}
+            placeholder="Select template message"
             searchable={true}
             shouldExclude={[Function]}
           />
