@@ -178,10 +178,6 @@ exports[`WebhookRouterForm should render 1`] = `
               "value": "POST",
             },
             Object {
-              "name": "PATCH",
-              "value": "PATCH",
-            },
-            Object {
               "name": "FUNCTION",
               "value": "FUNCTION",
             },

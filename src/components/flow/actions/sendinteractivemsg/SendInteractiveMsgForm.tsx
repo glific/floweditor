@@ -339,7 +339,7 @@ export default class SendMsgForm extends React.Component<
       const message = currentMessage.interactive_content;
       body = getMsgBody(message);
     }
-    console.log(additionalOption, this.state.interactives);
+
     return (
       <Dialog
         title={typeConfig.name}

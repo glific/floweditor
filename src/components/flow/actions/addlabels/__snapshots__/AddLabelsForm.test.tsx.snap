@@ -48,7 +48,7 @@ exports[`AddLabelsForm render allows expressions 1`] = `
                 namekey="description"
                 searchable="true"
                 valuekey="type"
-                values="[{\\"type\\":\\"start_session\\",\\"name\\":\\"Start Somebody Else\\",\\"description\\":\\"Start somebody else in a flow\\",\\"localizeableKeys\\":[\\"exits\\"]}]"
+                values="[{\\"type\\":\\"start_session\\",\\"name\\":\\"Start Somebody Else\\",\\"description\\":\\"Start somebody else in a flow\\",\\"localizeableKeys\\":[\\"exits\\"],\\"filter\\":\\"start_session\\"}]"
               />
             </div>
           </div>

@@ -311,6 +311,7 @@ Array [
   Object {
     "component": [Function],
     "description": "Start somebody else in a flow",
+    "filter": "start_session",
     "form": [Function],
     "localization": [Function],
     "localizeableKeys": Array [
@@ -1064,6 +1065,7 @@ Object {
   "start_session": Object {
     "component": [Function],
     "description": "Start somebody else in a flow",
+    "filter": "start_session",
     "form": [Function],
     "localization": [Function],
     "localizeableKeys": Array [

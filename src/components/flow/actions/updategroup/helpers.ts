@@ -38,6 +38,7 @@ export const stateToAction = (
 ): SetWAGroupField => {
   /* istanbul ignore else */
   const field = state.field.value;
+
   return {
     uuid: getActionUUID(settings, Types.set_wa_group_field),
     type: Types.set_wa_group_field,
