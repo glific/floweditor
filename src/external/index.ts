@@ -8,11 +8,6 @@ import { Asset, AssetMap, Assets, AssetStore, AssetType } from 'store/flowContex
 import { assetListToMap } from 'store/helpers';
 import { FlowTypes } from 'config/interfaces';
 
-// Configure axios to always send JSON requests
-axios.defaults.headers.post['Content-Type'] = 'application/javascript';
-axios.defaults.responseType = 'json';
-axios.defaults.timeout = 30000;
-
 export const setHTTPTimeout = (millis: number) => {
   axios.defaults.timeout = millis;
 };

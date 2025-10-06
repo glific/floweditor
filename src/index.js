@@ -3,6 +3,7 @@ import './global.module.scss';
 import FlowEditor from 'components';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import './services/axios';
 
 import * as serviceWorker from './serviceWorker';
 import { setHTTPTimeout } from 'external';
