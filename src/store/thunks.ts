@@ -801,11 +801,6 @@ export const onUpdateAction = (
       actionUUID: action.uuid
     });
   }
-  if (action && action.type === Types.set_contact_field) {
-    const value: any = action;
-    updatedAssets = mutators.addAssets('fields', assetStore, [value.field]);
-    dispatch(updateAssets(updatedAssets, 'fields'));
-  }
 
   let updatedNodes = nodes;
   const creatingNewNode = !!(originalNode !== null && originalNode.ghost);
@@ -850,10 +845,17 @@ export const onUpdateAction = (
     dispatch(updateAssets(updatedAssets));
   }
 
+  if (action && action.type === Types.set_contact_field) {
+    const { field }: any = action as SetContactField;
+
+    updatedAssets = mutators.addAssets('fields', assetStore, [field]);
+
+    dispatch(updateAssets(updatedAssets, 'fields'));
+    dispatch(updateContactFields({ ...contactFields, [field.key]: field.name }));
+  }
+
   // Add contact field to our store.
   if (action.type === Types.set_contact_field) {
-    const { field } = action as SetContactField;
-    dispatch(updateContactFields({ ...contactFields, [field.key]: field.name }));
   }
 
   markDirty(0);
