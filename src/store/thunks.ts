@@ -812,9 +812,17 @@ export const onUpdateAction = (
       node: {
         uuid: createUUID(),
         actions: [action],
-        exits: [{ uuid: createUUID(), destination_uuid: null }]
+        exits: [
+          {
+            uuid: createUUID(),
+            destination_uuid: null
+          }
+        ]
       },
-      ui: { position: originalNode.ui.position, type: Types.execute_actions },
+      ui: {
+        position: originalNode.ui.position,
+        type: Types.execute_actions
+      },
       inboundConnections: originalNode.inboundConnections
     };
     updatedNodes = mutators.mergeNode(nodes, newNode);
@@ -845,17 +853,19 @@ export const onUpdateAction = (
     dispatch(updateAssets(updatedAssets));
   }
 
+  // Add contact field to our store.
   if (action && action.type === Types.set_contact_field) {
     const { field }: any = action as SetContactField;
 
     updatedAssets = mutators.addAssets('fields', assetStore, [field]);
 
     dispatch(updateAssets(updatedAssets, 'fields'));
-    dispatch(updateContactFields({ ...contactFields, [field.key]: field.name }));
-  }
-
-  // Add contact field to our store.
-  if (action.type === Types.set_contact_field) {
+    dispatch(
+      updateContactFields({
+        ...contactFields,
+        [field.key]: field.name
+      })
+    );
   }
 
   markDirty(0);
