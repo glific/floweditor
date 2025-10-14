@@ -210,10 +210,14 @@ export const updateContactFields = (contactFields: ContactFields): UpdateContact
   }
 });
 
-export const updateAssets = (assets: AssetStore): UpdateAssetsAction => {
+export const updateAssets = (
+  assets: AssetStore,
+  assetName: string = 'results'
+): UpdateAssetsAction => {
   const store: TembaStore = document.querySelector('temba-store');
+
   if (store) {
-    store.setKeyedAssets('results', Object.keys(assets['results'].items));
+    store.setKeyedAssets(assetName, Object.keys(assets[assetName].items));
   }
 
   return {
