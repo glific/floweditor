@@ -17,6 +17,42 @@ LocalizedObject {
   "iso": undefined,
   "language": Object {
     "iso": undefined,
+    "name": "English",
+  },
+  "localized": false,
+  "localizedKeys": Object {},
+  "localizedObject": Object {
+    "text": "Hi there, what is your name?",
+    "type": "send_msg",
+    "uuid": "360a28a1-6741-4f16-9421-f6f313cf753e",
+  },
+  "name": undefined,
+}
+`;
+
+exports[`utils getLocalizations should return a localized object 2`] = `
+LocalizedObject {
+  "iso": undefined,
+  "language": Object {
+    "iso": undefined,
+    "name": "Spanish",
+  },
+  "localized": false,
+  "localizedKeys": Object {},
+  "localizedObject": Object {
+    "text": "Hi there, what is your name?",
+    "type": "send_msg",
+    "uuid": "360a28a1-6741-4f16-9421-f6f313cf753e",
+  },
+  "name": undefined,
+}
+`;
+
+exports[`utils getLocalizations should return a localized object 3`] = `
+LocalizedObject {
+  "iso": undefined,
+  "language": Object {
+    "iso": undefined,
     "name": "French",
   },
   "localized": false,
