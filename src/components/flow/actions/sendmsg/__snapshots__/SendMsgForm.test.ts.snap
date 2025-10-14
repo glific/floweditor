@@ -116,6 +116,7 @@ exports[`SendMsgForm render should render 1`] = `
                 },
               ]
             }
+            placeholder="Select template message"
             searchable={true}
             shouldExclude={[Function]}
           />
@@ -126,6 +127,7 @@ exports[`SendMsgForm render should render 1`] = `
               Select the labels to apply to the outgoing message.
             </p>
             <TembaSelectElement
+              allowCreate={true}
               createArbitraryOption={[Function]}
               createPrefix="Create Label: "
               endpoint="/assets/labels.json"
@@ -140,10 +142,11 @@ exports[`SendMsgForm render should render 1`] = `
               onChange={[Function]}
               placeholder="Enter the name of an existing label or create a new one"
               searchable={true}
+              valueKey="uuid"
             />
           </div>
         </React.Fragment>,
-        "checked": true,
+        "checked": false,
         "hasErrors": false,
         "name": "HSM Templates",
       },
@@ -181,7 +184,6 @@ exports[`SendMsgForm render should render 1`] = `
       }
     }
     focus={true}
-    maxLength={10000}
     name="Message"
     onChange={[Function]}
     showLabel={false}
@@ -197,6 +199,7 @@ exports[`SendMsgForm render should render 1`] = `
       Select the labels to apply to the outgoing message.
     </p>
     <TembaSelectElement
+      allowCreate={true}
       createArbitraryOption={[Function]}
       createPrefix="Create Label: "
       endpoint="/assets/labels.json"
@@ -206,11 +209,13 @@ exports[`SendMsgForm render should render 1`] = `
         }
       }
       expressions={true}
+      key="label_select"
       multi={true}
       name="Labels"
       onChange={[Function]}
       placeholder="Enter the name of an existing label or create a new one"
       searchable={true}
+      valueKey="uuid"
     />
   </div>
 </Dialog>

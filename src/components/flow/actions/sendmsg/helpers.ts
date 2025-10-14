@@ -50,7 +50,6 @@ export const initializeForm = (
       if (action.templating.expression) {
         expressionValue = { value: action.templating.expression };
       }
-
       template = {
         value: {
           uuid: msgTemplate.uuid,
@@ -143,6 +142,7 @@ export const stateToAction = (settings: NodeEditorSettings, state: SendMsgFormSt
       templating.expression = state.expression.value;
     }
   }
+
   const result: SendMsg = {
     attachments,
     text: state.message.value,

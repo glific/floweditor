@@ -26,7 +26,7 @@ export const nodeToState = (settings: NodeEditorSettings): ContactProfileRouterF
         profileOptionsList[0];
 
       resulNode.optionType = {
-        value: option.name
+        value: option
       };
 
       if (typeof action.value === 'string') {

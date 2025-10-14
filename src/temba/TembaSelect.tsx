@@ -69,12 +69,11 @@ export default class TembaSelect extends React.Component<TembaSelectProps, Temba
     if (this.props.getName) {
       name = this.props.getName(option);
     }
-
-    if (!name && this.props.nameKey in option) {
+    if (!name && this.props.nameKey && this.props.nameKey in option) {
       name = option[this.props.nameKey];
     }
 
-    if (!name && 'label' in option) {
+    if (!name && typeof option === 'object' && 'label' in option) {
       name = option['label'];
     }
 
@@ -118,16 +117,15 @@ export default class TembaSelect extends React.Component<TembaSelectProps, Temba
             const name = select.getName(option);
             return !!(name.toLowerCase().trim() === input.toLowerCase().trim());
           });
+
           if (!existing) {
-            if (this.props.createArbitraryOption) {
-              return this.props.createArbitraryOption(input);
-            }
+            const item = this.props.createArbitraryOption(input);
 
             return {
               prefix: this.props.createPrefix,
-              name: input,
               id: 'created',
-              post: true
+              post: true,
+              ...item
             };
           }
         }

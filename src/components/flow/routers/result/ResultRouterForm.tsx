@@ -9,12 +9,7 @@ import TypeList from 'components/nodeeditor/TypeList';
 import * as React from 'react';
 import { Asset } from 'store/flowContext';
 import { FormEntry, FormState, mergeForm, StringEntry } from 'store/nodeEditor';
-import {
-  LowerCaseAlphaNumeric,
-  shouldRequireIf,
-  StartIsNonNumeric,
-  validate
-} from 'store/validators';
+import { Alphanumeric, shouldRequireIf, StartIsNonNumeric, validate } from 'store/validators';
 
 import {
   DELIMITER_OPTIONS,
@@ -73,7 +68,7 @@ export default class ResultRouterForm extends React.Component<
 
     if (keys.hasOwnProperty('resultName')) {
       updates.resultName = validate(i18n.t('forms.result_name', 'Result Name'), keys.resultName, [
-        LowerCaseAlphaNumeric,
+        Alphanumeric,
         StartIsNonNumeric
       ]);
     }
@@ -94,15 +89,17 @@ export default class ResultRouterForm extends React.Component<
   }
 
   private handleResultChanged(selected: Asset, submitting = false): boolean {
-    const updates: Partial<ResultRouterFormState> = {
-      result: validate(i18n.t('forms.result_to_split_on', 'Result to split on'), selected, [
-        shouldRequireIf(submitting)
-      ])
-    };
+    if (selected) {
+      const updates: Partial<ResultRouterFormState> = {
+        result: validate(i18n.t('forms.result_to_split_on', 'Result to split on'), selected, [
+          shouldRequireIf(submitting)
+        ])
+      };
 
-    const updated = mergeForm(this.state, updates);
-    this.setState(updated);
-    return updated.valid;
+      const updated = mergeForm(this.state, updates);
+      this.setState(updated);
+      return updated.valid;
+    }
   }
 
   private handleSave(): void {

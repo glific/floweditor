@@ -122,7 +122,8 @@ export enum FeatureFilter {
   HAS_LOCATIONS = 'locations',
   HAS_OPTINS = 'optins',
   HAS_GROUPS = 'groups',
-  HAS_LLM = 'llm'
+  HAS_LLM = 'llm',
+  HAS_START_SESSION = 'start_session'
 }
 
 export interface FlowTypeVisibility {

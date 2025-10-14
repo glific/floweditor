@@ -126,12 +126,13 @@ export const stateToNode = (
   let nodeType = Types.split_by_run_result;
 
   const result = state.result.value;
-  let operand = `@results.${result.value}`;
+  let resultValue = result.id || result.value || result.name;
+  let operand = `@results.${resultValue}`;
 
   const config: any = {
     operand: {
       name: result.name,
-      id: result.value,
+      id: result.id || resultValue,
       type: AssetType.Result
     },
     cases: caseConfig

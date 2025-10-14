@@ -78,7 +78,7 @@ export default class WebhookRouterForm extends React.Component<
     let ensureEmptyHeader = false;
     let toRemove: any[] = [];
 
-    if (keys.hasOwnProperty('method')) {
+    if (keys.hasOwnProperty('method') && keys.method) {
       updates.method = { value: keys.method };
 
       const oldMethod = this.state.method.value.value;

@@ -12,7 +12,7 @@ import styles from './ContactProfileRouterForm.module.scss';
 import i18n from 'config/i18n';
 import TextInputElement from 'components/form/textinput/TextInputElement';
 import { AssetType } from 'store/flowContext';
-import TembaSelectElement from 'temba/TembaSelectElement';
+import SelectElement from 'components/form/select/SelectElement';
 
 export interface ContactProfileRouterFormState extends FormState {
   optionType: FormEntry;
@@ -48,7 +48,7 @@ export default class ContactProfileRouterForm extends React.Component<
   }
 
   private handleTypeChange(selection: any): void {
-    if (this.state.optionType.value.id !== selection.id) {
+    if (selection && this.state.optionType.value.id !== selection.id) {
       this.setState({
         optionType: { value: selection }
       });
@@ -86,16 +86,14 @@ export default class ContactProfileRouterForm extends React.Component<
     return (
       <Dialog title={typeConfig.name} headerClass={typeConfig.type} buttons={this.getButtons()}>
         <TypeList __className="" initialType={typeConfig} onChange={this.props.onTypeChange} />
-
         <p>{i18n.t('forms.select_what_to_update', 'Select what to update')}</p>
-        <TembaSelectElement
+        <SelectElement
+          key="method_select"
           name={i18n.t('forms.contact_field', 'Contact profile')}
           options={profileOptionsList}
           entry={this.state.optionType}
-          searchable={true}
           onChange={this.handleTypeChange}
         />
-
         <div className={styles.name_field}>
           <TextInputElement
             name={i18n.t('forms.name', 'Name')}

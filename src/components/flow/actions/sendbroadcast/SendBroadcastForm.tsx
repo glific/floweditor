@@ -58,7 +58,7 @@ export default class SendBroadcastForm extends React.Component<
       fetchAsset(this.props.assetStore.templates, this.state.template.value.uuid).then(
         (asset: Asset) => {
           if (asset && asset.content) {
-            this.handleTemplateChanged([{ ...this.state.template.value, ...asset.content }]);
+            this.handleTemplateChanged({ ...this.state.template.value, ...asset.content });
           }
         }
       );
@@ -242,9 +242,7 @@ export default class SendBroadcastForm extends React.Component<
     };
   }
 
-  private handleTemplateChanged(selected: any[]): void {
-    const template = selected ? selected[0] : null;
-
+  private handleTemplateChanged(template: any): void {
     if (!template) {
       this.setState({
         template: { value: null },
@@ -291,6 +289,7 @@ export default class SendBroadcastForm extends React.Component<
         <TembaSelectElement
           key="template_select"
           name={i18n.t('forms.template', 'template')}
+          placeholder={'Select template message'}
           endpoint={this.context.config.endpoints.templates}
           entry={this.state.template}
           onChange={this.handleTemplateChanged}
