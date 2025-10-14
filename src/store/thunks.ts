@@ -801,6 +801,11 @@ export const onUpdateAction = (
       actionUUID: action.uuid
     });
   }
+  if (action && action.type === Types.set_contact_field) {
+    const value: any = action;
+    updatedAssets = mutators.addAssets('fields', assetStore, [value.field]);
+    dispatch(updateAssets(updatedAssets, 'fields'));
+  }
 
   let updatedNodes = nodes;
   const creatingNewNode = !!(originalNode !== null && originalNode.ghost);

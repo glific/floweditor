@@ -498,7 +498,7 @@ export const generateResultQuery = (resultName: string) => `@run.results.${snaki
 export const assetListToMap = (assets: Asset[]): AssetMap => {
   const assetMap: any = {};
   for (const asset of assets) {
-    assetMap[asset.id] = asset;
+    assetMap[asset.id || asset.name] = asset;
   }
   return assetMap;
 };
