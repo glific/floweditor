@@ -76,35 +76,53 @@ export default class WebhookRouterForm extends React.Component<
   }
 
   async componentDidMount() {
-    const endpoint = this.context?.config?.endpoints?.completion;
-    if (endpoint) {
-      const response = await fetch(endpoint);
-      const data = await response.json();
+    const endpoint = this.context.config.endpoints.completion;
+    const response = await fetch(endpoint);
+    const data = await response.json();
 
-      this.setState({ webhookOptions: data.webhook });
-    }
+    const webhookOptions = (data.webhook || []).map((webhook: any) => ({
+      name: webhook.name,
+      body: webhook.body
+    }));
+
+    this.setState({ webhookOptions });
   }
 
   private handleWebhookFunctionChanged(selected: any[]): boolean {
-    const updates: Partial<WebhookRouterFormState> = {
-      webhookFunction: { value: selected }
-    };
+    const selectedArray = !selected ? [] : Array.isArray(selected) ? selected : [selected];
 
-    if (selected && selected.length > 0) {
-      const webhookName = selected[0].name || selected[0].value || selected[0];
-      const webhook = this.state.webhookOptions.find(w => w.name === webhookName);
-
-      updates.url = { value: webhookName };
-
-      if (webhook && webhook.body) {
-        updates.body = { value: webhook.body };
-      }
-    } else {
-      updates.url = { value: '' };
+    if (selectedArray.length === 0) {
+      const updates: Partial<WebhookRouterFormState> = {
+        webhookFunction: { value: null },
+        url: { value: '' },
+        body: { value: '' }
+      };
+      const updated = mergeForm(this.state, updates) as WebhookRouterFormState;
+      this.setState(updated);
+      return updated.valid;
     }
 
-    const updated = mergeForm(this.state, updates);
+    const selectedItem = selectedArray[0];
+    const webhookName =
+      typeof selectedItem === 'string'
+        ? selectedItem
+        : selectedItem?.value ||
+          selectedItem?.name ||
+          selectedItem?.id ||
+          selectedItem?.label ||
+          '';
+
+    const webhook = this.state.webhookOptions.find(w => w.name === webhookName);
+
+    const updates: Partial<WebhookRouterFormState> = {
+      webhookFunction: { value: selectedArray },
+      url: { value: webhookName },
+      body: { value: webhook?.body || '' }
+    };
+
+    const updated = mergeForm(this.state, updates) as WebhookRouterFormState;
     this.setState(updated);
+
     return updated.valid;
   }
 
@@ -136,14 +154,15 @@ export default class WebhookRouterForm extends React.Component<
           (header: HeaderEntry) => header.value.name.toLowerCase() === 'content-type'
         );
 
-        // whenever our method changes, update the default body
-        updates.body = { value: getDefaultBody(newMethod) };
+        // Only set default body for non-FUNCTION methods
+        if (newMethod !== Methods.FUNCTION) {
+          updates.body = { value: getDefaultBody(newMethod) };
+        }
 
         // switching from a GET, add a content-type
         if (oldMethod === Methods.GET && newMethod !== Methods.GET) {
           if (!existingContentTypeHeader) {
             let uuid = createUUID();
-            // if we have an empty header, use that one
             const lastHeader =
               this.state.headers.length > 0
                 ? this.state.headers[this.state.headers.length - 1]
@@ -154,7 +173,6 @@ export default class WebhookRouterForm extends React.Component<
             keys.header = { uuid, name: 'Content-Type', value: 'application/json' };
           }
         } else if (oldMethod !== Methods.GET && newMethod === Methods.GET) {
-          // remove content type if switching to a GET
           if (existingContentTypeHeader) {
             toRemove = [{ headers: [{ value: existingContentTypeHeader.value }] }];
           }
@@ -179,7 +197,13 @@ export default class WebhookRouterForm extends React.Component<
     }
 
     if (keys.hasOwnProperty('body')) {
-      updates.body = validate('POST body', keys.body, [isValidJson()]);
+      // Don't validate JSON for empty body in FUNCTION method
+      const isFunction = this.state.method.value.value === Methods.FUNCTION;
+      if (isFunction && keys.body.trim() === '') {
+        updates.body = { value: keys.body };
+      } else {
+        updates.body = validate('POST body', keys.body, [isValidJson()]);
+      }
     }
 
     if (keys.hasOwnProperty('header')) {
@@ -194,9 +218,7 @@ export default class WebhookRouterForm extends React.Component<
 
     const updated = mergeForm(this.state, updates, toRemove);
 
-    // update our form
     this.setState(updated, () => {
-      // if we updated headers, check if we need a new one
       if (ensureEmptyHeader) {
         let needsHeader = true;
         for (const header of this.state.headers) {
@@ -205,7 +227,6 @@ export default class WebhookRouterForm extends React.Component<
             break;
           }
         }
-
         if (needsHeader) {
           this.handleCreateHeader();
         }
@@ -249,7 +270,6 @@ export default class WebhookRouterForm extends React.Component<
   }
 
   private handleSave(): void {
-    // validate our url in case they haven't interacted
     let valid = false;
     if (this.state.method.value.name === 'FUNCTION') {
       valid = this.handleUpdate({ resultName: this.state.resultName.value }, true);
@@ -280,7 +300,7 @@ export default class WebhookRouterForm extends React.Component<
     const typeConfig = this.props.typeConfig;
 
     const headerElements: JSX.Element[] = this.state.headers.map(
-      (header: HeaderEntry, index: number, arr: HeaderEntry[]) => {
+      (header: HeaderEntry, index: number) => {
         return (
           <div key={`header_${header.value.uuid}`}>
             <HeaderElement
@@ -386,7 +406,8 @@ export default class WebhookRouterForm extends React.Component<
                 options={this.state.webhookOptions.map(webhook => ({
                   name: webhook.name,
                   value: webhook.name,
-                  id: webhook.name
+                  id: webhook.name,
+                  label: webhook.name
                 }))}
               />
             ) : (
