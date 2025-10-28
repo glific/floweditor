@@ -16,6 +16,7 @@ import { createResultNameInput } from 'components/flow/routers/widgets';
 import SelectElement from 'components/form/select/SelectElement';
 import TextInputElement from 'components/form/textinput/TextInputElement';
 import TypeList from 'components/nodeeditor/TypeList';
+import TembaSelectElement from 'temba/TembaSelectElement';
 import * as React from 'react';
 import { FormEntry, FormState, mergeForm, StringEntry, ValidationFailure } from 'store/nodeEditor';
 import {
@@ -32,6 +33,7 @@ import { createUUID } from 'utils';
 import styles from './WebhookRouterForm.module.scss';
 import { Trans } from 'react-i18next';
 import i18n from 'config/i18n';
+import { fakePropType } from 'config/ConfigProvider';
 
 export interface HeaderEntry extends FormEntry {
   value: Header;
@@ -47,18 +49,63 @@ export interface WebhookRouterFormState extends FormState {
   url: StringEntry;
   body: StringEntry;
   resultName: StringEntry;
+  webhookFunction: FormEntry;
+  webhookOptions: { name: string; body?: string }[];
 }
 
 export default class WebhookRouterForm extends React.Component<
   RouterFormProps,
   WebhookRouterFormState
 > {
+  public static contextTypes = {
+    config: fakePropType
+  };
+
   constructor(props: RouterFormProps) {
     super(props);
-    this.state = nodeToState(this.props.nodeSettings);
+
+    this.state = {
+      ...nodeToState(this.props.nodeSettings),
+      webhookFunction: { value: null },
+      webhookOptions: []
+    };
+
     bindCallbacks(this, {
       include: [/^handle/]
     });
+  }
+
+  async componentDidMount() {
+    const endpoint = this.context?.config?.endpoints?.completion;
+    if (endpoint) {
+      const response = await fetch(endpoint);
+      const data = await response.json();
+
+      this.setState({ webhookOptions: data.webhook });
+    }
+  }
+
+  private handleWebhookFunctionChanged(selected: any[]): boolean {
+    const updates: Partial<WebhookRouterFormState> = {
+      webhookFunction: { value: selected }
+    };
+
+    if (selected && selected.length > 0) {
+      const webhookName = selected[0].name || selected[0].value || selected[0];
+      const webhook = this.state.webhookOptions.find(w => w.name === webhookName);
+
+      updates.url = { value: webhookName };
+
+      if (webhook && webhook.body) {
+        updates.body = { value: webhook.body };
+      }
+    } else {
+      updates.url = { value: '' };
+    }
+
+    const updated = mergeForm(this.state, updates);
+    this.setState(updated);
+    return updated.valid;
   }
 
   private handleUpdate(
@@ -326,21 +373,31 @@ export default class WebhookRouterForm extends React.Component<
             />
           </div>
           <div className={styles.url}>
-            <TextInputElement
-              name={i18n.t('forms.url', 'URL')}
-              placeholder={
-                method === 'FUNCTION'
-                  ? 'Enter function'
-                  : i18n.t('forms.enter_a_url', 'Enter a URL')
-              }
-              entry={this.state.url}
-              onChange={(url, name) => {
-                method === 'FUNCTION'
-                  ? this.setState({ url: { value: url } })
-                  : this.handleUrlUpdate(url, name);
-              }}
-              autocomplete={true}
-            />
+            {method === 'FUNCTION' ? (
+              <TembaSelectElement
+                key="webhook_function_select"
+                name={i18n.t('forms.function', 'Function')}
+                placeholder={i18n.t('forms.select_or_type', 'Type to search or select')}
+                entry={this.state.webhookFunction}
+                searchable={true}
+                multi={false}
+                expressions={false}
+                onChange={this.handleWebhookFunctionChanged}
+                options={this.state.webhookOptions.map(webhook => ({
+                  name: webhook.name,
+                  value: webhook.name,
+                  id: webhook.name
+                }))}
+              />
+            ) : (
+              <TextInputElement
+                name={i18n.t('forms.url', 'URL')}
+                placeholder={i18n.t('forms.enter_a_url', 'Enter a URL')}
+                entry={this.state.url}
+                onChange={this.handleUrlUpdate}
+                autocomplete={true}
+              />
+            )}
           </div>
         </div>
         <div className={styles.instructions}>
