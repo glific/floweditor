@@ -89,7 +89,7 @@ export default class WebhookRouterForm extends React.Component<
 
     if (this.state.method.value.value === Methods.FUNCTION && this.state.url.value) {
       const functionName = this.state.url.value;
-      const selectedOption = webhookOptions.find(opt => opt.name === functionName);
+      const selectedOption = webhookOptions.find((opt: any) => opt.name === functionName);
 
       this.setState({
         webhookOptions,
