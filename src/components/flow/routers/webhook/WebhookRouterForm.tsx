@@ -50,7 +50,7 @@ export interface WebhookRouterFormState extends FormState {
   body: StringEntry;
   resultName: StringEntry;
   webhookFunction: FormEntry;
-  webhookOptions: any[]; //
+  webhookOptions: any[];
 }
 
 export default class WebhookRouterForm extends React.Component<
