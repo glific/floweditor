@@ -50,7 +50,7 @@ export interface WebhookRouterFormState extends FormState {
   body: StringEntry;
   resultName: StringEntry;
   webhookFunction: FormEntry;
-  webhookOptions: { name: string; body?: string }[];
+  webhookOptions: any[]; //
 }
 
 export default class WebhookRouterForm extends React.Component<
@@ -66,7 +66,6 @@ export default class WebhookRouterForm extends React.Component<
 
     this.state = {
       ...nodeToState(this.props.nodeSettings),
-      webhookFunction: { value: null },
       webhookOptions: []
     };
 
@@ -82,16 +81,27 @@ export default class WebhookRouterForm extends React.Component<
 
     const webhookOptions = (data.webhook || []).map((webhook: any) => ({
       name: webhook.name,
+      value: webhook.name,
+      id: webhook.name,
+      label: webhook.name,
       body: webhook.body
     }));
 
-    this.setState({ webhookOptions });
+    if (this.state.method.value.value === Methods.FUNCTION && this.state.url.value) {
+      const functionName = this.state.url.value;
+      const selectedOption = webhookOptions.find(opt => opt.name === functionName);
+
+      this.setState({
+        webhookOptions,
+        webhookFunction: { value: selectedOption || null }
+      });
+    } else {
+      this.setState({ webhookOptions });
+    }
   }
 
-  private handleWebhookFunctionChanged(selected: any[]): boolean {
-    const selectedArray = !selected ? [] : Array.isArray(selected) ? selected : [selected];
-
-    if (selectedArray.length === 0) {
+  private handleWebhookFunctionChanged(selected: any): boolean {
+    if (!selected) {
       const updates: Partial<WebhookRouterFormState> = {
         webhookFunction: { value: null },
         url: { value: '' },
@@ -102,22 +112,10 @@ export default class WebhookRouterForm extends React.Component<
       return updated.valid;
     }
 
-    const selectedItem = selectedArray[0];
-    const webhookName =
-      typeof selectedItem === 'string'
-        ? selectedItem
-        : selectedItem?.value ||
-          selectedItem?.name ||
-          selectedItem?.id ||
-          selectedItem?.label ||
-          '';
-
-    const webhook = this.state.webhookOptions.find(w => w.name === webhookName);
-
     const updates: Partial<WebhookRouterFormState> = {
-      webhookFunction: { value: selectedArray },
-      url: { value: webhookName },
-      body: { value: webhook?.body || '' }
+      webhookFunction: { value: selected },
+      url: { value: selected?.name || selected?.value || '' },
+      body: { value: selected?.body || '' }
     };
 
     const updated = mergeForm(this.state, updates) as WebhookRouterFormState;
@@ -403,12 +401,7 @@ export default class WebhookRouterForm extends React.Component<
                 multi={false}
                 expressions={false}
                 onChange={this.handleWebhookFunctionChanged}
-                options={this.state.webhookOptions.map(webhook => ({
-                  name: webhook.name,
-                  value: webhook.name,
-                  id: webhook.name,
-                  label: webhook.name
-                }))}
+                options={this.state.webhookOptions}
               />
             ) : (
               <TextInputElement
