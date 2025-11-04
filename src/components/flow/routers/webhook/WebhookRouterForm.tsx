@@ -114,8 +114,8 @@ export default class WebhookRouterForm extends React.Component<
 
     const updates: Partial<WebhookRouterFormState> = {
       webhookFunction: { value: selected },
-      url: { value: selected?.name || selected?.value || '' },
-      body: { value: selected?.body || '' }
+      url: { value: selected.name || selected.value || '' },
+      body: { value: selected.body || '' }
     };
 
     const updated = mergeForm(this.state, updates) as WebhookRouterFormState;
