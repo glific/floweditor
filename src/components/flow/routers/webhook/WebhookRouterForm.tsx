@@ -16,6 +16,7 @@ import { createResultNameInput } from 'components/flow/routers/widgets';
 import SelectElement from 'components/form/select/SelectElement';
 import TextInputElement from 'components/form/textinput/TextInputElement';
 import TypeList from 'components/nodeeditor/TypeList';
+import TembaSelectElement from 'temba/TembaSelectElement';
 import * as React from 'react';
 import { FormEntry, FormState, mergeForm, StringEntry, ValidationFailure } from 'store/nodeEditor';
 import {
@@ -32,6 +33,7 @@ import { createUUID } from 'utils';
 import styles from './WebhookRouterForm.module.scss';
 import { Trans } from 'react-i18next';
 import i18n from 'config/i18n';
+import { fakePropType } from 'config/ConfigProvider';
 
 export interface HeaderEntry extends FormEntry {
   value: Header;
@@ -47,18 +49,79 @@ export interface WebhookRouterFormState extends FormState {
   url: StringEntry;
   body: StringEntry;
   resultName: StringEntry;
+  webhookFunction: FormEntry;
+  webhookOptions: any[];
 }
 
 export default class WebhookRouterForm extends React.Component<
   RouterFormProps,
   WebhookRouterFormState
 > {
+  public static contextTypes = {
+    config: fakePropType
+  };
+
   constructor(props: RouterFormProps) {
     super(props);
-    this.state = nodeToState(this.props.nodeSettings);
+
+    this.state = {
+      ...nodeToState(this.props.nodeSettings),
+      webhookOptions: []
+    };
+
     bindCallbacks(this, {
       include: [/^handle/]
     });
+  }
+
+  async componentDidMount() {
+    const endpoint = this.context.config.endpoints.completion;
+    const response = await fetch(endpoint);
+    const data = await response.json();
+
+    const webhookOptions = (data.webhook || []).map((webhook: any) => ({
+      name: webhook.name,
+      value: webhook.name,
+      id: webhook.name,
+      label: webhook.name,
+      body: webhook.body
+    }));
+
+    if (this.state.method.value.value === Methods.FUNCTION && this.state.url.value) {
+      const functionName = this.state.url.value;
+      const selectedOption = webhookOptions.find((opt: any) => opt.name === functionName);
+
+      this.setState({
+        webhookOptions,
+        webhookFunction: { value: selectedOption || null }
+      });
+    } else {
+      this.setState({ webhookOptions });
+    }
+  }
+
+  private handleWebhookFunctionChanged(selected: any): boolean {
+    if (!selected) {
+      const updates: Partial<WebhookRouterFormState> = {
+        webhookFunction: { value: null },
+        url: { value: '' },
+        body: { value: '' }
+      };
+      const updated = mergeForm(this.state, updates) as WebhookRouterFormState;
+      this.setState(updated);
+      return updated.valid;
+    }
+
+    const updates: Partial<WebhookRouterFormState> = {
+      webhookFunction: { value: selected },
+      url: { value: selected.name || selected.value || '' },
+      body: { value: selected.body || '' }
+    };
+
+    const updated = mergeForm(this.state, updates) as WebhookRouterFormState;
+    this.setState(updated);
+
+    return updated.valid;
   }
 
   private handleUpdate(
@@ -89,14 +152,15 @@ export default class WebhookRouterForm extends React.Component<
           (header: HeaderEntry) => header.value.name.toLowerCase() === 'content-type'
         );
 
-        // whenever our method changes, update the default body
-        updates.body = { value: getDefaultBody(newMethod) };
+        // Only set default body for non-FUNCTION methods
+        if (newMethod !== Methods.FUNCTION) {
+          updates.body = { value: getDefaultBody(newMethod) };
+        }
 
         // switching from a GET, add a content-type
         if (oldMethod === Methods.GET && newMethod !== Methods.GET) {
           if (!existingContentTypeHeader) {
             let uuid = createUUID();
-            // if we have an empty header, use that one
             const lastHeader =
               this.state.headers.length > 0
                 ? this.state.headers[this.state.headers.length - 1]
@@ -107,7 +171,6 @@ export default class WebhookRouterForm extends React.Component<
             keys.header = { uuid, name: 'Content-Type', value: 'application/json' };
           }
         } else if (oldMethod !== Methods.GET && newMethod === Methods.GET) {
-          // remove content type if switching to a GET
           if (existingContentTypeHeader) {
             toRemove = [{ headers: [{ value: existingContentTypeHeader.value }] }];
           }
@@ -132,7 +195,13 @@ export default class WebhookRouterForm extends React.Component<
     }
 
     if (keys.hasOwnProperty('body')) {
-      updates.body = validate('POST body', keys.body, [isValidJson()]);
+      // Don't validate JSON for empty body in FUNCTION method
+      const isFunction = this.state.method.value.value === Methods.FUNCTION;
+      if (isFunction && keys.body.trim() === '') {
+        updates.body = { value: keys.body };
+      } else {
+        updates.body = validate('POST body', keys.body, [isValidJson()]);
+      }
     }
 
     if (keys.hasOwnProperty('header')) {
@@ -147,9 +216,7 @@ export default class WebhookRouterForm extends React.Component<
 
     const updated = mergeForm(this.state, updates, toRemove);
 
-    // update our form
     this.setState(updated, () => {
-      // if we updated headers, check if we need a new one
       if (ensureEmptyHeader) {
         let needsHeader = true;
         for (const header of this.state.headers) {
@@ -158,7 +225,6 @@ export default class WebhookRouterForm extends React.Component<
             break;
           }
         }
-
         if (needsHeader) {
           this.handleCreateHeader();
         }
@@ -202,7 +268,6 @@ export default class WebhookRouterForm extends React.Component<
   }
 
   private handleSave(): void {
-    // validate our url in case they haven't interacted
     let valid = false;
     if (this.state.method.value.name === 'FUNCTION') {
       valid = this.handleUpdate({ resultName: this.state.resultName.value }, true);
@@ -233,7 +298,7 @@ export default class WebhookRouterForm extends React.Component<
     const typeConfig = this.props.typeConfig;
 
     const headerElements: JSX.Element[] = this.state.headers.map(
-      (header: HeaderEntry, index: number, arr: HeaderEntry[]) => {
+      (header: HeaderEntry, index: number) => {
         return (
           <div key={`header_${header.value.uuid}`}>
             <HeaderElement
@@ -326,21 +391,27 @@ export default class WebhookRouterForm extends React.Component<
             />
           </div>
           <div className={styles.url}>
-            <TextInputElement
-              name={i18n.t('forms.url', 'URL')}
-              placeholder={
-                method === 'FUNCTION'
-                  ? 'Enter function'
-                  : i18n.t('forms.enter_a_url', 'Enter a URL')
-              }
-              entry={this.state.url}
-              onChange={(url, name) => {
-                method === 'FUNCTION'
-                  ? this.setState({ url: { value: url } })
-                  : this.handleUrlUpdate(url, name);
-              }}
-              autocomplete={true}
-            />
+            {method === 'FUNCTION' ? (
+              <TembaSelectElement
+                key="webhook_function_select"
+                name={i18n.t('forms.function', 'Function')}
+                placeholder={i18n.t('forms.select_or_type', 'Type to search or select')}
+                entry={this.state.webhookFunction}
+                searchable={true}
+                multi={false}
+                expressions={false}
+                onChange={this.handleWebhookFunctionChanged}
+                options={this.state.webhookOptions}
+              />
+            ) : (
+              <TextInputElement
+                name={i18n.t('forms.url', 'URL')}
+                placeholder={i18n.t('forms.enter_a_url', 'Enter a URL')}
+                entry={this.state.url}
+                onChange={this.handleUrlUpdate}
+                autocomplete={true}
+              />
+            )}
           </div>
         </div>
         <div className={styles.instructions}>
