@@ -297,6 +297,10 @@ Object {
     "value": "http://domain.com/",
   },
   "valid": true,
+  "webhookFunction": Object {
+    "value": null,
+  },
+  "webhookOptions": Array [],
 }
 `;
 
@@ -345,6 +349,10 @@ Object {
     "value": "http://domain.com/",
   },
   "valid": true,
+  "webhookFunction": Object {
+    "value": null,
+  },
+  "webhookOptions": Array [],
 }
 `;
 
