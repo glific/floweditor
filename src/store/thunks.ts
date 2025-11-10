@@ -371,18 +371,10 @@ export const loadFlowDefinition = (details: FlowDetails, assetStore: AssetStore)
     language = assetStore.languages.items[definition.language];
   }
 
-  const defaultLanguage = Object.values(assetStore.languages.items).find(
-    (lang: any) => lang.content.default
-  );
-
   if (!language) {
-    const defaultTab = {
-      ...DEFAULT_LANGUAGE,
-      name: defaultLanguage ? `Default (${defaultLanguage.name})` : DEFAULT_LANGUAGE.name
-    };
-    language = defaultTab;
-    dispatch(mergeEditorState({ language: defaultTab }));
-    mergeAssetMaps(assetStore.languages.items, { base: defaultTab });
+    language = DEFAULT_LANGUAGE;
+    dispatch(mergeEditorState({ language: DEFAULT_LANGUAGE }));
+    mergeAssetMaps(assetStore.languages.items, { base: DEFAULT_LANGUAGE });
   }
 
   if (details.issues) {
