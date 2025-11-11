@@ -34,6 +34,7 @@ import styles from './WebhookRouterForm.module.scss';
 import { Trans } from 'react-i18next';
 import i18n from 'config/i18n';
 import { fakePropType } from 'config/ConfigProvider';
+import axios from 'axios';
 
 export interface HeaderEntry extends FormEntry {
   value: Header;
@@ -76,8 +77,8 @@ export default class WebhookRouterForm extends React.Component<
 
   async componentDidMount() {
     const endpoint = this.context.config.endpoints.completion;
-    const response = await fetch(endpoint);
-    const data = await response.json();
+    const response = await axios.get(endpoint);
+    const data = response.data;
 
     const webhookOptions = (data.webhook || []).map((webhook: any) => ({
       name: webhook.name,
