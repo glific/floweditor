@@ -9,8 +9,11 @@ import { createWebhookRouterNode, getRouterFormProps } from 'testUtils/assetCrea
 import * as utils from 'utils';
 import * as React from 'react';
 import { render, fireEvent, fireChangeText, fireTembaSelect } from 'test/utils';
+import axios from 'axios';
 
 mock(utils, 'createUUID', utils.seededUUIDs());
+jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const webhookForm = getRouterFormProps({
   node: createWebhookRouterNode(),
@@ -18,6 +21,10 @@ const webhookForm = getRouterFormProps({
 } as RenderNode);
 
 const { setup } = composeComponentTestUtils<RouterFormProps>(WebhookRouterForm, webhookForm);
+
+beforeEach(() => {
+  mockedAxios.get.mockResolvedValue({ data: {} });
+});
 
 describe(WebhookRouterForm.name, () => {
   it('should render', () => {
