@@ -33,13 +33,13 @@ export const GET_METHOD: MethodOption = {
 };
 
 export const METHOD_OPTIONS: MethodOption[] = [
+  { value: Methods.FUNCTION, name: Methods.FUNCTION },
   GET_METHOD,
-  { value: Methods.POST, name: Methods.POST },
+  { value: Methods.POST, name: Methods.POST }
   // { value: Methods.PUT, name: Methods.PUT },
   // { value: Methods.DELETE, name: Methods.DELETE }, // These methods are not needed currently
   // { value: Methods.HEAD, name: Methods.HEAD },
   // { value: Methods.PATCH, name: Methods.PATCH },
-  { value: Methods.FUNCTION, name: Methods.FUNCTION }
 ];
 
 export const getOriginalAction = (settings: NodeEditorSettings): CallWebhook => {
@@ -95,6 +95,9 @@ export const nodeToState = (settings: NodeEditorSettings): WebhookRouterFormStat
         value: 'application/json'
       }
     });
+    state.method = { value: { name: Methods.FUNCTION, value: Methods.FUNCTION } };
+    state.url = { value: 'FUNCTION' };
+    state.webhookFunction = { value: { name: 'FUNCTION', value: 'FUNCTION' } };
   }
 
   // one empty header
