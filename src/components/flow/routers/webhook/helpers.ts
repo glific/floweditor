@@ -68,24 +68,12 @@ export const nodeToState = (settings: NodeEditorSettings): WebhookRouterFormStat
     valid: false
   };
 
-  if (getType(settings.originalNode) === Types.split_by_webhook) {
-    const action = getOriginalAction(settings) as CallWebhook;
-
-    // add in our headers
-    for (const name of Object.keys(action.headers || []).sort()) {
-      state.headers.push({
-        value: {
-          uuid: createUUID(),
-          value: action.headers[name],
-          name
-        }
-      });
-    }
-
+  const action = getOriginalAction(settings) as CallWebhook;
+  if (action) {
     state.resultName = { value: action.result_name || router.result_name || '' };
     state.url = { value: action.url };
     state.method = { value: { name: action.method, value: action.method } };
-    state.body = { value: action.body };
+    state.body = { value: action.body ?? getDefaultBody(action.method) };
     state.valid = true;
   } else {
     state.headers.push({
@@ -98,7 +86,6 @@ export const nodeToState = (settings: NodeEditorSettings): WebhookRouterFormStat
     state.method = { value: { name: Methods.FUNCTION, value: Methods.FUNCTION } };
     state.url = { value: 'FUNCTION' };
     state.body = { value: getDefaultBody(Methods.FUNCTION) };
-    state.webhookFunction = { value: { name: 'FUNCTION', value: 'FUNCTION' } };
   }
 
   // one empty header

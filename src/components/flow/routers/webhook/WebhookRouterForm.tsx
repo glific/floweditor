@@ -102,37 +102,25 @@ export default class WebhookRouterForm extends React.Component<
   }
 
   private handleWebhookFunctionChanged(selected: any): boolean {
-    if (!selected) {
-      const updates: Partial<WebhookRouterFormState> = {
-        webhookFunction: { value: null },
-        url: { value: '' },
-        body: { value: '' }
-      };
-      const updated = mergeForm(this.state, updates) as WebhookRouterFormState;
-      this.setState(updated);
-      return updated.valid;
-    }
-    const currentBody =
-      this.state.body && this.state.body.value ? String(this.state.body.value) : '';
-    const selectedBody =
-      selected.body !== undefined && selected.body !== null ? String(selected.body) : '';
+    const prevFunction = this.state.webhookFunction?.value;
+    const prevFunctionName = prevFunction?.name || prevFunction?.value;
 
-    let bodyUpdate: StringEntry | undefined;
-    const shouldOverwrite = currentBody.trim() === '' || currentBody.trim() === selectedBody;
-
-    if (shouldOverwrite) {
-      bodyUpdate = { value: selectedBody };
-    } else {
-      bodyUpdate = undefined;
-    }
-
-    const updates: Partial<WebhookRouterFormState> = {
+    let updates: Partial<WebhookRouterFormState> = {
       webhookFunction: { value: selected },
-      url: { value: selected.name || selected.value || '' }
+      url: { value: selected ? selected.name || selected.value : '' }
     };
 
-    if (bodyUpdate) {
-      updates.body = bodyUpdate;
+    if (selected) {
+      const backendDefaultBody = selected.body || '';
+      const currentBody = this.state.body.value;
+
+      const shouldResetBody = !prevFunction || selected.name !== prevFunctionName;
+
+      updates.body = {
+        value: shouldResetBody ? backendDefaultBody : currentBody
+      };
+    } else {
+      updates.body = { value: '' };
     }
 
     const updated = mergeForm(this.state, updates) as WebhookRouterFormState;
