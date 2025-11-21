@@ -118,7 +118,7 @@ export default class WebhookRouterForm extends React.Component<
       selected.body !== undefined && selected.body !== null ? String(selected.body) : '';
 
     let bodyUpdate: StringEntry | undefined;
-    const shouldOverwrite = currentBody.trim() === '' || currentBody.trim() === selectedBody; // no body yet — safe to set default // user hasn't changed from default — safe to reapply default
+    const shouldOverwrite = currentBody.trim() === '' || currentBody.trim() === selectedBody;
 
     if (shouldOverwrite) {
       bodyUpdate = { value: selectedBody };
