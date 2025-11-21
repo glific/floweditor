@@ -22,14 +22,14 @@ exports[`WebhookRouterForm should render 1`] = `
           className="body_form"
         >
           <h4>
-            GET Body
+            FUNCTION Body
           </h4>
           <p>
             <Trans
               i18nKey="forms.webhook_body_summary"
               values={
                 Object {
-                  "method": "GET",
+                 "method": "FUNCTION",
                 }
               }
             >
@@ -50,22 +50,22 @@ exports[`WebhookRouterForm should render 1`] = `
                 i18nKey="forms.webhook_body_summary"
                 values={
                   Object {
-                    "method": "GET",
+                    "method": "FUNCTION",
                   }
                 }
               >
                 Modify the body of the [[method]] request that will be sent to your webhook.
               </Trans>
             }
-            name="GET Body"
+            name="FUNCTION Body"
             onChange={[Function]}
             showLabel={false}
             textarea={true}
           />
         </div>,
-        "checked": false,
+        "checked": true,
         "hasErrors": false,
-        "name": "GET Body",
+        "name": "FUNCTION Body",
       },
       Object {
         "body": <React.Fragment>
@@ -159,8 +159,8 @@ exports[`WebhookRouterForm should render 1`] = `
         entry={
           Object {
             "value": Object {
-              "name": "GET",
-              "value": "GET",
+              "name": "FUNCTION",
+              "value": "FUNCTION",
             },
           }
         }
@@ -169,6 +169,10 @@ exports[`WebhookRouterForm should render 1`] = `
         onChange={[Function]}
         options={
           Array [
+             Object {
+              "name": "FUNCTION",
+              "value": "FUNCTION",
+            },
             Object {
               "name": "GET",
               "value": "GET",
@@ -177,10 +181,7 @@ exports[`WebhookRouterForm should render 1`] = `
               "name": "POST",
               "value": "POST",
             },
-            Object {
-              "name": "FUNCTION",
-              "value": "FUNCTION",
-            },
+           
           ]
         }
       />
@@ -188,16 +189,23 @@ exports[`WebhookRouterForm should render 1`] = `
     <div
       className="url"
     >
-      <TextInputElement
-        autocomplete={true}
+     <TembaSelectElement
         entry={
           Object {
-            "value": "",
+           "value": Object {
+                  "name": "FUNCTION",
+                  "value": "FUNCTION",
+                },
           }
         }
-        name="URL"
+        expressions={false}
+            key="webhook_function_select"
+           multi={false}
+            name="Function"
         onChange={[Function]}
-        placeholder="Enter a URL"
+        options={Array []}
+         placeholder="Type to search or select"
+        searchable={true}
       />
     </div>
   </div>
