@@ -2,7 +2,6 @@ import { createServiceCallSplitNode } from 'components/flow/routers/helpers';
 import { WebhookRouterFormState } from 'components/flow/routers/webhook/WebhookRouterForm';
 import { DEFAULT_BODY } from 'components/nodeeditor/constants';
 import { Operators, Types } from 'config/interfaces';
-import { getType } from 'config/typeConfigs';
 import { CallWebhook, SwitchRouter } from 'flowTypes';
 import { RenderNode } from 'store/flowContext';
 import { NodeEditorSettings, StringEntry } from 'store/nodeEditor';
