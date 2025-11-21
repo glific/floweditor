@@ -97,6 +97,7 @@ export const nodeToState = (settings: NodeEditorSettings): WebhookRouterFormStat
     });
     state.method = { value: { name: Methods.FUNCTION, value: Methods.FUNCTION } };
     state.url = { value: 'FUNCTION' };
+    state.body = { value: getDefaultBody(Methods.FUNCTION) };
     state.webhookFunction = { value: { name: 'FUNCTION', value: 'FUNCTION' } };
   }
 
