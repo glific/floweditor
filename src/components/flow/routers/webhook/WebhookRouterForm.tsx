@@ -180,10 +180,16 @@ export default class WebhookRouterForm extends React.Component<
     }
 
     if (keys.hasOwnProperty('url')) {
-      updates.url = validate(i18n.t('forms.url', 'URL'), keys.url, [
-        shouldRequireIf(submitting),
-        validateIf(ValidURL, keys.url.indexOf('@') === -1)
-      ]);
+      const isFunction = this.state.method.value.value === Methods.FUNCTION;
+
+      if (isFunction) {
+        updates.url = { value: keys.url };
+      } else {
+        updates.url = validate(i18n.t('forms.url', 'URL'), keys.url, [
+          shouldRequireIf(submitting),
+          validateIf(ValidURL, keys.url.indexOf('@') === -1)
+        ]);
+      }
     }
 
     if (keys.hasOwnProperty('resultName')) {
@@ -270,8 +276,12 @@ export default class WebhookRouterForm extends React.Component<
 
   private handleSave(): void {
     let valid = false;
-    if (this.state.method.value.name === 'FUNCTION') {
-      valid = this.handleUpdate({ resultName: this.state.resultName.value }, true);
+    const isFunction = this.state.method.value.name === Methods.FUNCTION;
+    if (isFunction) {
+      valid = this.handleUpdate(
+        { resultName: this.state.resultName.value, url: this.state.url.value },
+        true
+      );
     } else {
       valid = this.handleUpdate(
         { url: this.state.url.value, resultName: this.state.resultName.value },
@@ -280,7 +290,10 @@ export default class WebhookRouterForm extends React.Component<
     }
 
     if (valid) {
-      this.props.updateRouter(stateToNode(this.props.nodeSettings, this.state));
+      const payload = stateToNode(this.props.nodeSettings, this.state);
+
+      this.props.updateRouter(payload);
+
       this.props.onClose(false);
     }
   }
