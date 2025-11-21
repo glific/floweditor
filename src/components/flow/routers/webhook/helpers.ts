@@ -74,6 +74,15 @@ export const nodeToState = (settings: NodeEditorSettings): WebhookRouterFormStat
     state.method = { value: { name: action.method, value: action.method } };
     state.body = { value: action.body ?? getDefaultBody(action.method) };
     state.valid = true;
+    if (action.headers) {
+      state.headers = Object.entries(action.headers).map(([name, value]) => ({
+        value: {
+          uuid: createUUID(),
+          name,
+          value
+        }
+      }));
+    }
   } else {
     state.headers.push({
       value: {
@@ -83,7 +92,7 @@ export const nodeToState = (settings: NodeEditorSettings): WebhookRouterFormStat
       }
     });
     state.method = { value: { name: Methods.FUNCTION, value: Methods.FUNCTION } };
-    state.url = { value: 'FUNCTION' };
+    state.url = { value: '' };
     state.body = { value: getDefaultBody(Methods.FUNCTION) };
   }
 

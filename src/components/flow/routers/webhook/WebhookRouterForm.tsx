@@ -156,12 +156,18 @@ export default class WebhookRouterForm extends React.Component<
         const existingContentTypeHeader = this.state.headers.find(
           (header: HeaderEntry) => header.value.name.toLowerCase() === 'content-type'
         );
-
-        // Only set default body for non-FUNCTION methods
-        if (newMethod !== Methods.FUNCTION) {
-          updates.body = { value: getDefaultBody(newMethod) };
+        if (newMethod === Methods.FUNCTION && oldMethod !== Methods.FUNCTION) {
+          updates.url = { value: '' };
+          updates.webhookFunction = { value: null };
         }
 
+        if (newMethod !== Methods.FUNCTION) {
+          updates.body = { value: getDefaultBody(newMethod) };
+          updates.url = { value: '' };
+        }
+        if (oldMethod === Methods.FUNCTION && newMethod !== Methods.FUNCTION) {
+          updates.url = { value: '' };
+        }
         // switching from a GET, add a content-type
         if (oldMethod === Methods.GET && newMethod !== Methods.GET) {
           if (!existingContentTypeHeader) {
