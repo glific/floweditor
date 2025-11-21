@@ -112,12 +112,28 @@ export default class WebhookRouterForm extends React.Component<
       this.setState(updated);
       return updated.valid;
     }
+    const currentBody =
+      this.state.body && this.state.body.value ? String(this.state.body.value) : '';
+    const selectedBody =
+      selected.body !== undefined && selected.body !== null ? String(selected.body) : '';
+
+    let bodyUpdate: StringEntry | undefined;
+    const shouldOverwrite = currentBody.trim() === '' || currentBody.trim() === selectedBody; // no body yet — safe to set default // user hasn't changed from default — safe to reapply default
+
+    if (shouldOverwrite) {
+      bodyUpdate = { value: selectedBody };
+    } else {
+      bodyUpdate = undefined;
+    }
 
     const updates: Partial<WebhookRouterFormState> = {
       webhookFunction: { value: selected },
-      url: { value: selected.name || selected.value || '' },
-      body: { value: selected.body || '' }
+      url: { value: selected.name || selected.value || '' }
     };
+
+    if (bodyUpdate) {
+      updates.body = bodyUpdate;
+    }
 
     const updated = mergeForm(this.state, updates) as WebhookRouterFormState;
     this.setState(updated);
