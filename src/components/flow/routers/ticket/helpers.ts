@@ -8,7 +8,6 @@ import { createUUID } from 'utils';
 import { TicketRouterFormState } from 'components/flow/routers/ticket/TicketRouterForm';
 
 export const getUserName = (user: User): string => {
-  console.log(user);
   if (!user.first_name && !user.last_name) {
     return user.email || '';
   }
