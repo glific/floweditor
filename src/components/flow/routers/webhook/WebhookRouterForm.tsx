@@ -102,22 +102,26 @@ export default class WebhookRouterForm extends React.Component<
   }
 
   private handleWebhookFunctionChanged(selected: any): boolean {
-    if (!selected) {
-      const updates: Partial<WebhookRouterFormState> = {
-        webhookFunction: { value: null },
-        url: { value: '' },
-        body: { value: '' }
-      };
-      const updated = mergeForm(this.state, updates) as WebhookRouterFormState;
-      this.setState(updated);
-      return updated.valid;
-    }
+    const prevFunction = this.state.webhookFunction?.value;
+    const prevFunctionName = prevFunction?.name || prevFunction?.value;
 
-    const updates: Partial<WebhookRouterFormState> = {
+    let updates: Partial<WebhookRouterFormState> = {
       webhookFunction: { value: selected },
-      url: { value: selected.name || selected.value || '' },
-      body: { value: selected.body || '' }
+      url: { value: selected ? selected.name || selected.value : '' }
     };
+
+    if (selected) {
+      const backendDefaultBody = selected.body || '';
+      const currentBody = this.state.body.value;
+
+      const shouldResetBody = !prevFunction || selected.name !== prevFunctionName;
+
+      updates.body = {
+        value: shouldResetBody ? backendDefaultBody : currentBody
+      };
+    } else {
+      updates.body = { value: '' };
+    }
 
     const updated = mergeForm(this.state, updates) as WebhookRouterFormState;
     this.setState(updated);
@@ -152,12 +156,18 @@ export default class WebhookRouterForm extends React.Component<
         const existingContentTypeHeader = this.state.headers.find(
           (header: HeaderEntry) => header.value.name.toLowerCase() === 'content-type'
         );
-
-        // Only set default body for non-FUNCTION methods
-        if (newMethod !== Methods.FUNCTION) {
-          updates.body = { value: getDefaultBody(newMethod) };
+        if (newMethod === Methods.FUNCTION && oldMethod !== Methods.FUNCTION) {
+          updates.url = { value: '' };
+          updates.webhookFunction = { value: null };
         }
 
+        if (newMethod !== Methods.FUNCTION) {
+          updates.body = { value: getDefaultBody(newMethod) };
+          updates.url = { value: '' };
+        }
+        if (oldMethod === Methods.FUNCTION && newMethod !== Methods.FUNCTION) {
+          updates.url = { value: '' };
+        }
         // switching from a GET, add a content-type
         if (oldMethod === Methods.GET && newMethod !== Methods.GET) {
           if (!existingContentTypeHeader) {
@@ -180,10 +190,16 @@ export default class WebhookRouterForm extends React.Component<
     }
 
     if (keys.hasOwnProperty('url')) {
-      updates.url = validate(i18n.t('forms.url', 'URL'), keys.url, [
-        shouldRequireIf(submitting),
-        validateIf(ValidURL, keys.url.indexOf('@') === -1)
-      ]);
+      const isFunction = this.state.method.value.value === Methods.FUNCTION;
+
+      if (isFunction) {
+        updates.url = { value: keys.url };
+      } else {
+        updates.url = validate(i18n.t('forms.url', 'URL'), keys.url, [
+          shouldRequireIf(submitting),
+          validateIf(ValidURL, keys.url.indexOf('@') === -1)
+        ]);
+      }
     }
 
     if (keys.hasOwnProperty('resultName')) {
@@ -270,8 +286,12 @@ export default class WebhookRouterForm extends React.Component<
 
   private handleSave(): void {
     let valid = false;
-    if (this.state.method.value.name === 'FUNCTION') {
-      valid = this.handleUpdate({ resultName: this.state.resultName.value }, true);
+    const isFunction = this.state.method.value.name === Methods.FUNCTION;
+    if (isFunction) {
+      valid = this.handleUpdate(
+        { resultName: this.state.resultName.value, url: this.state.url.value },
+        true
+      );
     } else {
       valid = this.handleUpdate(
         { url: this.state.url.value, resultName: this.state.resultName.value },
@@ -280,7 +300,10 @@ export default class WebhookRouterForm extends React.Component<
     }
 
     if (valid) {
-      this.props.updateRouter(stateToNode(this.props.nodeSettings, this.state));
+      const payload = stateToNode(this.props.nodeSettings, this.state);
+
+      this.props.updateRouter(payload);
+
       this.props.onClose(false);
     }
   }
