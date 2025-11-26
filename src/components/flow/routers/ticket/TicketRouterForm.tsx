@@ -188,7 +188,6 @@ export default class TicketRouterForm extends React.Component<
               onChange={this.handleAssigneeUpdate}
               clearable={true}
               value={this.state.assignee.value}
-              getName={getUserName}
             />
           </div>
         </div>
