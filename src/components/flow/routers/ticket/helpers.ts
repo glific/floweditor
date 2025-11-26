@@ -7,6 +7,14 @@ import { NodeEditorSettings, FormEntry } from 'store/nodeEditor';
 import { createUUID } from 'utils';
 import { TicketRouterFormState } from 'components/flow/routers/ticket/TicketRouterForm';
 
+export const getUserName = (user: User): string => {
+  console.log(user);
+  if (!user.first_name && !user.last_name) {
+    return user.email || '';
+  }
+  return `${user.first_name} ${user.last_name}`;
+};
+
 export const getOriginalAction = (settings: NodeEditorSettings): OpenTicket => {
   const action =
     settings.originalAction ||
