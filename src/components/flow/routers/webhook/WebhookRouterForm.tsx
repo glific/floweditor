@@ -52,8 +52,8 @@ export interface WebhookRouterFormState extends FormState {
   resultName: StringEntry;
   webhookFunction: FormEntry;
   webhookOptions: any[];
+  isLoading: boolean;
 }
-
 export default class WebhookRouterForm extends React.Component<
   RouterFormProps,
   WebhookRouterFormState
@@ -67,7 +67,8 @@ export default class WebhookRouterForm extends React.Component<
 
     this.state = {
       ...nodeToState(this.props.nodeSettings),
-      webhookOptions: []
+      webhookOptions: [],
+      isLoading: true
     };
 
     bindCallbacks(this, {
@@ -77,27 +78,35 @@ export default class WebhookRouterForm extends React.Component<
 
   async componentDidMount() {
     const endpoint = this.context.config.endpoints.completion;
-    const response = await axios.get(endpoint);
-    const data = response.data;
 
-    const webhookOptions = (data.webhook || []).map((webhook: any) => ({
-      name: webhook.name,
-      value: webhook.name,
-      id: webhook.name,
-      label: webhook.name,
-      body: webhook.body
-    }));
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    try {
+      const response = await axios.get(endpoint);
+      const data = response.data;
 
-    if (this.state.method.value.value === Methods.FUNCTION && this.state.url.value) {
-      const functionName = this.state.url.value;
-      const selectedOption = webhookOptions.find((opt: any) => opt.name === functionName);
+      const webhookOptions = (data.webhook || []).map((webhook: any) => ({
+        name: webhook.name,
+        value: webhook.name,
+        id: webhook.name,
+        label: webhook.name,
+        body: webhook.body
+      }));
 
-      this.setState({
-        webhookOptions,
-        webhookFunction: { value: selectedOption || null }
-      });
-    } else {
-      this.setState({ webhookOptions });
+      if (this.state.method.value.value === Methods.FUNCTION && this.state.url.value) {
+        const functionName = this.state.url.value;
+        const selectedOption = webhookOptions.find((opt: any) => opt.name === functionName);
+
+        this.setState({
+          webhookOptions,
+          webhookFunction: { value: selectedOption || null }
+        });
+      } else {
+        this.setState({ webhookOptions });
+      }
+    } catch (error) {
+      console.error('Error fetching webhook options:', error);
+    } finally {
+      this.setState({ isLoading: false }); // ⭐ loading done
     }
   }
 
@@ -419,7 +428,11 @@ export default class WebhookRouterForm extends React.Component<
               <TembaSelectElement
                 key="webhook_function_select"
                 name={i18n.t('forms.function', 'Function')}
-                placeholder={i18n.t('forms.select_or_type', 'Type to search or select')}
+                placeholder={
+                  this.state.isLoading
+                    ? 'Loading functions…'
+                    : i18n.t('forms.select_or_type', 'Type to search or select')
+                }
                 entry={this.state.webhookFunction}
                 searchable={true}
                 multi={false}
