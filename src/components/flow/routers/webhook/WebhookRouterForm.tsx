@@ -78,6 +78,7 @@ export default class WebhookRouterForm extends React.Component<
 
   async componentDidMount() {
     const endpoint = this.context.config.endpoints.completion;
+    this.setState({ isLoading: true });
     try {
       const response = await axios.get(endpoint);
       const data = response.data;
