@@ -2,7 +2,6 @@ import { createServiceCallSplitNode } from 'components/flow/routers/helpers';
 import { WebhookRouterFormState } from 'components/flow/routers/webhook/WebhookRouterForm';
 import { DEFAULT_BODY } from 'components/nodeeditor/constants';
 import { Operators, Types } from 'config/interfaces';
-import { getType } from 'config/typeConfigs';
 import { CallWebhook, SwitchRouter } from 'flowTypes';
 import { RenderNode } from 'store/flowContext';
 import { NodeEditorSettings, StringEntry } from 'store/nodeEditor';
@@ -33,13 +32,13 @@ export const GET_METHOD: MethodOption = {
 };
 
 export const METHOD_OPTIONS: MethodOption[] = [
+  { value: Methods.FUNCTION, name: Methods.FUNCTION },
   GET_METHOD,
-  { value: Methods.POST, name: Methods.POST },
+  { value: Methods.POST, name: Methods.POST }
   // { value: Methods.PUT, name: Methods.PUT },
   // { value: Methods.DELETE, name: Methods.DELETE }, // These methods are not needed currently
   // { value: Methods.HEAD, name: Methods.HEAD },
   // { value: Methods.PATCH, name: Methods.PATCH },
-  { value: Methods.FUNCTION, name: Methods.FUNCTION }
 ];
 
 export const getOriginalAction = (settings: NodeEditorSettings): CallWebhook => {
@@ -63,28 +62,28 @@ export const nodeToState = (settings: NodeEditorSettings): WebhookRouterFormStat
     method: { value: GET_METHOD },
     url: { value: '' },
     body: { value: getDefaultBody(Methods.GET) },
-    valid: false
+    webhookFunction: { value: null },
+    webhookOptions: [],
+    valid: false,
+    isLoading: false
   };
 
-  if (getType(settings.originalNode) === Types.split_by_webhook) {
-    const action = getOriginalAction(settings) as CallWebhook;
-
-    // add in our headers
-    for (const name of Object.keys(action.headers || []).sort()) {
-      state.headers.push({
-        value: {
-          uuid: createUUID(),
-          value: action.headers[name],
-          name
-        }
-      });
-    }
-
+  const action = getOriginalAction(settings) as CallWebhook;
+  if (action) {
     state.resultName = { value: action.result_name || router.result_name || '' };
     state.url = { value: action.url };
     state.method = { value: { name: action.method, value: action.method } };
-    state.body = { value: action.body };
+    state.body = { value: action.body ?? getDefaultBody(action.method) };
     state.valid = true;
+    if (action.headers) {
+      state.headers = Object.entries(action.headers).map(([name, value]) => ({
+        value: {
+          uuid: createUUID(),
+          name,
+          value
+        }
+      }));
+    }
   } else {
     state.headers.push({
       value: {
@@ -93,6 +92,9 @@ export const nodeToState = (settings: NodeEditorSettings): WebhookRouterFormStat
         value: 'application/json'
       }
     });
+    state.method = { value: { name: Methods.FUNCTION, value: Methods.FUNCTION } };
+    state.url = { value: '' };
+    state.body = { value: getDefaultBody(Methods.FUNCTION) };
   }
 
   // one empty header

@@ -9,8 +9,11 @@ import { createWebhookRouterNode, getRouterFormProps } from 'testUtils/assetCrea
 import * as utils from 'utils';
 import * as React from 'react';
 import { render, fireEvent, fireChangeText, fireTembaSelect } from 'test/utils';
+import axios from 'axios';
 
 mock(utils, 'createUUID', utils.seededUUIDs());
+jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const webhookForm = getRouterFormProps({
   node: createWebhookRouterNode(),
@@ -18,6 +21,10 @@ const webhookForm = getRouterFormProps({
 } as RenderNode);
 
 const { setup } = composeComponentTestUtils<RouterFormProps>(WebhookRouterForm, webhookForm);
+
+beforeEach(() => {
+  mockedAxios.get.mockResolvedValue({ data: {} });
+});
 
 describe(WebhookRouterForm.name, () => {
   it('should render', () => {
@@ -39,14 +46,16 @@ describe(WebhookRouterForm.name, () => {
       expect(webhookForm.updateRouter).not.toBeCalled();
 
       // set our url and add a result name
-      const url = getByTestId('URL');
-      fireChangeText(url, 'http://app.rapidpro.io');
+      let url = getByTestId('URL');
+      fireChangeText(url, 'https://example.com/webhook');
 
       const resultName = getByTestId('Result Name');
       fireChangeText(resultName, 'my_webhook_result');
 
-      // make it a post
       fireTembaSelect(getByTestId('temba_select_method'), 'POST');
+
+      url = getByTestId('URL');
+      fireChangeText(url, 'https://example.com/webhook');
 
       // set a post body
       fireEvent.click(getByText('POST Body'));
@@ -59,8 +68,8 @@ describe(WebhookRouterForm.name, () => {
       const headerName = getAllByTestId('Header Name')[0];
       const headerValue = getAllByTestId('Value')[0];
 
-      fireEvent.change(headerName, 'Content-type');
-      fireEvent.change(headerValue, 'application/json');
+      fireChangeText(headerName, 'Content-type');
+      fireChangeText(headerValue, 'application/json');
 
       fireEvent.click(okButton);
       expect(webhookForm.updateRouter).toBeCalled();

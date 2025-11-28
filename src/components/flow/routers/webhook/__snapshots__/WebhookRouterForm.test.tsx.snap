@@ -83,9 +83,9 @@ exports[`WebhookRouterForm should render 1`] = `
               entry={
                 Object {
                   "value": Object {
-                    "name": "Accept",
+                    "name": "",
                     "uuid": "2dc85899-0577-4f1b-a620-f12094e34b5e",
-                    "value": "application/json",
+                    "value": "",
                   },
                 }
               }
@@ -94,24 +94,8 @@ exports[`WebhookRouterForm should render 1`] = `
               onRemove={[Function]}
             />
           </div>
-          <div>
-            <HeaderElement
-              entry={
-                Object {
-                  "value": Object {
-                    "name": "",
-                    "uuid": "42ebf1d0-a43e-4ba6-9577-c863b20c88c4",
-                    "value": "",
-                  },
-                }
-              }
-              index={1}
-              onChange={[Function]}
-              onRemove={[Function]}
-            />
-          </div>
         </React.Fragment>,
-        "checked": true,
+        "checked": false,
         "hasErrors": false,
         "name": "HTTP Headers",
       },
@@ -170,16 +154,16 @@ exports[`WebhookRouterForm should render 1`] = `
         options={
           Array [
             Object {
+              "name": "FUNCTION",
+              "value": "FUNCTION",
+            },
+            Object {
               "name": "GET",
               "value": "GET",
             },
             Object {
               "name": "POST",
               "value": "POST",
-            },
-            Object {
-              "name": "FUNCTION",
-              "value": "FUNCTION",
             },
           ]
         }
@@ -192,7 +176,7 @@ exports[`WebhookRouterForm should render 1`] = `
         autocomplete={true}
         entry={
           Object {
-            "value": "",
+            "value": "http://www.google.com",
           }
         }
         name="URL"
@@ -243,7 +227,7 @@ exports[`WebhookRouterForm should render 1`] = `
         i18nKey="forms.result_name_help"
         values={
           Object {
-            "resultFormat": "@results.result",
+            "resultFormat": "@results.response",
           }
         }
       >
@@ -256,7 +240,7 @@ exports[`WebhookRouterForm should render 1`] = `
     toggleText="Save as.."
     value={
       Object {
-        "value": "result",
+        "value": "Response",
       }
     }
   />
@@ -271,32 +255,30 @@ Object {
   "headers": Array [
     Object {
       "value": Object {
-        "name": "Accept",
-        "uuid": "9adce29f-da95-4182-9cb3-0f1e3bf714e5",
-        "value": "application/json",
-      },
-    },
-    Object {
-      "value": Object {
         "name": "",
-        "uuid": "6b59e863-2e14-442b-9987-aaa284871b8e",
+        "uuid": "a62e8284-49f8-4292-adbc-d5f6607f85c5",
         "value": "",
       },
     },
   ],
+  "isLoading": true,
   "method": Object {
     "value": Object {
       "value": "GET",
     },
   },
   "resultName": Object {
-    "value": "result",
+    "value": "Response",
   },
   "url": Object {
     "validationFailures": Array [],
     "value": "http://domain.com/",
   },
   "valid": true,
+  "webhookFunction": Object {
+    "value": null,
+  },
+  "webhookOptions": Array [],
 }
 `;
 
@@ -311,17 +293,10 @@ Object {
   },
   "headers": Array [
     Object {
-      "value": Object {
-        "name": "Accept",
-        "uuid": "9adce29f-da95-4182-9cb3-0f1e3bf714e5",
-        "value": "application/json",
-      },
-    },
-    Object {
       "validationFailures": undefined,
       "value": Object {
         "name": "Content-Type",
-        "uuid": "6b59e863-2e14-442b-9987-aaa284871b8e",
+        "uuid": "a62e8284-49f8-4292-adbc-d5f6607f85c5",
         "value": "application/json",
       },
     },
@@ -329,22 +304,26 @@ Object {
       "validationFailures": undefined,
       "value": Object {
         "name": "",
-        "uuid": "c5722340-f7e1-4d99-ac5e-3a6e59845111",
+        "uuid": "9adce29f-da95-4182-9cb3-0f1e3bf714e5",
         "value": "",
       },
     },
   ],
+  "isLoading": true,
   "method": Object {
     "value": "POST",
   },
   "resultName": Object {
-    "value": "result",
+    "value": "Response",
   },
   "url": Object {
-    "validationFailures": Array [],
-    "value": "http://domain.com/",
+    "value": "",
   },
   "valid": true,
+  "webhookFunction": Object {
+    "value": null,
+  },
+  "webhookOptions": Array [],
 }
 `;
 
@@ -393,10 +372,6 @@ exports[`WebhookRouterForm updates should save changes 1`] = `
               <div>
                 HTTP Headers
               </div>
-              <temba-icon
-                name="check"
-                style="margin-left: 8px;"
-              />
             </div>
             <div
               class="tab active"
@@ -454,7 +429,7 @@ exports[`WebhookRouterForm updates should save changes 1`] = `
                   name="Method"
                   namekey="name"
                   valuekey="value"
-                  values="[{\\"value\\":\\"GET\\",\\"name\\":\\"GET\\"}]"
+                  values="[{\\"name\\":\\"GET\\",\\"value\\":\\"GET\\"}]"
                 />
               </div>
             </div>
@@ -472,7 +447,7 @@ exports[`WebhookRouterForm updates should save changes 1`] = `
                   data-testid="URL"
                   name="URL"
                   placeholder="Enter a URL"
-                  value=""
+                  value="http://www.google.com"
                 />
               </div>
             </div>
@@ -522,13 +497,13 @@ exports[`WebhookRouterForm updates should save changes 1`] = `
               <input
                 data-testid="Result Name"
                 name="Result Name"
-                value="result"
+                value="Response"
               />
             </div>
             <div
               class="help_text"
             >
-              By naming the result, you can reference it later using @results.result
+              By naming the result, you can reference it later using @results.response
                
             </div>
           </div>
@@ -581,13 +556,12 @@ Array [
         Object {
           "body": "{ \\"body\\": \\"Updated post body\\" }",
           "headers": Object {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
+            "Content-type": "application/json",
           },
           "method": "POST",
           "result_name": "my_webhook_result",
           "type": "call_webhook",
-          "url": "http://app.rapidpro.io",
+          "url": "https://example.com/webhook",
           "uuid": "b1f332f3-bdd3-4891-aec5-1843a712dbf1",
         },
       ],
@@ -610,7 +584,7 @@ Array [
             ],
             "category_uuid": "763e4844-3e1b-407a-a1b5-5fdfcd308b41",
             "type": "has_number_between",
-            "uuid": "0c8c9239-9b59-473a-a229-d8a9693be270",
+            "uuid": "6c22884b-0e35-4206-982e-18320691eda9",
           },
         ],
         "categories": Array [
