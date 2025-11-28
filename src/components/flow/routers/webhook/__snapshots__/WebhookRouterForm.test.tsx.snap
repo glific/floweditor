@@ -261,6 +261,7 @@ Object {
       },
     },
   ],
+  "isLoading": true,
   "method": Object {
     "value": Object {
       "value": "GET",
@@ -308,6 +309,7 @@ Object {
       },
     },
   ],
+  "isLoading": true,
   "method": Object {
     "value": "POST",
   },

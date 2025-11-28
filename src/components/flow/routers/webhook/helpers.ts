@@ -64,7 +64,8 @@ export const nodeToState = (settings: NodeEditorSettings): WebhookRouterFormStat
     body: { value: getDefaultBody(Methods.GET) },
     webhookFunction: { value: null },
     webhookOptions: [],
-    valid: false
+    valid: false,
+    isLoading: false
   };
 
   const action = getOriginalAction(settings) as CallWebhook;
