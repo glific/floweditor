@@ -67,8 +67,7 @@ export default class WebhookRouterForm extends React.Component<
 
     this.state = {
       ...nodeToState(this.props.nodeSettings),
-      webhookOptions: [],
-      isLoading: true
+      webhookOptions: []
     };
 
     bindCallbacks(this, {
