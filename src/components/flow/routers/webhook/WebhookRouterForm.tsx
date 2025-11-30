@@ -53,6 +53,7 @@ export interface WebhookRouterFormState extends FormState {
   webhookFunction: FormEntry;
   webhookOptions: any[];
   isLoading: boolean;
+  openAssistantPreview: boolean;
 }
 export default class WebhookRouterForm extends React.Component<
   RouterFormProps,
@@ -404,70 +405,97 @@ export default class WebhookRouterForm extends React.Component<
     tabs.reverse();
 
     return (
-      <Dialog
-        title={typeConfig.name}
-        headerClass={typeConfig.type}
-        buttons={this.getButtons()}
-        tabs={tabs}
-      >
-        <TypeList __className="" initialType={typeConfig} onChange={this.props.onTypeChange} />
-        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-          <div className={styles.method}>
-            <SelectElement
-              key="method_select"
-              name={i18n.t('forms.method', 'Method')}
-              entry={this.state.method}
-              onChange={this.handleMethodUpdate}
-              options={METHOD_OPTIONS}
-            />
-          </div>
-          <div className={styles.url}>
-            {method === 'FUNCTION' ? (
-              <TembaSelectElement
-                key="webhook_function_select"
-                name={i18n.t('forms.function', 'Function')}
-                placeholder={
-                  this.state.isLoading
-                    ? 'Loading functions…'
-                    : i18n.t('forms.select_or_type', 'Type to search or select')
-                }
-                entry={this.state.webhookFunction}
-                searchable={true}
-                multi={false}
-                expressions={false}
-                onChange={this.handleWebhookFunctionChanged}
-                options={this.state.webhookOptions}
+      <>
+        {/* Assistant Preview Dialog */}
+        {this.state.openAssistantPreview && (
+          <Dialog
+            title="Assistant Preview"
+            buttons={{
+              primary: {
+                name: 'Close',
+                onClick: () => this.setState({ openAssistantPreview: false })
+              }
+            }}
+          >
+            <div style={{ width: '100%', height: '600px' }}>
+              <iframe
+                src="https://glific.test:3000/assistants"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  borderRadius: '6px'
+                }}
               />
-            ) : (
-              <TextInputElement
-                name={i18n.t('forms.url', 'URL')}
-                placeholder={i18n.t('forms.enter_a_url', 'Enter a URL')}
-                entry={this.state.url}
-                onChange={this.handleUrlUpdate}
-                autocomplete={true}
+            </div>
+          </Dialog>
+        )}
+        <Dialog
+          title={typeConfig.name}
+          headerClass={typeConfig.type}
+          buttons={this.getButtons()}
+          tabs={tabs}
+        >
+          <TypeList __className="" initialType={typeConfig} onChange={this.props.onTypeChange} />
+          <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+            <div className={styles.method}>
+              <SelectElement
+                key="method_select"
+                name={i18n.t('forms.method', 'Method')}
+                entry={this.state.method}
+                onChange={this.handleMethodUpdate}
+                options={METHOD_OPTIONS}
               />
-            )}
+            </div>
+            <div className={styles.url}>
+              {method === 'FUNCTION' ? (
+                <TembaSelectElement
+                  key="webhook_function_select"
+                  name={i18n.t('forms.function', 'Function')}
+                  placeholder={
+                    this.state.isLoading
+                      ? 'Loading functions…'
+                      : i18n.t('forms.select_or_type', 'Type to search or select')
+                  }
+                  entry={this.state.webhookFunction}
+                  searchable={true}
+                  multi={false}
+                  expressions={false}
+                  onChange={this.handleWebhookFunctionChanged}
+                  options={this.state.webhookOptions}
+                />
+              ) : (
+                <TextInputElement
+                  name={i18n.t('forms.url', 'URL')}
+                  placeholder={i18n.t('forms.enter_a_url', 'Enter a URL')}
+                  entry={this.state.url}
+                  onChange={this.handleUrlUpdate}
+                  autocomplete={true}
+                />
+              )}
+            </div>
           </div>
-        </div>
-        <div className={styles.instructions}>
-          <p>
-            <Trans i18nKey="forms.webhook_help">
-              If your server responds with JSON, each property will be added to the Flow.
-            </Trans>
-          </p>
-          <pre className={styles.code}>
-            {'{ "product": "Solar Charging Kit", "stock level": 32 }'}
-          </pre>
-          <p>
-            <Trans i18nKey="forms.webhook_example">
-              This response would add <span className={styles.example}>@webhook.product</span> and{' '}
-              <span className={styles.example}>@(webhook["stock level"])</span> for use in the flow.
-            </Trans>
-          </p>
-        </div>
-        {createResultNameInput(this.state.resultName, this.handleUpdateResultName)}
-        {renderIssues(this.props)}
-      </Dialog>
+          <div className={styles.instructions}>
+            <p>
+              <Trans i18nKey="forms.webhook_help">
+                If your server responds with JSON, each property will be added to the Flow.
+              </Trans>
+            </p>
+            <pre className={styles.code}>
+              {'{ "product": "Solar Charging Kit", "stock level": 32 }'}
+            </pre>
+            <p>
+              <Trans i18nKey="forms.webhook_example">
+                This response would add <span className={styles.example}>@webhook.product</span> and{' '}
+                <span className={styles.example}>@(webhook["stock level"])</span> for use in the
+                flow.
+              </Trans>
+            </p>
+          </div>
+          {createResultNameInput(this.state.resultName, this.handleUpdateResultName)}
+          {renderIssues(this.props)}
+        </Dialog>
+      </>
     );
   }
 
