@@ -75,7 +75,13 @@ export default class TimeoutControl extends React.Component<TimeoutControlProps>
   }
 
   private handleTimeoutChanged(selected: any): void {
-    this.props.onChanged(parseInt(selected.value));
+    const timeout = parseInt(selected.value);
+
+    if (this.props.expression) {
+      this.props.onChanged(timeout, this.props.expression);
+    } else {
+      this.props.onChanged(timeout);
+    }
   }
 
   public render(): JSX.Element {
