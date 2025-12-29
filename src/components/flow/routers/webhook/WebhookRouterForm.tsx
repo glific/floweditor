@@ -95,9 +95,9 @@ export default class WebhookRouterForm extends React.Component<
         let selectedOption = webhookOptions.find((opt: any) => opt.name === functionName);
         if (!selectedOption) {
           selectedOption = {
-            value: 'custom',
-            name: 'custom',
-            label: 'Custom'
+            value: 'custom_webhook',
+            name: 'custom_webhook',
+            label: 'custom_webhook'
           };
         }
 
@@ -105,7 +105,8 @@ export default class WebhookRouterForm extends React.Component<
           webhookOptions,
           webhookFunction: { value: selectedOption || null },
           url: {
-            value: selectedOption.value === 'custom' ? this.state.url.value : selectedOption.name
+            value:
+              selectedOption.value === 'custom_webhook' ? this.state.url.value : selectedOption.name
           }
         });
       } else {
@@ -119,7 +120,7 @@ export default class WebhookRouterForm extends React.Component<
   }
 
   private handleWebhookFunctionChanged(selected: any): boolean {
-    const isCustom = selected?.value === 'custom';
+    const isCustom = selected?.value === 'custom_webhook';
     const prevFunction = this.state.webhookFunction?.value;
     const prevFunctionName = prevFunction?.name || prevFunction?.value;
 
@@ -438,7 +439,7 @@ export default class WebhookRouterForm extends React.Component<
           <div className={styles.url}>
             {method === 'FUNCTION' ? (
               <>
-                {this.state.webhookFunction?.value?.value === 'custom' ? (
+                {this.state.webhookFunction?.value?.value === 'custom_webhook' ? (
                   <div className={styles.custom_function_wrapper}>
                     <TextInputElement
                       name={i18n.t('forms.custom_function_label', 'Function Name')}
