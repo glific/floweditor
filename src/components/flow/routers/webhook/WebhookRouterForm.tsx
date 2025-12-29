@@ -92,11 +92,21 @@ export default class WebhookRouterForm extends React.Component<
 
       if (this.state.method.value.value === Methods.FUNCTION && this.state.url.value) {
         const functionName = this.state.url.value;
-        const selectedOption = webhookOptions.find((opt: any) => opt.name === functionName);
+        let selectedOption = webhookOptions.find((opt: any) => opt.name === functionName);
+        if (!selectedOption) {
+          selectedOption = {
+            value: 'custom',
+            name: 'custom',
+            label: 'Custom'
+          };
+        }
 
         this.setState({
           webhookOptions,
-          webhookFunction: { value: selectedOption || null }
+          webhookFunction: { value: selectedOption || null },
+          url: {
+            value: selectedOption.value === 'custom' ? this.state.url.value : selectedOption.name
+          }
         });
       } else {
         this.setState({ webhookOptions });
@@ -109,15 +119,18 @@ export default class WebhookRouterForm extends React.Component<
   }
 
   private handleWebhookFunctionChanged(selected: any): boolean {
+    const isCustom = selected?.value === 'custom';
     const prevFunction = this.state.webhookFunction?.value;
     const prevFunctionName = prevFunction?.name || prevFunction?.value;
 
     let updates: Partial<WebhookRouterFormState> = {
       webhookFunction: { value: selected },
-      url: { value: selected ? selected.name || selected.value : '' }
+      url: {
+        value: selected ? (isCustom ? '' : selected.name || selected.value) : ''
+      }
     };
 
-    if (selected) {
+    if (selected && !isCustom) {
       const backendDefaultBody = selected.body || '';
       const currentBody = this.state.body.value;
 
@@ -126,6 +139,8 @@ export default class WebhookRouterForm extends React.Component<
       updates.body = {
         value: shouldResetBody ? backendDefaultBody : currentBody
       };
+    } else if (isCustom) {
+      updates.body = { value: '{}' };
     } else {
       updates.body = { value: '' };
     }
@@ -308,7 +323,6 @@ export default class WebhookRouterForm extends React.Component<
 
     if (valid) {
       const payload = stateToNode(this.props.nodeSettings, this.state);
-
       this.props.updateRouter(payload);
 
       this.props.onClose(false);
@@ -423,21 +437,41 @@ export default class WebhookRouterForm extends React.Component<
           </div>
           <div className={styles.url}>
             {method === 'FUNCTION' ? (
-              <TembaSelectElement
-                key="webhook_function_select"
-                name={i18n.t('forms.function', 'Function')}
-                placeholder={
-                  this.state.isLoading
-                    ? 'Loading functions…'
-                    : i18n.t('forms.select_or_type', 'Type to search or select')
-                }
-                entry={this.state.webhookFunction}
-                searchable={true}
-                multi={false}
-                expressions={false}
-                onChange={this.handleWebhookFunctionChanged}
-                options={this.state.webhookOptions}
-              />
+              <>
+                {this.state.webhookFunction?.value?.value === 'custom' ? (
+                  <div className={styles.custom_function_wrapper}>
+                    <TextInputElement
+                      name={i18n.t('forms.custom_function_label', 'Function Name')}
+                      placeholder={i18n.t('forms.enter_label', 'Enter function name')}
+                      entry={this.state.url}
+                      onChange={(v: string) => this.handleUpdate({ url: v })}
+                      autocomplete={true}
+                    />
+                    <div
+                      className={styles.toggle_icon}
+                      onClick={() => this.handleWebhookFunctionChanged(null)}
+                    >
+                      ▾
+                    </div>
+                  </div>
+                ) : (
+                  <TembaSelectElement
+                    key="webhook_function_select"
+                    name={i18n.t('forms.function', 'Function')}
+                    placeholder={
+                      this.state.isLoading
+                        ? 'Loading functions…'
+                        : i18n.t('forms.select_or_type', 'Type to search or select')
+                    }
+                    entry={this.state.webhookFunction}
+                    searchable={true}
+                    multi={false}
+                    expressions={false}
+                    onChange={this.handleWebhookFunctionChanged}
+                    options={this.state.webhookOptions}
+                  />
+                )}
+              </>
             ) : (
               <TextInputElement
                 name={i18n.t('forms.url', 'URL')}
