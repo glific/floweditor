@@ -17,7 +17,9 @@ import {
   moveActionUp,
   OnOpenNodeEditor,
   onOpenNodeEditor,
-  removeAction
+  removeAction,
+  CopyNode,
+  copyNode
 } from 'store/thunks';
 import { createClickHandler, getLocalization } from 'utils';
 
@@ -43,6 +45,7 @@ export interface ActionWrapperStoreProps {
   onOpenNodeEditor: OnOpenNodeEditor;
   removeAction: ActionAC;
   moveActionUp: ActionAC;
+  copyNode: CopyNode;
   scrollToAction: string;
 }
 
@@ -96,6 +99,17 @@ export class ActionWrapper extends React.Component<ActionWrapperProps> {
       event.stopPropagation();
     }
     this.props.moveActionUp(this.props.renderNode.node.uuid, this.props.action);
+  }
+
+  public handleCopy(event: React.MouseEvent<HTMLElement>): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    // Only show copy on the first action to copy the entire node
+    if (this.props.first) {
+      this.props.copyNode(this.props.renderNode);
+    }
   }
 
   public getAction(): Action {
@@ -196,6 +210,8 @@ export class ActionWrapper extends React.Component<ActionWrapperProps> {
           showRemoval={showRemoval}
           showMove={showMove}
           onMoveUp={this.handleMoveUp}
+          showCopy={!this.props.translating && this.props.first}
+          onCopy={this.handleCopy}
           shouldCancelClick={() => this.props.selected}
         />
         <div className={styles.body + ' ' + actionClass} data-spec={actionBodySpecId}>
@@ -243,16 +259,14 @@ const mapDispatchToProps = (dispatch: DispatchWithState) =>
     {
       onOpenNodeEditor,
       removeAction,
-      moveActionUp
+      moveActionUp,
+      copyNode
     },
     dispatch
   );
 
-const ConnectedActionWrapper = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  null,
-  { forwardRef: true }
-)(ActionWrapper);
+const ConnectedActionWrapper = connect(mapStateToProps, mapDispatchToProps, null, {
+  forwardRef: true
+})(ActionWrapper);
 
 export default ConnectedActionWrapper;

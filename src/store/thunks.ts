@@ -10,6 +10,7 @@ import {
   Action,
   AnyAction,
   Category,
+  Case,
   Dimensions,
   Endpoints,
   Exit,
@@ -19,6 +20,7 @@ import {
   SetContactField,
   SetRunResult,
   StickyNote,
+  SwitchRouter,
   FlowDetails
 } from 'flowTypes';
 import mutate from 'immutability-helper';
@@ -95,6 +97,8 @@ export type OnRemoveNodes = (nodeUUIDs: string[]) => Thunk<RenderNodeMap>;
 export type AddAsset = (assetType: string, asset: Asset) => Thunk<void>;
 
 export type RemoveNode = (nodeToRemove: FlowNode) => Thunk<RenderNodeMap>;
+
+export type CopyNode = (nodeToCopy: RenderNode) => Thunk<RenderNodeMap>;
 
 export type UpdateDimensions = (uuid: string, dimensions: Dimensions) => Thunk<void>;
 
@@ -947,6 +951,105 @@ export const onRemoveNodes = (uuids: string[]) => (
   }
 
   return nodes;
+};
+
+/**
+ * Creates a deep copy of a node with new UUIDs and offset position
+ * @param nodeToCopy the RenderNode to copy
+ */
+export const copyNode = (nodeToCopy: RenderNode) => (
+  dispatch: DispatchWithState,
+  getState: GetState
+): RenderNodeMap => {
+  const {
+    flowContext: { nodes }
+  } = getState();
+
+  // Deep clone the node
+  const clonedNode: RenderNode = JSON.parse(JSON.stringify(nodeToCopy));
+
+  // Create UUID mapping for all UUIDs that need to be remapped
+  const uuidMap: { [oldUUID: string]: string } = {};
+
+  // Remap node UUID
+  const newNodeUUID = createUUID();
+  uuidMap[clonedNode.node.uuid] = newNodeUUID;
+  clonedNode.node.uuid = newNodeUUID;
+
+  // Remap action UUIDs
+  if (clonedNode.node.actions) {
+    clonedNode.node.actions.forEach((action: AnyAction) => {
+      const newActionUUID = createUUID();
+      uuidMap[action.uuid] = newActionUUID;
+      action.uuid = newActionUUID;
+    });
+  }
+
+  // Remap exit UUIDs
+  if (clonedNode.node.exits) {
+    clonedNode.node.exits.forEach((exit: Exit) => {
+      const newExitUUID = createUUID();
+      uuidMap[exit.uuid] = newExitUUID;
+      exit.uuid = newExitUUID;
+      // Clear destination since it's a copy
+      exit.destination_uuid = null;
+    });
+  }
+
+  // Remap router category and case UUIDs if router exists
+  if (clonedNode.node.router) {
+    const router = clonedNode.node.router as SwitchRouter;
+
+    if (router.categories) {
+      router.categories.forEach((category: Category) => {
+        const newCategoryUUID = createUUID();
+        uuidMap[category.uuid] = newCategoryUUID;
+        category.uuid = newCategoryUUID;
+
+        // Remap exit_uuid reference
+        if (uuidMap[category.exit_uuid]) {
+          category.exit_uuid = uuidMap[category.exit_uuid];
+        }
+      });
+    }
+
+    if (router.cases) {
+      router.cases.forEach((caseItem: Case) => {
+        const newCaseUUID = createUUID();
+        uuidMap[caseItem.uuid] = newCaseUUID;
+        caseItem.uuid = newCaseUUID;
+
+        // Remap category_uuid reference
+        if (uuidMap[caseItem.category_uuid]) {
+          caseItem.category_uuid = uuidMap[caseItem.category_uuid];
+        }
+      });
+    }
+
+    // Remap default_category_uuid
+    if (router.default_category_uuid && uuidMap[router.default_category_uuid]) {
+      router.default_category_uuid = uuidMap[router.default_category_uuid];
+    }
+  }
+
+  // Offset position to avoid overlap (offset by NODE_SPACING)
+  clonedNode.ui.position = {
+    left: clonedNode.ui.position.left + NODE_SPACING * 2,
+    top: clonedNode.ui.position.top + NODE_SPACING * 2
+  };
+
+  // Clear inbound connections since it's a copy
+  clonedNode.inboundConnections = {};
+
+  // Remove ghost flag if present
+  delete clonedNode.ghost;
+
+  // Add the copied node to the flow
+  const updatedNodes = mutators.mergeNode(nodes, clonedNode);
+  dispatch(updateNodes(updatedNodes));
+  markDirty();
+
+  return updatedNodes;
 };
 
 export const onUpdateCanvasPositions = (positions: CanvasPositions) => (

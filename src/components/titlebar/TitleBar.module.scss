@@ -37,12 +37,26 @@
     }
   }
 
+  .copy_button {
+    padding-right: 5px;
+    width: 20px;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
   .remove_button {
     padding-right: 0px;
     visibility: hidden;
     width: 20px;
-    right: 0;
     color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .up_button {
@@ -53,6 +67,10 @@
   }
 
   &:hover {
+    .copy_button {
+      opacity: 1;
+    }
+
     .remove_button {
       visibility: visible;
     }
