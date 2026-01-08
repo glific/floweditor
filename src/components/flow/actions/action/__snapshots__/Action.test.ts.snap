@@ -17,9 +17,11 @@ exports[`ActionWrapper render should display hybrid style 1`] = `
   >
     <TitleBar
       __className="send_msg"
+      onCopy={[Function]}
       onMoveUp={[Function]}
       onRemoval={[Function]}
       shouldCancelClick={[Function]}
+      showCopy={true}
       showMove={false}
       showRemoval={true}
       title="Send Message"
@@ -49,9 +51,11 @@ exports[`ActionWrapper render should display missing_localization style 1`] = `
   >
     <TitleBar
       __className="send_msg"
+      onCopy={[Function]}
       onMoveUp={[Function]}
       onRemoval={[Function]}
       shouldCancelClick={[Function]}
+      showCopy={false}
       showMove={false}
       showRemoval={false}
       title="Send Message"
@@ -81,9 +85,11 @@ exports[`ActionWrapper render should display not_localizable style 1`] = `
   >
     <TitleBar
       __className="enter_flow"
+      onCopy={[Function]}
       onMoveUp={[Function]}
       onRemoval={[Function]}
       shouldCancelClick={[Function]}
+      showCopy={false}
       showMove={false}
       showRemoval={false}
       title="Enter a Flow"
@@ -113,9 +119,11 @@ exports[`ActionWrapper render should display translating style 1`] = `
   >
     <TitleBar
       __className="send_msg"
+      onCopy={[Function]}
       onMoveUp={[Function]}
       onRemoval={[Function]}
       shouldCancelClick={[Function]}
+      showCopy={false}
       showMove={false}
       showRemoval={false}
       title="Send Message"
@@ -132,9 +140,11 @@ exports[`ActionWrapper render should render self, children with base props 1`] =
 Object {
   "__className": "send_msg",
   "nodeUUID": undefined,
+  "onCopy": [Function],
   "onMoveUp": [Function],
   "onRemoval": [Function],
   "shouldCancelClick": [Function],
+  "showCopy": true,
   "showMove": false,
   "showRemoval": true,
   "title": "Send Message",
@@ -158,9 +168,11 @@ exports[`ActionWrapper render should render self, children with base props 2`] =
   >
     <TitleBar
       __className="send_msg"
+      onCopy={[Function]}
       onMoveUp={[Function]}
       onRemoval={[Function]}
       shouldCancelClick={[Function]}
+      showCopy={true}
       showMove={false}
       showRemoval={true}
       title="Send Message"
@@ -190,9 +202,11 @@ exports[`ActionWrapper render should show move icon 1`] = `
   >
     <TitleBar
       __className="send_msg"
+      onCopy={[Function]}
       onMoveUp={[Function]}
       onRemoval={[Function]}
       shouldCancelClick={[Function]}
+      showCopy={false}
       showMove={true}
       showRemoval={true}
       title="Send Message"

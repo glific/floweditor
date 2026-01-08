@@ -35,6 +35,10 @@ exports[`ActionWrapper can have localized quick replies when empty on default la
                
             </div>
             <div
+              class="copy_button"
+              data-testid="copy-icon"
+            />
+            <div
               class="remove_button"
               data-testid="remove-icon"
             />
@@ -108,6 +112,15 @@ exports[`ActionWrapper renders a base language 1`] = `
             >
               Send Message
                
+            </div>
+            <div
+              class="copy_button"
+              data-testid="copy-icon"
+            >
+              <temba-icon
+                name="copy"
+                size="1.2"
+              />
             </div>
             <div
               class="remove_button"
