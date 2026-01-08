@@ -36,7 +36,11 @@ import {
   UpdateConnection,
   updateConnection,
   updateSticky,
-  UpdateSticky
+  UpdateSticky,
+  PasteNodeFromClipboard,
+  pasteNodeFromClipboard,
+  CopyNode,
+  copyNode
 } from 'store/thunks';
 import {
   createUUID,
@@ -81,6 +85,8 @@ export interface FlowStoreProps {
   resetNodeEditingState: NoParamsAC;
   onConnectionDrag: OnConnectionDrag;
   updateSticky: UpdateSticky;
+  pasteNodeFromClipboard: PasteNodeFromClipboard;
+  copyNode: CopyNode;
 }
 
 export interface Translations {
@@ -429,6 +435,9 @@ export class Flow extends React.PureComponent<FlowStoreProps, {}> {
           onDoubleClick={this.handleDoubleClick}
           onUpdatePositions={this.props.onUpdateCanvasPositions}
           onLoaded={this.handleCanvasLoaded}
+          pasteNodeFromClipboard={this.props.pasteNodeFromClipboard}
+          copyNode={this.props.copyNode}
+          nodes={this.props.nodes}
         ></Canvas>
         <div id="activity_recent_contacts"></div>
       </div>
@@ -467,12 +476,11 @@ const mapDispatchToProps = (dispatch: DispatchWithState) =>
       onUpdateCanvasPositions,
       onRemoveNodes,
       updateConnection,
-      updateSticky
+      updateSticky,
+      pasteNodeFromClipboard,
+      copyNode
     },
     dispatch
   );
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Flow);
+export default connect(mapStateToProps, mapDispatchToProps)(Flow);

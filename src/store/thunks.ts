@@ -67,7 +67,16 @@ import {
   updateUserAddingAction
 } from 'store/nodeEditor';
 import AppState from 'store/state';
-import { createUUID, hasString, NODE_SPACING, timeEnd, timeStart, ACTIVITY_INTERVAL } from 'utils';
+import {
+  createUUID,
+  hasString,
+  NODE_SPACING,
+  timeEnd,
+  timeStart,
+  ACTIVITY_INTERVAL,
+  storeNodeInClipboard,
+  getNodeFromClipboard
+} from 'utils';
 import { AxiosError } from 'axios';
 import i18n from 'config/i18n';
 import { TembaStore } from 'temba-components';
@@ -98,7 +107,9 @@ export type AddAsset = (assetType: string, asset: Asset) => Thunk<void>;
 
 export type RemoveNode = (nodeToRemove: FlowNode) => Thunk<RenderNodeMap>;
 
-export type CopyNode = (nodeToCopy: RenderNode) => Thunk<RenderNodeMap>;
+export type CopyNode = (nodeToCopy: RenderNode, storeInClipboard?: boolean) => Thunk<RenderNodeMap>;
+
+export type PasteNodeFromClipboard = () => Thunk<RenderNodeMap>;
 
 export type UpdateDimensions = (uuid: string, dimensions: Dimensions) => Thunk<void>;
 
@@ -956,8 +967,9 @@ export const onRemoveNodes = (uuids: string[]) => (
 /**
  * Creates a deep copy of a node with new UUIDs and offset position
  * @param nodeToCopy the RenderNode to copy
+ * @param storeInClipboard if true, also stores the node in cross-flow clipboard
  */
-export const copyNode = (nodeToCopy: RenderNode) => (
+export const copyNode = (nodeToCopy: RenderNode, storeInClipboard: boolean = false) => (
   dispatch: DispatchWithState,
   getState: GetState
 ): RenderNodeMap => {
@@ -1031,6 +1043,115 @@ export const copyNode = (nodeToCopy: RenderNode) => (
   clonedNode.inboundConnections = {};
   delete clonedNode.ghost;
 
+  // Store in cross-flow clipboard if requested
+  if (storeInClipboard) {
+    storeNodeInClipboard(clonedNode);
+  }
+
+  const updatedNodes = mutators.mergeNode(nodes, clonedNode);
+  dispatch(updateNodes(updatedNodes));
+  markDirty();
+
+  return updatedNodes;
+};
+
+/**
+ * Pastes a node from the cross-flow clipboard into the current flow
+ */
+export const pasteNodeFromClipboard = () => (
+  dispatch: DispatchWithState,
+  getState: GetState
+): RenderNodeMap => {
+  const {
+    flowContext: { nodes }
+  } = getState();
+
+  const clipboardNode = getNodeFromClipboard();
+  if (!clipboardNode) {
+    console.warn('No node found in clipboard');
+    return nodes;
+  }
+
+  // Deep clone the clipboard node
+  const clonedNode: RenderNode = JSON.parse(JSON.stringify(clipboardNode));
+
+  // Create UUID mapping for all UUIDs that need to be remapped
+  const uuidMap: { [oldUUID: string]: string } = {};
+
+  // Remap node UUID
+  const newNodeUUID = createUUID();
+  uuidMap[clonedNode.node.uuid] = newNodeUUID;
+  clonedNode.node.uuid = newNodeUUID;
+
+  // Remap action UUIDs
+  if (clonedNode.node.actions) {
+    clonedNode.node.actions.forEach((action: AnyAction) => {
+      const newActionUUID = createUUID();
+      uuidMap[action.uuid] = newActionUUID;
+      action.uuid = newActionUUID;
+    });
+  }
+
+  // Remap exit UUIDs
+  if (clonedNode.node.exits) {
+    clonedNode.node.exits.forEach((exit: Exit) => {
+      const newExitUUID = createUUID();
+      uuidMap[exit.uuid] = newExitUUID;
+      exit.uuid = newExitUUID;
+      // Clear destination since it's a paste
+      exit.destination_uuid = null;
+    });
+  }
+
+  // Remap router category and case UUIDs if router exists
+  if (clonedNode.node.router) {
+    const router = clonedNode.node.router as SwitchRouter;
+
+    if (router.categories) {
+      router.categories.forEach((category: Category) => {
+        const newCategoryUUID = createUUID();
+        uuidMap[category.uuid] = newCategoryUUID;
+        category.uuid = newCategoryUUID;
+
+        // Remap exit_uuid reference
+        if (uuidMap[category.exit_uuid]) {
+          category.exit_uuid = uuidMap[category.exit_uuid];
+        }
+      });
+    }
+
+    if (router.cases) {
+      router.cases.forEach((caseItem: Case) => {
+        const newCaseUUID = createUUID();
+        uuidMap[caseItem.uuid] = newCaseUUID;
+        caseItem.uuid = newCaseUUID;
+
+        // Remap category_uuid reference
+        if (uuidMap[caseItem.category_uuid]) {
+          caseItem.category_uuid = uuidMap[caseItem.category_uuid];
+        }
+      });
+    }
+
+    // Remap default_category_uuid
+    if (router.default_category_uuid && uuidMap[router.default_category_uuid]) {
+      router.default_category_uuid = uuidMap[router.default_category_uuid];
+    }
+  }
+
+  // Offset position to avoid overlap (offset by NODE_SPACING)
+  clonedNode.ui.position = {
+    left: clonedNode.ui.position.left + NODE_SPACING * 2,
+    top: clonedNode.ui.position.top + NODE_SPACING * 2
+  };
+
+  // Clear inbound connections since it's a paste
+  clonedNode.inboundConnections = {};
+
+  // Remove ghost flag if present
+  delete clonedNode.ghost;
+
+  // Add the pasted node to the flow
   const updatedNodes = mutators.mergeNode(nodes, clonedNode);
   dispatch(updateNodes(updatedNodes));
   markDirty();

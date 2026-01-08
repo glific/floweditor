@@ -217,7 +217,8 @@ export class NodeComp extends React.PureComponent<NodeProps> {
   private handleCopy(event: React.MouseEvent<HTMLElement>): void {
     event.preventDefault();
     event.stopPropagation();
-    this.props.copyNode(this.props.renderNode);
+    // Store in cross-flow clipboard for cross-flow copying
+    this.props.copyNode(this.props.renderNode, true);
   }
 
   private getExits(): JSX.Element[] {

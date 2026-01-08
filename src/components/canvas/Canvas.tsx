@@ -7,7 +7,8 @@ import mutate from 'immutability-helper';
 import React from 'react';
 import { CanvasPositions, DragSelection } from 'store/editor';
 import { addPosition } from 'store/helpers';
-import { MergeEditorState } from 'store/thunks';
+import { MergeEditorState, PasteNodeFromClipboard, CopyNode } from 'store/thunks';
+import { RenderNodeMap } from 'store/flowContext';
 import { COLLISION_FUDGE, snapPositionToGrid, throttle, snapToGrid } from 'utils';
 
 import styles from './Canvas.module.scss';
@@ -28,6 +29,9 @@ export interface CanvasProps {
   onRemoveNodes: (nodeUUIDs: string[]) => void;
   onDoubleClick: (position: FlowPosition) => void;
   mergeEditorState: MergeEditorState;
+  pasteNodeFromClipboard: PasteNodeFromClipboard;
+  copyNode: CopyNode;
+  nodes: RenderNodeMap;
 }
 
 interface CanvasState {
@@ -100,11 +104,37 @@ export class Canvas extends React.PureComponent<CanvasProps, CanvasState> {
   }
 
   private handleKeyDown(event: any): void {
+    // Handle delete
     if (this.state.selected && event.key === 'Backspace') {
       const nodeUUIDs = Object.keys(this.state.selected);
       if (nodeUUIDs.length > 0) {
         this.props.onRemoveNodes(Object.keys(this.state.selected));
       }
+      return;
+    }
+
+    // Handle copy (Ctrl+C or Cmd+C)
+    if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
+      const selectedUUIDs = Object.keys(this.state.selected);
+      if (selectedUUIDs.length > 0 && this.props.nodes && this.props.copyNode) {
+        // Copy the first selected node to clipboard (cross-flow)
+        const nodeToCopy = this.props.nodes[selectedUUIDs[0]];
+        if (nodeToCopy) {
+          event.preventDefault();
+          // Store in cross-flow clipboard
+          this.props.copyNode(nodeToCopy, true);
+        }
+      }
+      return;
+    }
+
+    // Handle paste (Ctrl+V or Cmd+V)
+    if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
+      if (this.props.pasteNodeFromClipboard) {
+        event.preventDefault();
+        this.props.pasteNodeFromClipboard();
+      }
+      return;
     }
   }
 
@@ -428,7 +458,7 @@ export class Canvas extends React.PureComponent<CanvasProps, CanvasState> {
           }
         }
         // if we are scrolling but given a clientY then user is mousing
-        else if (windowY !== 0 && (windowY > 100 && windowY + 100 < viewportHeight)) {
+        else if (windowY !== 0 && windowY > 100 && windowY + 100 < viewportHeight) {
           window.clearInterval(this.isScrolling);
           this.isScrolling = null;
         }

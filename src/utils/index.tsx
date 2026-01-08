@@ -9,7 +9,7 @@ import {
 import { Query } from 'immutability-helper';
 import * as React from 'react';
 import Localization, { LocalizedObject } from 'services/Localization';
-import { Asset, Assets } from 'store/flowContext';
+import { Asset, Assets, RenderNode } from 'store/flowContext';
 import { FormEntry } from 'store/nodeEditor';
 import { v4 as generateUUID } from 'uuid';
 import variables from 'variables.module.scss';
@@ -423,6 +423,51 @@ export const getURNPath = (urn: string) => {
 
 export const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text);
+};
+
+/**
+ * Cross-flow clipboard storage key
+ */
+const CROSS_FLOW_CLIPBOARD_KEY = 'floweditor_cross_flow_clipboard';
+
+/**
+ * Stores a node in the cross-flow clipboard (localStorage)
+ * @param node The RenderNode to store
+ */
+export const storeNodeInClipboard = (node: RenderNode): void => {
+  try {
+    const nodeData = JSON.stringify(node);
+    localStorage.setItem(CROSS_FLOW_CLIPBOARD_KEY, nodeData);
+  } catch (error) {
+    console.error('Failed to store node in clipboard:', error);
+  }
+};
+
+/**
+ * Retrieves a node from the cross-flow clipboard (localStorage)
+ * @returns The stored RenderNode or null if not found
+ */
+export const getNodeFromClipboard = (): RenderNode | null => {
+  try {
+    const nodeData = localStorage.getItem(CROSS_FLOW_CLIPBOARD_KEY);
+    if (nodeData) {
+      return JSON.parse(nodeData) as RenderNode;
+    }
+  } catch (error) {
+    console.error('Failed to retrieve node from clipboard:', error);
+  }
+  return null;
+};
+
+/**
+ * Clears the cross-flow clipboard
+ */
+export const clearClipboard = (): void => {
+  try {
+    localStorage.removeItem(CROSS_FLOW_CLIPBOARD_KEY);
+  } catch (error) {
+    console.error('Failed to clear clipboard:', error);
+  }
 };
 
 export const throttle = (func: any, timeout: any) => {
