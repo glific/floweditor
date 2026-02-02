@@ -10,7 +10,8 @@ import {
   nodeToState,
   stateToNode,
   getDefaultBody,
-  isValidJson
+  isValidJson,
+  fetchWebhookOptions
 } from 'components/flow/routers/webhook/helpers';
 import { createResultNameInput } from 'components/flow/routers/widgets';
 import SelectElement from 'components/form/select/SelectElement';
@@ -34,7 +35,6 @@ import styles from './WebhookRouterForm.module.scss';
 import { Trans } from 'react-i18next';
 import i18n from 'config/i18n';
 import { fakePropType } from 'config/ConfigProvider';
-import axios from 'axios';
 
 export interface HeaderEntry extends FormEntry {
   value: Header;
@@ -79,31 +79,10 @@ export default class WebhookRouterForm extends React.Component<
     const endpoint = this.context.config.endpoints.completion;
     this.setState({ isLoading: true });
     try {
-      const response = await axios.get(endpoint);
-      const data = response.data;
-
-      const webhookOptions = (data.webhook || []).map((webhook: any) => ({
-        name: webhook.name,
-        value: webhook.name,
-        id: webhook.name,
-        label: webhook.name,
-        body: webhook.body
-      }));
-
-      if (this.state.method.value.value === Methods.FUNCTION && this.state.url.value) {
-        const functionName = this.state.url.value;
-        const selectedOption = webhookOptions.find((opt: any) => opt.name === functionName);
-
-        this.setState({
-          webhookOptions,
-          webhookFunction: { value: selectedOption || null }
-        });
-      } else {
-        this.setState({ webhookOptions });
-      }
+      const stateUpdate = await fetchWebhookOptions(endpoint, this.state.url.value);
+      this.setState(stateUpdate);
     } catch (error) {
       console.error('Error fetching webhook options:', error);
-    } finally {
       this.setState({ isLoading: false });
     }
   }
@@ -402,7 +381,7 @@ export default class WebhookRouterForm extends React.Component<
     });
 
     tabs.reverse();
-
+    console.log(this.state.webhookFunction);
     return (
       <Dialog
         title={typeConfig.name}
@@ -437,6 +416,12 @@ export default class WebhookRouterForm extends React.Component<
                 expressions={false}
                 onChange={this.handleWebhookFunctionChanged}
                 options={this.state.webhookOptions}
+                allowCreate={true}
+                createArbitraryOption={val => {
+                  this.handleWebhookFunctionChanged({ name: val, value: val });
+                  return { name: val, value: val, id: val, label: val };
+                }}
+                createPrefix={i18n.t('select_function', 'Select Function') + ': '}
               />
             ) : (
               <TextInputElement
