@@ -155,6 +155,10 @@ export default class TicketRouterForm extends React.Component<
     };
   }
 
+  public handleCreateAssetFromInput(input: string): any {
+    return { name: input };
+  }
+
   private renderEdit(): JSX.Element {
     const typeConfig = this.props.typeConfig;
 
@@ -175,6 +179,7 @@ export default class TicketRouterForm extends React.Component<
               createPrefix={i18n.t('forms.topic_prefix', 'Create Topic: ')}
               searchable={true}
               errors={(this.state.topic.validationFailures || []).map(failure => failure.message)}
+              createArbitraryOption={this.handleCreateAssetFromInput}
             />
           </div>
 
