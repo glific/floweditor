@@ -173,13 +173,14 @@ export const fetchWebhookOptions = async (
   const response = await axios.get(endpoint);
   const data = response.data;
 
-  const webhookOptions: WebhookOption[] = (data.webhook || []).map((webhook: any) => ({
-    name: webhook.name,
-    value: webhook.name,
-    id: webhook.name,
-    label: webhook.name,
-    body: webhook.body
-  }));
+  const webhookOptions: WebhookOption[] =
+    data.webhook.map((webhook: any) => ({
+      name: webhook.name,
+      value: webhook.name,
+      id: webhook.name,
+      label: webhook.name,
+      body: webhook.body
+    })) ?? [];
 
   const stateUpdate: Pick<
     WebhookRouterFormState,

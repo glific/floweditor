@@ -381,7 +381,7 @@ export default class WebhookRouterForm extends React.Component<
     });
 
     tabs.reverse();
-    console.log(this.state.webhookFunction);
+
     return (
       <Dialog
         title={typeConfig.name}
