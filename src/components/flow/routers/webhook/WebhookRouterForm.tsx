@@ -84,6 +84,8 @@ export default class WebhookRouterForm extends React.Component<
     } catch (error) {
       console.error('Error fetching webhook options:', error);
       this.setState({ isLoading: false });
+    } finally {
+      this.setState({ isLoading: false });
     }
   }
 
