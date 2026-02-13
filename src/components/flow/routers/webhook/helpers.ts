@@ -7,6 +7,7 @@ import { RenderNode } from 'store/flowContext';
 import { NodeEditorSettings, StringEntry } from 'store/nodeEditor';
 import { ValidatorFunc } from 'store/validators';
 import { createUUID } from 'utils';
+import axios from 'axios';
 
 export enum Methods {
   GET = 'GET',
@@ -155,6 +156,53 @@ export const stateToNode = (
 
 export const getDefaultBody = (method: string): string => {
   return method === Methods.GET ? '' : DEFAULT_BODY;
+};
+
+export interface WebhookOption {
+  name: string;
+  value: string;
+  id: string;
+  label: string;
+  body?: string;
+}
+
+export const fetchWebhookOptions = async (
+  endpoint: string,
+  currentUrl: string
+): Promise<Pick<WebhookRouterFormState, 'webhookOptions' | 'webhookFunction' | 'isLoading'>> => {
+  const response = await axios.get(endpoint);
+  const data = response.data;
+
+  const webhookOptions: WebhookOption[] =
+    data.webhook.map((webhook: any) => ({
+      name: webhook.name,
+      value: webhook.name,
+      id: webhook.name,
+      label: webhook.name,
+      body: webhook.body
+    })) ?? [];
+
+  const stateUpdate: Pick<
+    WebhookRouterFormState,
+    'webhookOptions' | 'webhookFunction' | 'isLoading'
+  > = {
+    webhookOptions,
+    webhookFunction: { value: null },
+    isLoading: false
+  };
+
+  if (currentUrl) {
+    stateUpdate.webhookFunction = {
+      value: {
+        name: currentUrl,
+        value: currentUrl,
+        id: currentUrl,
+        label: currentUrl
+      }
+    };
+  }
+
+  return stateUpdate;
 };
 
 export const isValidJson = (): ValidatorFunc => (name, body: any) => {
