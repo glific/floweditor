@@ -100,6 +100,8 @@ export type RemoveNode = (nodeToRemove: FlowNode) => Thunk<RenderNodeMap>;
 
 export type CopyNode = (nodeToCopy: RenderNode) => Thunk<RenderNodeMap>;
 
+export type PasteNode = () => Thunk<RenderNodeMap | null>;
+
 export type UpdateDimensions = (uuid: string, dimensions: Dimensions) => Thunk<void>;
 
 export type FetchFlow = (
@@ -953,19 +955,14 @@ export const onRemoveNodes = (uuids: string[]) => (
   return nodes;
 };
 
-/**
- * Creates a deep copy of a node with new UUIDs and offset position
- * @param nodeToCopy the RenderNode to copy
- */
-export const copyNode = (nodeToCopy: RenderNode) => (
-  dispatch: DispatchWithState,
-  getState: GetState
-): RenderNodeMap => {
-  const {
-    flowContext: { nodes }
-  } = getState();
+const COPIED_NODE_KEY = 'floweditor_copied_node';
 
-  const clonedNode: RenderNode = JSON.parse(JSON.stringify(nodeToCopy));
+/**
+ * Deep-clones a RenderNode, assigning fresh UUIDs to all node/action/exit/router
+ * sub-elements and clearing inbound connections and ghost state.
+ */
+const cloneNodeWithNewUUIDs = (source: RenderNode): RenderNode => {
+  const clonedNode: RenderNode = JSON.parse(JSON.stringify(source));
 
   const uuidMap: { [oldUUID: string]: string } = {};
 
@@ -986,7 +983,6 @@ export const copyNode = (nodeToCopy: RenderNode) => (
       const newExitUUID = createUUID();
       uuidMap[exit.uuid] = newExitUUID;
       exit.uuid = newExitUUID;
-
       exit.destination_uuid = null;
     });
   }
@@ -1030,6 +1026,62 @@ export const copyNode = (nodeToCopy: RenderNode) => (
 
   clonedNode.inboundConnections = {};
   delete clonedNode.ghost;
+
+  return clonedNode;
+};
+
+/**
+ * Creates a deep copy of a node with new UUIDs and offset position.
+ * Also persists the original node data to localStorage so it can be
+ * pasted into a different flow via pasteNode / Ctrl+V.
+ * @param nodeToCopy the RenderNode to copy
+ */
+export const copyNode = (nodeToCopy: RenderNode) => (
+  dispatch: DispatchWithState,
+  getState: GetState
+): RenderNodeMap => {
+  const {
+    flowContext: { nodes }
+  } = getState();
+
+  // Persist the source node so it can be pasted across flows
+  localStorage.setItem(COPIED_NODE_KEY, JSON.stringify(nodeToCopy));
+
+  const clonedNode = cloneNodeWithNewUUIDs(nodeToCopy);
+
+  const updatedNodes = mutators.mergeNode(nodes, clonedNode);
+  dispatch(updateNodes(updatedNodes));
+  markDirty();
+
+  return updatedNodes;
+};
+
+/**
+ * Pastes the most-recently copied node (from localStorage) into the current flow.
+ * This enables cross-flow copy-paste: copy in Flow A, navigate to Flow B, Ctrl+V.
+ * Returns null if there is nothing in the clipboard.
+ */
+export const pasteNode: PasteNode = () => (
+  dispatch: DispatchWithState,
+  getState: GetState
+): RenderNodeMap | null => {
+  const raw = localStorage.getItem(COPIED_NODE_KEY);
+  if (!raw) {
+    return null;
+  }
+
+  const {
+    flowContext: { nodes }
+  } = getState();
+
+  let sourceNode: RenderNode;
+  try {
+    sourceNode = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+
+  const clonedNode = cloneNodeWithNewUUIDs(sourceNode);
 
   const updatedNodes = mutators.mergeNode(nodes, clonedNode);
   dispatch(updateNodes(updatedNodes));

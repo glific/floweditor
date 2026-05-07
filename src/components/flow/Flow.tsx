@@ -32,6 +32,8 @@ import {
   OnRemoveNodes,
   OnUpdateCanvasPositions,
   onUpdateCanvasPositions,
+  pasteNode,
+  PasteNode,
   resetNodeEditingState,
   UpdateConnection,
   updateConnection,
@@ -81,6 +83,7 @@ export interface FlowStoreProps {
   resetNodeEditingState: NoParamsAC;
   onConnectionDrag: OnConnectionDrag;
   updateSticky: UpdateSticky;
+  pasteNode: PasteNode;
 }
 
 export interface Translations {
@@ -151,7 +154,20 @@ export class Flow extends React.PureComponent<FlowStoreProps, {}> {
     return win.isMobile && win.isMobile();
   }
 
+  private handleKeyDown(event: KeyboardEvent): void {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
+      const target = event.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return;
+      }
+      event.preventDefault();
+      this.props.pasteNode();
+    }
+  }
+
   public componentDidMount(): void {
+    document.addEventListener('keydown', this.handleKeyDown);
+
     this.Plumber.bind('connection', (event: ConnectionEvent) =>
       this.props.updateConnection(event.sourceId, event.targetId)
     );
@@ -178,6 +194,7 @@ export class Flow extends React.PureComponent<FlowStoreProps, {}> {
   }
 
   public componentWillUnmount(): void {
+    document.removeEventListener('keydown', this.handleKeyDown);
     this.Plumber.reset();
     if ((window as any).activityTimeout) {
       clearTimeout((window as any).activityTimeout);
@@ -467,12 +484,10 @@ const mapDispatchToProps = (dispatch: DispatchWithState) =>
       onUpdateCanvasPositions,
       onRemoveNodes,
       updateConnection,
-      updateSticky
+      updateSticky,
+      pasteNode
     },
     dispatch
   );
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Flow);
+export default connect(mapStateToProps, mapDispatchToProps)(Flow);

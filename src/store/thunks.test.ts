@@ -16,6 +16,7 @@ import { getFlowComponents, getNodeWithAction, getUniqueDestinations } from 'sto
 import { NodeEditorSettings } from 'store/nodeEditor';
 import { initialState } from 'store/state';
 import {
+  copyNode,
   disconnectExit,
   handleTypeConfigChange,
   loadFlowDefinition,
@@ -27,6 +28,7 @@ import {
   onUpdateAction,
   onUpdateLocalizations,
   onUpdateRouter,
+  pasteNode,
   removeAction,
   removeNode,
   resetNodeEditingState,
@@ -201,6 +203,171 @@ describe('Flow Manipulation', () => {
         )
       );
       expect(store.getActions()).toMatchSnapshot();
+    });
+
+    describe('copy and paste', () => {
+      beforeEach(() => {
+        store = createMockStore(
+          mutate(initialState, {
+            flowContext: {
+              nodes: { $set: testNodes },
+              assetStore: { $set: { results: { items: {} } } }
+            }
+          })
+        );
+        localStorage.clear();
+      });
+
+      afterEach(() => {
+        localStorage.clear();
+      });
+
+      describe('copyNode', () => {
+        it('should add the copied action node to the flow with fresh UUIDs', () => {
+          const sourceNode = testNodes.node3;
+          store.dispatch(copyNode(sourceNode));
+
+          const updatedNodes = getUpdatedNodes(store);
+
+          // original node is still present
+          expect(updatedNodes.node3).toBeDefined();
+
+          // a new node was added
+          const copiedUUID = Object.keys(updatedNodes).find(
+            uuid => uuid !== sourceNode.node.uuid && !testNodes[uuid]
+          );
+          expect(copiedUUID).toBeDefined();
+
+          const copiedNode = updatedNodes[copiedUUID];
+
+          // node UUID is fresh
+          expect(copiedNode.node.uuid).not.toBe(sourceNode.node.uuid);
+
+          // action UUIDs are fresh
+          copiedNode.node.actions.forEach((action: any, idx: number) => {
+            expect(action.uuid).not.toBe(sourceNode.node.actions[idx].uuid);
+          });
+
+          // exit UUIDs are fresh and destination is cleared
+          copiedNode.node.exits.forEach((exit: any, idx: number) => {
+            expect(exit.uuid).not.toBe(sourceNode.node.exits[idx].uuid);
+            expect(exit.destination_uuid).toBeNull();
+          });
+
+          // no inbound connections on the copy
+          expect(copiedNode.inboundConnections).toEqual({});
+        });
+
+        it('should offset the position of the copied node by NODE_SPACING * 2', () => {
+          const sourceNode = testNodes.node3;
+          store.dispatch(copyNode(sourceNode));
+
+          const updatedNodes = getUpdatedNodes(store);
+          const copiedUUID = Object.keys(updatedNodes).find(uuid => !testNodes[uuid]);
+          const copiedNode = updatedNodes[copiedUUID];
+
+          expect(copiedNode.ui.position.left).toBe(sourceNode.ui.position.left + 20);
+          expect(copiedNode.ui.position.top).toBe(sourceNode.ui.position.top + 20);
+        });
+
+        it('should correctly remap internal UUIDs for a router node', () => {
+          const sourceNode = testNodes.node1;
+          store.dispatch(copyNode(sourceNode));
+
+          const updatedNodes = getUpdatedNodes(store);
+          const copiedUUID = Object.keys(updatedNodes).find(uuid => !testNodes[uuid]);
+          const copiedNode = updatedNodes[copiedUUID];
+
+          const originalRouter = sourceNode.node.router as any;
+          const copiedRouter = copiedNode.node.router as any;
+
+          // each category gets a new UUID
+          copiedRouter.categories.forEach((cat: any, idx: number) => {
+            expect(cat.uuid).not.toBe(originalRouter.categories[idx].uuid);
+            // its exit_uuid must point to a real exit on the copied node
+            const matchingExit = copiedNode.node.exits.find((e: any) => e.uuid === cat.exit_uuid);
+            expect(matchingExit).toBeDefined();
+          });
+
+          // each case gets a new UUID
+          copiedRouter.cases.forEach((c: any, idx: number) => {
+            expect(c.uuid).not.toBe(originalRouter.cases[idx].uuid);
+            // its category_uuid must point to a real category on the copied router
+            const matchingCat = copiedRouter.categories.find(
+              (cat: any) => cat.uuid === c.category_uuid
+            );
+            expect(matchingCat).toBeDefined();
+          });
+        });
+
+        it('should save the source node to localStorage', () => {
+          const sourceNode = testNodes.node3;
+          store.dispatch(copyNode(sourceNode));
+
+          const stored = localStorage.getItem('floweditor_copied_node');
+          expect(stored).not.toBeNull();
+          expect(JSON.parse(stored)).toEqual(sourceNode);
+        });
+
+        it('should dispatch UPDATE_NODES', () => {
+          store.dispatch(copyNode(testNodes.node3));
+          expect(store).toHaveReduxActions([Constants.UPDATE_NODES]);
+        });
+      });
+
+      describe('pasteNode', () => {
+        it('should return null when the clipboard is empty', () => {
+          const result = store.dispatch(pasteNode());
+          expect(result).toBeNull();
+        });
+
+        it('should not dispatch UPDATE_NODES when the clipboard is empty', () => {
+          store.dispatch(pasteNode());
+          expect(store).not.toHaveReduxActions([Constants.UPDATE_NODES]);
+        });
+
+        it('should add a new node from clipboard into the current flow', () => {
+          localStorage.setItem('floweditor_copied_node', JSON.stringify(testNodes.node3));
+          store.dispatch(pasteNode());
+
+          const updatedNodes = getUpdatedNodes(store);
+
+          // original node is still present
+          expect(updatedNodes.node3).toBeDefined();
+
+          // a new node was added
+          const pastedUUID = Object.keys(updatedNodes).find(uuid => !testNodes[uuid]);
+          expect(pastedUUID).toBeDefined();
+        });
+
+        it('should paste a node with fresh UUIDs different from the clipboard source', () => {
+          const sourceNode = testNodes.node3;
+          localStorage.setItem('floweditor_copied_node', JSON.stringify(sourceNode));
+          store.dispatch(pasteNode());
+
+          const updatedNodes = getUpdatedNodes(store);
+          const pastedUUID = Object.keys(updatedNodes).find(uuid => !testNodes[uuid]);
+          const pastedNode = updatedNodes[pastedUUID];
+
+          expect(pastedNode.node.uuid).not.toBe(sourceNode.node.uuid);
+          expect(pastedNode.node.actions[0].uuid).not.toBe(sourceNode.node.actions[0].uuid);
+          expect(pastedNode.node.exits[0].uuid).not.toBe(sourceNode.node.exits[0].uuid);
+          expect(pastedNode.node.exits[0].destination_uuid).toBeNull();
+          expect(pastedNode.inboundConnections).toEqual({});
+        });
+
+        it('should dispatch UPDATE_NODES when pasting a valid clipboard node', () => {
+          localStorage.setItem('floweditor_copied_node', JSON.stringify(testNodes.node3));
+          store.dispatch(pasteNode());
+          expect(store).toHaveReduxActions([Constants.UPDATE_NODES]);
+        });
+
+        it('should return null for malformed clipboard data', () => {
+          localStorage.setItem('floweditor_copied_node', 'invalid{json');
+          const result = store.dispatch(pasteNode());
+          expect(result).toBeNull();
+        });
+      });
     });
 
     describe('removal', () => {
