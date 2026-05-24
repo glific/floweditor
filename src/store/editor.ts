@@ -62,6 +62,9 @@ export interface EditorState {
   modalMessage?: ModalMessage;
   saving?: boolean;
 
+  copiedNode: RenderNode | null;
+  toast: ToastMessage | null;
+
   // the currently shown activity, can be
   // simulation or live
   activity: Activity;
@@ -82,6 +85,11 @@ export interface EditorState {
 export interface ModalMessage {
   title: string;
   body: string;
+}
+
+export interface ToastMessage {
+  message: string;
+  duration?: number;
 }
 
 export const EMPTY_DRAG_STATE: any = {
@@ -118,7 +126,10 @@ export const initialState: EditorState = {
   visible: true,
 
   scrollToNode: null,
-  scrollToAction: null
+  scrollToAction: null,
+
+  copiedNode: null,
+  toast: null
 };
 
 // Action Creator

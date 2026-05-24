@@ -13,6 +13,8 @@ import { Asset, RenderNode, AssetStore } from 'store/flowContext';
 import AppState from 'store/state';
 import {
   ActionAC,
+  CopyNode,
+  copyNode,
   DispatchWithState,
   moveActionUp,
   OnOpenNodeEditor,
@@ -43,6 +45,7 @@ export interface ActionWrapperStoreProps {
   onOpenNodeEditor: OnOpenNodeEditor;
   removeAction: ActionAC;
   moveActionUp: ActionAC;
+  copyNode: CopyNode;
   scrollToAction: string;
 }
 
@@ -96,6 +99,14 @@ export class ActionWrapper extends React.Component<ActionWrapperProps> {
       event.stopPropagation();
     }
     this.props.moveActionUp(this.props.renderNode.node.uuid, this.props.action);
+  }
+
+  public handleCopy(event: React.MouseEvent<HTMLDivElement>): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    this.props.copyNode(this.props.renderNode.node.uuid);
   }
 
   public getAction(): Action {
@@ -196,6 +207,8 @@ export class ActionWrapper extends React.Component<ActionWrapperProps> {
           showRemoval={showRemoval}
           showMove={showMove}
           onMoveUp={this.handleMoveUp}
+          showCopy={this.props.first && !this.props.translating}
+          onCopy={this.handleCopy}
           shouldCancelClick={() => this.props.selected}
         />
         <div className={styles.body + ' ' + actionClass} data-spec={actionBodySpecId}>
@@ -243,16 +256,14 @@ const mapDispatchToProps = (dispatch: DispatchWithState) =>
     {
       onOpenNodeEditor,
       removeAction,
-      moveActionUp
+      moveActionUp,
+      copyNode
     },
     dispatch
   );
 
-const ConnectedActionWrapper = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  null,
-  { forwardRef: true }
-)(ActionWrapper);
+const ConnectedActionWrapper = connect(mapStateToProps, mapDispatchToProps, null, {
+  forwardRef: true
+})(ActionWrapper);
 
 export default ConnectedActionWrapper;

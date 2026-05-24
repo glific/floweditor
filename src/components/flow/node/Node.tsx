@@ -25,6 +25,8 @@ import { DebugState } from 'store/editor';
 import { AssetMap, RenderNode, Asset } from 'store/flowContext';
 import AppState from 'store/state';
 import {
+  CopyNode,
+  copyNode,
   DispatchWithState,
   MergeEditorState,
   mergeEditorState,
@@ -75,6 +77,7 @@ export interface NodeStoreProps {
   onAddToNode: OnAddToNode;
   onOpenNodeEditor: OnOpenNodeEditor;
   removeNode: RemoveNode;
+  copyNode: CopyNode;
   mergeEditorState: MergeEditorState;
   scrollToNode: string;
   scrollToAction: string;
@@ -209,6 +212,12 @@ export class NodeComp extends React.PureComponent<NodeProps> {
     event.preventDefault();
     event.stopPropagation();
     this.props.removeNode(this.props.renderNode.node);
+  }
+
+  private handleCopyNode(event: React.MouseEvent<HTMLElement>): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.props.copyNode(this.props.renderNode.node.uuid);
   }
 
   private getExits(): JSX.Element[] {
@@ -370,6 +379,8 @@ export class NodeComp extends React.PureComponent<NodeProps> {
                 nodeUUID={showLabel && this.props.nodeUUID}
                 showRemoval={!this.props.translating}
                 onRemoval={this.handleRemoval}
+                showCopy={!this.props.translating}
+                onCopy={this.handleCopyNode}
                 shouldCancelClick={this.handleShouldCancelClick}
                 title={title}
               />
@@ -542,14 +553,10 @@ const mapDispatchToProps = (dispatch: DispatchWithState) =>
       onAddToNode,
       onOpenNodeEditor,
       removeNode,
+      copyNode,
       mergeEditorState
     },
     dispatch
   );
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  null,
-  { forwardRef: true }
-)(NodeComp);
+export default connect(mapStateToProps, mapDispatchToProps, null, { forwardRef: true })(NodeComp);

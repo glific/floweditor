@@ -28,6 +28,8 @@ export interface CanvasProps {
   onRemoveNodes: (nodeUUIDs: string[]) => void;
   onDoubleClick: (position: FlowPosition) => void;
   mergeEditorState: MergeEditorState;
+  onPasteNode?: (position: FlowPosition) => void;
+  onClearCopiedNode?: () => void;
 }
 
 interface CanvasState {
@@ -50,6 +52,10 @@ export class Canvas extends React.PureComponent<CanvasProps, CanvasState> {
   // when auto scrolling we need to move dragged elements
   private lastX!: number | null;
   private lastY!: number | null;
+
+  // mouse position in page coordinates for paste placement
+  private pasteX: number = 200;
+  private pasteY: number = 200;
 
   // did we just select something
   private justSelected = false;
@@ -104,6 +110,28 @@ export class Canvas extends React.PureComponent<CanvasProps, CanvasState> {
       const nodeUUIDs = Object.keys(this.state.selected);
       if (nodeUUIDs.length > 0) {
         this.props.onRemoveNodes(Object.keys(this.state.selected));
+      }
+    }
+
+    const target = event.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      return;
+    }
+
+    if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
+      if (this.props.onPasteNode) {
+        event.preventDefault();
+        const offset = this.ele ? this.ele.getBoundingClientRect() : { left: 0, top: 0 };
+        const left = this.pasteX - offset.left;
+        const top = this.pasteY - offset.top - window.scrollY;
+        const snapped = snapToGrid(left, top);
+        this.props.onPasteNode({ left: snapped.left, top: snapped.top });
+      }
+    }
+
+    if (event.key === 'Escape') {
+      if (this.props.onClearCopiedNode) {
+        this.props.onClearCopiedNode();
       }
     }
   }
@@ -193,6 +221,9 @@ export class Canvas extends React.PureComponent<CanvasProps, CanvasState> {
   }
 
   private handleMouseMove(event: React.MouseEvent<HTMLDivElement>): void {
+    this.pasteX = event.pageX;
+    this.pasteY = event.pageY;
+
     if (!this.props.mutable) {
       return;
     }
@@ -428,7 +459,7 @@ export class Canvas extends React.PureComponent<CanvasProps, CanvasState> {
           }
         }
         // if we are scrolling but given a clientY then user is mousing
-        else if (windowY !== 0 && (windowY > 100 && windowY + 100 < viewportHeight)) {
+        else if (windowY !== 0 && windowY > 100 && windowY + 100 < viewportHeight) {
           window.clearInterval(this.isScrolling);
           this.isScrolling = null;
         }

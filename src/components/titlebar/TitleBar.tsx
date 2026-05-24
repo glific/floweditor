@@ -13,6 +13,8 @@ export interface TitleBarProps {
   showRemoval?: boolean;
   showMove?: boolean;
   onMoveUp?(event: React.MouseEvent<HTMLElement>): any;
+  showCopy?: boolean;
+  onCopy?(event: React.MouseEvent<HTMLElement>): any;
   shouldCancelClick?: () => boolean;
 }
 
@@ -106,6 +108,26 @@ export default class TitleBar extends React.Component<TitleBarProps, TitleBarSta
     return moveArrow;
   }
 
+  private getCopy(): JSX.Element {
+    if (this.props.showCopy && this.context.config.mutable && this.props.onCopy) {
+      return (
+        <div
+          className={styles.copy_button}
+          title="Copy node"
+          {...createClickHandler(
+            this.props.onCopy,
+            this.props.shouldCancelClick,
+            this.handleMouseUpCapture
+          )}
+          data-testid="copy-icon"
+        >
+          <temba-icon name="copy" size="1.2"></temba-icon>
+        </div>
+      );
+    }
+    return <div className={styles.copy_button} />;
+  }
+
   private getRemove(): JSX.Element {
     let remove: JSX.Element = (
       <div className={styles.remove_button} data-testid={removeIconSpecId}></div>
@@ -159,6 +181,7 @@ export default class TitleBar extends React.Component<TitleBarProps, TitleBarSta
   public render(): JSX.Element {
     const confirmation: JSX.Element = this.getConfirmationEl();
     const moveArrow: JSX.Element = this.getMoveArrow();
+    const copy: JSX.Element = this.getCopy();
     const remove: JSX.Element = this.getRemove();
     return (
       <div className={styles.titlebar} data-spec={titlebarContainerSpecId}>
@@ -167,6 +190,7 @@ export default class TitleBar extends React.Component<TitleBarProps, TitleBarSta
           <div className={styles.titletext}>
             {this.props.title} {this.props.nodeUUID && `: ${this.props.nodeUUID.slice(-4)}`}
           </div>
+          {copy}
           {remove}
         </div>
         {confirmation}

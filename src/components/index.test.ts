@@ -26,7 +26,12 @@ const baseProps: FlowEditorStoreProps = {
   scrollToAction: null,
   scrollToNode: null,
   popped: null,
-  issues: {}
+  issues: {},
+  toast: null,
+  clearCopiedNode: jest.fn(),
+  reset: jest.fn(),
+  updateTranslationFilters: jest.fn(),
+  onUpdateLocalizations: jest.fn()
 };
 
 const { setup, spyOn } = composeComponentTestUtils(FlowEditor, baseProps);

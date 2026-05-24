@@ -15,12 +15,19 @@ import {
   Exit,
   FlowDefinition,
   FlowNode,
+  FlowPosition,
   SendMsg,
   SetContactField,
   SetRunResult,
   StickyNote,
   FlowDetails
 } from 'flowTypes';
+import {
+  CLIPBOARD_KEY,
+  cloneNodeWithNewUUIDs,
+  resolveResultNames,
+  detectCrossFlowIssues
+} from 'store/clipboardHelpers';
 import mutate from 'immutability-helper';
 import { Dispatch } from 'redux';
 import {
@@ -95,6 +102,10 @@ export type OnRemoveNodes = (nodeUUIDs: string[]) => Thunk<RenderNodeMap>;
 export type AddAsset = (assetType: string, asset: Asset) => Thunk<void>;
 
 export type RemoveNode = (nodeToRemove: FlowNode) => Thunk<RenderNodeMap>;
+
+export type CopyNode = (nodeUUID: string) => Thunk<void>;
+export type PasteNode = (position: FlowPosition) => Thunk<void>;
+export type ClearCopiedNode = () => Thunk<void>;
 
 export type UpdateDimensions = (uuid: string, dimensions: Dimensions) => Thunk<void>;
 
@@ -947,6 +958,104 @@ export const onRemoveNodes = (uuids: string[]) => (
   }
 
   return nodes;
+};
+
+export const copyNode = (nodeUUID: string) => (
+  dispatch: DispatchWithState,
+  getState: GetState
+): void => {
+  const {
+    flowContext: { nodes }
+  } = getState();
+
+  const renderNode = nodes[nodeUUID];
+  if (!renderNode) {
+    return;
+  }
+
+  localStorage.setItem(CLIPBOARD_KEY, JSON.stringify(renderNode));
+
+  dispatch(
+    mergeEditorState({
+      copiedNode: renderNode,
+      toast: {
+        message: 'Node copied to clipboard. Ctrl+V to paste. Esc to cancel.',
+        duration: 5000
+      }
+    })
+  );
+};
+
+export const pasteNode = (position: FlowPosition) => (
+  dispatch: DispatchWithState,
+  getState: GetState
+): void => {
+  const {
+    editorState: { copiedNode },
+    flowContext: { nodes, assetStore, issues }
+  } = getState();
+
+  let sourceNode = copiedNode;
+  if (!sourceNode) {
+    const raw = localStorage.getItem(CLIPBOARD_KEY);
+    if (!raw) {
+      return;
+    }
+    try {
+      sourceNode = JSON.parse(raw) as RenderNode;
+    } catch {
+      return;
+    }
+  }
+
+  const cloned = cloneNodeWithNewUUIDs(sourceNode);
+
+  const existingResultKeys = assetStore.results ? Object.keys(assetStore.results.items) : [];
+  resolveResultNames(cloned, existingResultKeys);
+
+  cloned.ui.position = position;
+
+  const updatedNodes = mutators.mergeNode(nodes, cloned);
+  dispatch(updateNodes(updatedNodes));
+
+  // Validate @results references before registering this node's own result
+  const crossIssues = detectCrossFlowIssues(cloned.node, existingResultKeys);
+  if (crossIssues.length > 0) {
+    const updatedIssues = { ...issues, [cloned.node.uuid]: crossIssues };
+    dispatch(updateIssues(updatedIssues));
+  }
+
+  // Register any result names produced by this node into the asset store
+  let updatedAssets = assetStore;
+
+  if (cloned.node.actions) {
+    cloned.node.actions.forEach((action: AnyAction) => {
+      if (action.type === Types.set_run_result) {
+        const setResult = action as SetRunResult;
+        if (setResult.name) {
+          updatedAssets = mutators.addResultToStore(setResult.name, updatedAssets, {
+            nodeUUID: cloned.node.uuid,
+            actionUUID: action.uuid
+          });
+        }
+      }
+    });
+  }
+
+  updatedAssets = mutators.addFlowResult(updatedAssets, cloned.node);
+
+  if (updatedAssets !== assetStore) {
+    dispatch(updateAssets(updatedAssets));
+  }
+
+  markDirty();
+
+  dispatch(mergeEditorState({ toast: null }));
+};
+
+export const clearCopiedNode = () => (dispatch: DispatchWithState): void => {
+  localStorage.removeItem(CLIPBOARD_KEY);
+  dispatch(mergeEditorState({ copiedNode: null, toast: null }));
 };
 
 export const onUpdateCanvasPositions = (positions: CanvasPositions) => (

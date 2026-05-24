@@ -45,6 +45,16 @@
     color: rgba(255, 255, 255, 0.8);
   }
 
+  .copy_button {
+    visibility: hidden;
+    width: 20px;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .up_button {
     visibility: hidden;
     padding-left: 5px;
@@ -54,6 +64,10 @@
 
   &:hover {
     .remove_button {
+      visibility: visible;
+    }
+
+    .copy_button {
       visibility: visible;
     }
 

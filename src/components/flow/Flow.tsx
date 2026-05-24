@@ -19,6 +19,8 @@ import { createEmptyNode, detectLoops, getOrderedNodes } from 'store/helpers';
 import { NodeEditorSettings } from 'store/nodeEditor';
 import AppState from 'store/state';
 import {
+  ClearCopiedNode,
+  clearCopiedNode,
   ConnectionEvent,
   DispatchWithState,
   mergeEditorState,
@@ -32,6 +34,8 @@ import {
   OnRemoveNodes,
   OnUpdateCanvasPositions,
   onUpdateCanvasPositions,
+  PasteNode,
+  pasteNode,
   resetNodeEditingState,
   UpdateConnection,
   updateConnection,
@@ -81,6 +85,8 @@ export interface FlowStoreProps {
   resetNodeEditingState: NoParamsAC;
   onConnectionDrag: OnConnectionDrag;
   updateSticky: UpdateSticky;
+  pasteNode: PasteNode;
+  clearCopiedNode: ClearCopiedNode;
 }
 
 export interface Translations {
@@ -429,6 +435,8 @@ export class Flow extends React.PureComponent<FlowStoreProps, {}> {
           onDoubleClick={this.handleDoubleClick}
           onUpdatePositions={this.props.onUpdateCanvasPositions}
           onLoaded={this.handleCanvasLoaded}
+          onPasteNode={this.props.pasteNode}
+          onClearCopiedNode={this.props.clearCopiedNode}
         ></Canvas>
         <div id="activity_recent_contacts"></div>
       </div>
@@ -467,12 +475,11 @@ const mapDispatchToProps = (dispatch: DispatchWithState) =>
       onUpdateCanvasPositions,
       onRemoveNodes,
       updateConnection,
-      updateSticky
+      updateSticky,
+      pasteNode,
+      clearCopiedNode
     },
     dispatch
   );
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Flow);
+export default connect(mapStateToProps, mapDispatchToProps)(Flow);

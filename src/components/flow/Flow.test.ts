@@ -48,7 +48,9 @@ const baseProps: FlowStoreProps = {
   onUpdateCanvasPositions: jest.fn(),
   resetNodeEditingState: jest.fn(),
   onConnectionDrag: jest.fn(),
-  updateSticky: jest.fn()
+  updateSticky: jest.fn(),
+  pasteNode: jest.fn(),
+  clearCopiedNode: jest.fn()
 };
 
 const { setup, spyOn } = composeComponentTestUtils(Flow, baseProps);

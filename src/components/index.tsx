@@ -2,6 +2,7 @@ import { react as bindCallbacks } from 'auto-bind';
 import Button, { ButtonTypes } from 'components/button/Button';
 import Dialog from 'components/dialog/Dialog';
 import ConnectedFlow from 'components/flow/Flow';
+import Toast from 'components/toast/Toast';
 import styles from 'components/index.module.scss';
 import ConnectedLanguageSelector from 'components/languageselector/LanguageSelector';
 import Loading from 'components/loading/Loading';
@@ -15,11 +16,13 @@ import * as React from 'react';
 import { connect, Provider as ReduxProvider } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import createStore from 'store/createStore';
-import { ModalMessage } from 'store/editor';
+import { ModalMessage, ToastMessage } from 'store/editor';
 import { Asset, Assets, AssetStore, RenderNodeMap, FlowIssueMap } from 'store/flowContext';
 import { getCurrentDefinition } from 'store/helpers';
 import AppState from 'store/state';
 import {
+  ClearCopiedNode,
+  clearCopiedNode,
   CreateNewRevision,
   createNewRevision,
   DispatchWithState,
@@ -70,7 +73,9 @@ export interface FlowEditorStoreProps {
   reset: Reset;
   nodes: RenderNodeMap;
   modalMessage: ModalMessage;
+  toast: ToastMessage | null;
   saving: boolean;
+  clearCopiedNode: ClearCopiedNode;
   scrollToNode: string;
   scrollToAction: string;
   popped: string;
@@ -160,6 +165,19 @@ export class FlowEditor extends React.Component<FlowEditorStoreProps> {
           <div className={styles.alert_body}>{this.props.modalMessage.body}</div>
         </Dialog>
       </Modal>
+    );
+  }
+
+  public getToast(): JSX.Element {
+    if (!this.props.toast) {
+      return null;
+    }
+    return (
+      <Toast
+        message={this.props.toast.message}
+        duration={this.props.toast.duration || 5000}
+        onDismiss={this.props.clearCopiedNode}
+      />
     );
   }
 
@@ -277,6 +295,7 @@ export class FlowEditor extends React.Component<FlowEditorStoreProps> {
             )(<ConnectedLanguageSelector />)}
 
             {this.getSavingIndicator()}
+            {this.getToast()}
 
             {renderIf(this.props.definition && this.props.language && !this.props.fetchingFlow)(
               <ConnectedFlow />
@@ -341,6 +360,7 @@ const mapStateToProps = ({
     fetchingFlow,
     simulating,
     modalMessage,
+    toast,
     saving,
     scrollToAction,
     scrollToNode,
@@ -353,6 +373,7 @@ const mapStateToProps = ({
     popped,
     baseLanguage,
     modalMessage,
+    toast,
     saving,
     simulating,
     assetStore,
@@ -379,14 +400,12 @@ const mapDispatchToProps = (dispatch: DispatchWithState) =>
       handleLanguageChange,
       updateTranslationFilters,
       onUpdateLocalizations,
-      reset
+      reset,
+      clearCopiedNode
     },
     dispatch
   );
 
-export const ConnectedFlowEditor = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(FlowEditor);
+export const ConnectedFlowEditor = connect(mapStateToProps, mapDispatchToProps)(FlowEditor);
 
 export default FlowEditorContainer;
