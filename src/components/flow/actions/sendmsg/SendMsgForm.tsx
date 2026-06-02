@@ -226,7 +226,12 @@ export default class SendMsgForm extends React.Component<ActionFormProps, SendMs
   private handleTemplateChanged(template: any): void {
     if (template) {
       if (template.name === 'Expression') {
-        this.setState({ expression: { value: this.state.expression.value } });
+        this.setState({
+          expression: { value: this.state.expression ? this.state.expression.value : '' },
+          template: { value: template },
+          templateTranslation: null,
+          templateVariables: []
+        });
       } else {
         const templateTranslation = template.translations[0];
         const templateVariables =
