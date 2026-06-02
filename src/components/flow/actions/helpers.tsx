@@ -23,7 +23,7 @@ export const renderIssue = (
   // worst case, defer to the default description
   let message: JSX.Element = <>{issue.description}</>;
 
-  if (issue.type === FlowIssueType.MISSING_DEPENDENCY) {
+  if (issue.type === FlowIssueType.MISSING_DEPENDENCY && issue.dependency) {
     message = (
       <Trans
         i18nKey="issues.missing_dependency"
