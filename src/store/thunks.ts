@@ -15,6 +15,7 @@ import {
   Exit,
   FlowDefinition,
   FlowNode,
+  FlowPosition,
   SendMsg,
   SetContactField,
   SetRunResult,
@@ -46,7 +47,9 @@ import {
   initialState as flowContext
 } from 'store/flowContext';
 import {
+  cloneNodeWithNewUUIDs,
   createEmptyNode,
+  detectCrossFlowIssues,
   fetchFlowActivity,
   getActionIndex,
   getCurrentDefinition,
@@ -55,7 +58,8 @@ import {
   getNode,
   guessNodeType,
   mergeAssetMaps,
-  createFlowIssueMap
+  createFlowIssueMap,
+  resolveResultNames
 } from 'store/helpers';
 import * as mutators from 'store/mutators';
 import {
@@ -1212,4 +1216,111 @@ export const updateTranslationFilters = (translationFilters: { categories: boole
   definition._ui.translation_filters = translationFilters;
   dispatch(updateDefinition(definition));
   markDirty();
+};
+
+export const CLIPBOARD_KEY = 'glific_clipboard_node';
+
+export interface ClipboardPayload {
+  primary: RenderNode;
+  paired?: RenderNode;
+  pairedOffset?: FlowPosition;
+}
+
+export type CopyNode = (nodeUUID: string) => Thunk<void>;
+export type PasteNode = (position: FlowPosition) => Thunk<void>;
+
+export const copyNode = (nodeUUID: string) => (
+  dispatch: DispatchWithState,
+  getState: GetState
+): void => {
+  const {
+    flowContext: { nodes }
+  } = getState();
+
+  const primary = nodes[nodeUUID];
+  if (!primary) return;
+
+  const payload: ClipboardPayload = { primary };
+
+  if (primary.node.actions?.[0]?.type === Types.send_interactive_msg) {
+    const pairedUUID = primary.node.exits?.[0]?.destination_uuid;
+    const paired = pairedUUID ? nodes[pairedUUID] : null;
+    if (paired) {
+      payload.paired = paired;
+      payload.pairedOffset = {
+        left: paired.ui.position.left - primary.ui.position.left,
+        top: paired.ui.position.top - primary.ui.position.top
+      };
+    }
+  }
+
+  localStorage.setItem(CLIPBOARD_KEY, JSON.stringify(payload));
+  dispatch(
+    mergeEditorState({ toast: { message: 'Node copied. Ctrl+V to paste.', duration: 5000 } })
+  );
+};
+
+export const pasteNode = (position: FlowPosition) => (
+  dispatch: DispatchWithState,
+  getState: GetState
+): void => {
+  const raw = localStorage.getItem(CLIPBOARD_KEY);
+  if (!raw) return;
+
+  const { primary, paired, pairedOffset } = JSON.parse(raw) as ClipboardPayload;
+
+  const {
+    flowContext: { nodes, assetStore, issues }
+  } = getState();
+
+  const cloned = cloneNodeWithNewUUIDs(primary);
+  cloned.node = resolveResultNames(cloned.node, nodes);
+  cloned.ui = { ...cloned.ui, position };
+
+  let updatedNodes = nodes;
+
+  if (paired && pairedOffset) {
+    const clonedPaired = cloneNodeWithNewUUIDs(paired);
+    clonedPaired.node = resolveResultNames(clonedPaired.node, nodes);
+    clonedPaired.ui = {
+      ...clonedPaired.ui,
+      position: {
+        left: position.left + pairedOffset.left,
+        top: position.top + pairedOffset.top
+      }
+    };
+
+    cloned.node.exits[0].destination_uuid = clonedPaired.node.uuid;
+    clonedPaired.inboundConnections = { [cloned.node.exits[0].uuid]: cloned.node.uuid };
+
+    updatedNodes = mutators.mergeNode(updatedNodes, cloned);
+    updatedNodes = mutators.mergeNode(updatedNodes, clonedPaired);
+
+    dispatch(updateNodes(updatedNodes));
+
+    const primaryIssues = detectCrossFlowIssues(cloned.node, assetStore);
+    const pairedIssues = detectCrossFlowIssues(clonedPaired.node, assetStore);
+    if (primaryIssues.length || pairedIssues.length) {
+      const updatedIssues = { ...issues };
+      if (primaryIssues.length) updatedIssues[cloned.node.uuid] = primaryIssues;
+      if (pairedIssues.length) updatedIssues[clonedPaired.node.uuid] = pairedIssues;
+      dispatch(updateIssues(updatedIssues));
+    }
+
+    dispatch(updateAssets(mutators.addFlowResult(assetStore, cloned.node)));
+    dispatch(updateAssets(mutators.addFlowResult(assetStore, clonedPaired.node)));
+  } else {
+    updatedNodes = mutators.mergeNode(updatedNodes, cloned);
+    dispatch(updateNodes(updatedNodes));
+
+    const primaryIssues = detectCrossFlowIssues(cloned.node, assetStore);
+    if (primaryIssues.length) {
+      dispatch(updateIssues({ ...issues, [cloned.node.uuid]: primaryIssues }));
+    }
+
+    dispatch(updateAssets(mutators.addFlowResult(assetStore, cloned.node)));
+  }
+
+  markDirty();
+  dispatch(mergeEditorState({ toast: null }));
 };

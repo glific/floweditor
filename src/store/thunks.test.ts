@@ -16,6 +16,8 @@ import { getFlowComponents, getNodeWithAction, getUniqueDestinations } from 'sto
 import { NodeEditorSettings } from 'store/nodeEditor';
 import { initialState } from 'store/state';
 import {
+  CLIPBOARD_KEY,
+  copyNode,
   disconnectExit,
   handleTypeConfigChange,
   loadFlowDefinition,
@@ -27,6 +29,7 @@ import {
   onUpdateAction,
   onUpdateLocalizations,
   onUpdateRouter,
+  pasteNode,
   removeAction,
   removeNode,
   resetNodeEditingState,
@@ -852,6 +855,149 @@ describe('Flow Manipulation', () => {
 
       expect(nodes.node0).toMatchSnapshot();
       expect(newNode).toMatchSnapshot();
+    });
+  });
+});
+
+describe('copy-paste thunks', () => {
+  const sendMsgNode = {
+    node: {
+      uuid: 'node-sm',
+      actions: [{ uuid: 'action-sm', type: Types.send_msg, text: 'Hello' }],
+      exits: [{ uuid: 'exit-sm', destination_uuid: null }]
+    },
+    ui: { position: { left: 100, top: 200 }, type: Types.send_msg },
+    inboundConnections: {}
+  };
+
+  const imNode = {
+    node: {
+      uuid: 'node-im',
+      actions: [{ uuid: 'action-im', type: Types.send_interactive_msg }],
+      exits: [{ uuid: 'exit-im', destination_uuid: 'node-wfr' }]
+    },
+    ui: { position: { left: 100, top: 100 }, type: Types.send_interactive_msg },
+    inboundConnections: {}
+  };
+
+  const wfrNode = {
+    node: {
+      uuid: 'node-wfr',
+      actions: [],
+      exits: [{ uuid: 'exit-wfr', destination_uuid: null }],
+      router: {
+        type: 'switch',
+        result_name: 'wfr_result',
+        categories: [],
+        cases: [],
+        operand: '@input.text',
+        default_category_uuid: null
+      }
+    },
+    ui: { position: { left: 100, top: 400 }, type: Types.wait_for_response },
+    inboundConnections: { 'node-im': 'exit-im' }
+  };
+
+  const baseState = {
+    flowContext: {
+      nodes: { 'node-sm': sendMsgNode, 'node-im': imNode, 'node-wfr': wfrNode },
+      assetStore: { results: { type: AssetType.Result, items: {} } },
+      issues: {}
+    }
+  };
+
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  describe('copyNode', () => {
+    it('writes primary node to localStorage for a plain node', () => {
+      const store = createMockStore(
+        mutate(initialState, { flowContext: { $set: baseState.flowContext } })
+      );
+      store.dispatch(copyNode('node-sm'));
+
+      const stored = JSON.parse(localStorage.getItem(CLIPBOARD_KEY));
+      expect(stored.primary.node.uuid).toBe('node-sm');
+      expect(stored.paired).toBeUndefined();
+    });
+
+    it('writes primary and paired WFR for an Interactive Message node', () => {
+      const store = createMockStore(
+        mutate(initialState, { flowContext: { $set: baseState.flowContext } })
+      );
+      store.dispatch(copyNode('node-im'));
+
+      const stored = JSON.parse(localStorage.getItem(CLIPBOARD_KEY));
+      expect(stored.primary.node.uuid).toBe('node-im');
+      expect(stored.paired.node.uuid).toBe('node-wfr');
+      expect(stored.pairedOffset).toEqual({ left: 0, top: 300 });
+    });
+
+    it('dispatches toast after copying', () => {
+      const store = createMockStore(
+        mutate(initialState, { flowContext: { $set: baseState.flowContext } })
+      );
+      store.dispatch(copyNode('node-sm'));
+
+      const editorAction = store
+        .getActions()
+        .find((a: any) => a.type === Constants.UPDATE_EDITOR_STATE);
+      expect(editorAction.payload.editorState.toast).not.toBeNull();
+    });
+  });
+
+  describe('pasteNode', () => {
+    it('is a no-op when clipboard is empty', () => {
+      const store = createMockStore(
+        mutate(initialState, { flowContext: { $set: baseState.flowContext } })
+      );
+      store.dispatch(pasteNode({ left: 50, top: 50 }));
+      expect(store.getActions()).toHaveLength(0);
+    });
+
+    it('dispatches updateNodes with a new cloned node', () => {
+      const store = createMockStore(
+        mutate(initialState, { flowContext: { $set: baseState.flowContext } })
+      );
+      store.dispatch(copyNode('node-sm'));
+      store.clearActions();
+      store.dispatch(pasteNode({ left: 50, top: 50 }));
+
+      const nodesAction = store.getActions().find((a: any) => a.type === Constants.UPDATE_NODES);
+      expect(nodesAction).toBeDefined();
+      const pastedKeys = Object.keys(nodesAction.payload.nodes);
+      expect(pastedKeys).toHaveLength(4); // 3 original nodes + 1 new cloned node
+      const newNodeUUID = pastedKeys.find(k => !['node-sm', 'node-im', 'node-wfr'].includes(k));
+      expect(newNodeUUID).toBeDefined();
+      expect(nodesAction.payload.nodes[newNodeUUID].ui.position).toEqual({ left: 50, top: 50 });
+    });
+
+    it('dispatches both nodes for an IM+WFR paste with rewired connection', () => {
+      const store = createMockStore(
+        mutate(initialState, { flowContext: { $set: baseState.flowContext } })
+      );
+      store.dispatch(copyNode('node-im'));
+      store.clearActions();
+      store.dispatch(pasteNode({ left: 200, top: 200 }));
+
+      const nodesAction = store.getActions().find((a: any) => a.type === Constants.UPDATE_NODES);
+      const allNodes = nodesAction.payload.nodes;
+      const newKeys = Object.keys(allNodes).filter(
+        k => !['node-sm', 'node-im', 'node-wfr'].includes(k)
+      );
+      expect(newKeys).toHaveLength(2);
+
+      const newIM = Object.values(allNodes).find(
+        (n: any) =>
+          n.node.actions?.[0]?.type === Types.send_interactive_msg && n.node.uuid !== 'node-im'
+      ) as any;
+      const newWFR = allNodes[newIM.node.exits[0].destination_uuid];
+
+      expect(newWFR).toBeDefined();
+      expect(newWFR.inboundConnections[newIM.node.exits[0].uuid]).toBe(newIM.node.uuid);
+      expect(newIM.ui.position).toEqual({ left: 200, top: 200 });
+      expect(newWFR.ui.position).toEqual({ left: 200, top: 500 });
     });
   });
 });
