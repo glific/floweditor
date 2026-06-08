@@ -772,6 +772,9 @@ export const cloneNodeWithNewUUIDs = (source: RenderNode): RenderNode => {
       cat.uuid = uuidMap[cat.uuid];
       cat.exit_uuid = uuidMap[cat.exit_uuid];
     });
+    if (router.wait?.timeout?.category_uuid) {
+      router.wait.timeout.category_uuid = uuidMap[router.wait.timeout.category_uuid];
+    }
   }
   if (router?.cases) {
     router.cases.forEach((c: Case) => {
@@ -791,24 +794,24 @@ export const cloneNodeWithNewUUIDs = (source: RenderNode): RenderNode => {
 export const resolveResultNames = (node: FlowNode, existingNodes: RenderNodeMap): FlowNode => {
   const cloned: FlowNode = JSON.parse(JSON.stringify(node));
 
-  const usedNames = new Set<string>();
+  const usedKeys = new Set<string>();
   Object.values(existingNodes).forEach(rn => {
     const routerName = getResultName(rn.node);
-    if (routerName) usedNames.add(routerName);
+    if (routerName) usedKeys.add(snakify(routerName));
     rn.node.actions.forEach((action: any) => {
       if (action.type === Types.set_run_result && action.name) {
-        usedNames.add(action.name);
+        usedKeys.add(snakify(action.name));
       }
     });
   });
 
   const nextName = (original: string): string => {
     const base = `copy_of_${original}`;
-    if (!usedNames.has(base)) return base;
+    if (!usedKeys.has(snakify(base))) return base;
     let i = 1;
     while (true) {
       const candidate = `${base}_${String(i).padStart(2, '0')}`;
-      if (!usedNames.has(candidate)) return candidate;
+      if (!usedKeys.has(snakify(candidate))) return candidate;
       i++;
     }
   };
@@ -816,13 +819,13 @@ export const resolveResultNames = (node: FlowNode, existingNodes: RenderNodeMap)
   cloned.actions.forEach((action: any) => {
     if (action.type === Types.set_run_result && action.name) {
       action.name = nextName(action.name);
-      usedNames.add(action.name);
+      usedKeys.add(snakify(action.name));
     }
   });
 
   if (cloned.router?.result_name) {
     cloned.router.result_name = nextName(cloned.router.result_name);
-    usedNames.add(cloned.router.result_name);
+    usedKeys.add(snakify(cloned.router.result_name));
   }
 
   return cloned;

@@ -279,6 +279,44 @@ describe('copy-paste helpers', () => {
       cloneNodeWithNewUUIDs(source);
       expect(source.node.uuid).toBe(originalUUID);
     });
+
+    it('remaps wait.timeout.category_uuid to the new category uuid', () => {
+      const source: RenderNode = {
+        node: {
+          uuid: 'wfr-node',
+          actions: [],
+          exits: [
+            { uuid: 'exit-yes', destination_uuid: null },
+            { uuid: 'exit-timeout', destination_uuid: null }
+          ],
+          router: {
+            type: RouterTypes.switch,
+            categories: [
+              { uuid: 'cat-yes', name: 'Yes', exit_uuid: 'exit-yes' },
+              { uuid: 'cat-timeout', name: 'Timeout', exit_uuid: 'exit-timeout' }
+            ],
+            cases: [] as any,
+            operand: '@input.text',
+            default_category_uuid: 'cat-yes',
+            wait: {
+              type: 'msg' as any,
+              timeout: { category_uuid: 'cat-timeout', seconds: 300 }
+            }
+          } as any
+        },
+        ui: { position: { left: 0, top: 0 }, type: Types.wait_for_response },
+        inboundConnections: {}
+      };
+
+      const cloned = cloneNodeWithNewUUIDs(source);
+      const router = cloned.node.router as any;
+      const newTimeoutCatUUID = router.wait.timeout.category_uuid;
+
+      expect(newTimeoutCatUUID).not.toBe('cat-timeout');
+      const matchingCategory = router.categories.find((c: any) => c.uuid === newTimeoutCatUUID);
+      expect(matchingCategory).toBeDefined();
+      expect(matchingCategory.name).toBe('Timeout');
+    });
   });
 
   describe('resolveResultNames', () => {
@@ -329,6 +367,29 @@ describe('copy-paste helpers', () => {
       };
       resolveResultNames(node, emptyNodes);
       expect((node.actions[0] as any).name).toBe('my_result');
+    });
+
+    it('treats names with spaces/hyphens as collisions when they snakify to the same key', () => {
+      // "copy of my_result" snakifies to "copy_of_my_result" — same as "copy_of_my_result"
+      const existingNode: RenderNode = {
+        node: {
+          uuid: 'existing',
+          actions: [
+            { uuid: 'a0', type: Types.set_run_result, name: 'copy of my_result', value: '' } as any
+          ],
+          exits: []
+        },
+        ui: { position: { left: 0, top: 0 }, type: Types.send_msg },
+        inboundConnections: {}
+      };
+      const node = {
+        uuid: 'n1',
+        actions: [{ uuid: 'a1', type: Types.set_run_result, name: 'my_result', value: '' } as any],
+        exits: [] as Exit[]
+      };
+      const resolved = resolveResultNames(node, { existing: existingNode });
+      // "copy_of_my_result" collides with "copy of my_result" after snakify, so should increment
+      expect((resolved.actions[0] as any).name).toBe('copy_of_my_result_01');
     });
   });
 

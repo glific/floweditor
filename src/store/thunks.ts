@@ -1267,7 +1267,19 @@ export const pasteNode = (position: FlowPosition) => (
   const raw = localStorage.getItem(CLIPBOARD_KEY);
   if (!raw) return;
 
-  const { primary, paired, pairedOffset } = JSON.parse(raw) as ClipboardPayload;
+  let payload: ClipboardPayload;
+  try {
+    payload = JSON.parse(raw) as ClipboardPayload;
+  } catch {
+    dispatch(
+      mergeEditorState({
+        toast: { message: 'Clipboard data is invalid. Please copy the node again.', duration: 5000 }
+      })
+    );
+    return;
+  }
+
+  const { primary, paired, pairedOffset } = payload;
 
   const {
     flowContext: { nodes, assetStore, issues }
