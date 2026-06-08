@@ -1292,8 +1292,9 @@ export const pasteNode = (position: FlowPosition) => (
   let updatedNodes = nodes;
 
   if (paired && pairedOffset) {
+    const nodesWithCloned = { ...nodes, [cloned.node.uuid]: cloned };
     const clonedPaired = cloneNodeWithNewUUIDs(paired);
-    clonedPaired.node = resolveResultNames(clonedPaired.node, nodes);
+    clonedPaired.node = resolveResultNames(clonedPaired.node, nodesWithCloned);
     clonedPaired.ui = {
       ...clonedPaired.ui,
       position: {
@@ -1319,8 +1320,9 @@ export const pasteNode = (position: FlowPosition) => (
       dispatch(updateIssues(updatedIssues));
     }
 
-    dispatch(updateAssets(mutators.addFlowResult(assetStore, cloned.node)));
-    dispatch(updateAssets(mutators.addFlowResult(assetStore, clonedPaired.node)));
+    let updatedAssets = mutators.addFlowResult(assetStore, cloned.node);
+    updatedAssets = mutators.addFlowResult(updatedAssets, clonedPaired.node);
+    dispatch(updateAssets(updatedAssets));
   } else {
     updatedNodes = mutators.mergeNode(updatedNodes, cloned);
     dispatch(updateNodes(updatedNodes));

@@ -999,5 +999,78 @@ describe('copy-paste thunks', () => {
       expect(newIM.ui.position).toEqual({ left: 200, top: 200 });
       expect(newWFR.ui.position).toEqual({ left: 200, top: 500 });
     });
+
+    it('gives unique result names when primary and paired share the same result name', () => {
+      // IM node: send_interactive_msg first (so copyNode detects pairing), set_run_result second
+      const imWithResult = {
+        ...imNode,
+        node: {
+          ...imNode.node,
+          actions: [
+            { uuid: 'action-im', type: Types.send_interactive_msg },
+            { uuid: 'action-result', type: Types.set_run_result, name: 'shared_result', value: '' }
+          ]
+        }
+      };
+      const wfrWithSameResult = {
+        ...wfrNode,
+        node: {
+          ...wfrNode.node,
+          router: { ...wfrNode.node.router, result_name: 'shared_result' }
+        }
+      };
+
+      const stateWithShared = {
+        flowContext: {
+          nodes: { 'node-im': imWithResult, 'node-wfr': wfrWithSameResult },
+          assetStore: { results: { type: AssetType.Result, items: {} } },
+          issues: {}
+        }
+      };
+
+      const store = createMockStore(
+        mutate(initialState, { flowContext: { $set: stateWithShared.flowContext } })
+      );
+      store.dispatch(copyNode('node-im'));
+      store.clearActions();
+      store.dispatch(pasteNode({ left: 200, top: 200 }));
+
+      const nodesAction = store.getActions().find((a: any) => a.type === Constants.UPDATE_NODES);
+      const allNodes = nodesAction.payload.nodes;
+
+      const newIM = Object.values(allNodes).find(
+        (n: any) =>
+          n.node.actions?.[0]?.type === Types.send_interactive_msg && n.node.uuid !== 'node-im'
+      ) as any;
+      const newWFR = allNodes[newIM.node.exits[0].destination_uuid];
+
+      // primary clone's set_run_result gets copy_of_shared_result
+      const imResultName = newIM.node.actions[1].name;
+      // paired clone sees primary already claimed copy_of_shared_result → increments to _01
+      const wfrResultName = newWFR.node.router.result_name;
+
+      expect(imResultName).toBe('copy_of_shared_result');
+      expect(wfrResultName).toBe('copy_of_shared_result_01');
+    });
+
+    it('registers both IM and WFR result names in the asset store after paste', () => {
+      const store = createMockStore(
+        mutate(initialState, { flowContext: { $set: baseState.flowContext } })
+      );
+      store.dispatch(copyNode('node-im'));
+      store.clearActions();
+      store.dispatch(pasteNode({ left: 200, top: 200 }));
+
+      // get the last UPDATE_ASSET_MAP action — should contain wfr_result from the WFR node
+      const assetActions = store
+        .getActions()
+        .filter((a: any) => a.type === Constants.UPDATE_ASSET_MAP);
+
+      // only one dispatch should have fired for assets
+      expect(assetActions).toHaveLength(1);
+
+      const finalItems = assetActions[0].payload.assets.results.items;
+      expect(finalItems['copy_of_wfr_result']).toBeDefined();
+    });
   });
 });
