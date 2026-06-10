@@ -122,6 +122,7 @@ export class Canvas extends React.PureComponent<CanvasProps, CanvasState> {
         return;
       }
       if (this.props.pasteNode) {
+        event.preventDefault();
         const snapped = snapToGrid(this.mouseX, this.mouseY);
         this.props.pasteNode(snapped);
       }
