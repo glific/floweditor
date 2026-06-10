@@ -49,7 +49,6 @@ import {
 import {
   cloneNodeWithNewUUIDs,
   createEmptyNode,
-  detectCrossFlowIssues,
   fetchFlowActivity,
   getActionIndex,
   getCurrentDefinition,
