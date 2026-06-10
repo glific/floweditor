@@ -1282,7 +1282,7 @@ export const pasteNode = (position: FlowPosition) => (
   const { primary, paired, pairedOffset } = payload;
 
   const {
-    flowContext: { nodes, assetStore, issues }
+    flowContext: { nodes, assetStore }
   } = getState();
 
   const cloned = cloneNodeWithNewUUIDs(primary);
@@ -1311,26 +1311,12 @@ export const pasteNode = (position: FlowPosition) => (
 
     dispatch(updateNodes(updatedNodes));
 
-    const primaryIssues = detectCrossFlowIssues(cloned.node, assetStore);
-    const pairedIssues = detectCrossFlowIssues(clonedPaired.node, assetStore);
-    if (primaryIssues.length || pairedIssues.length) {
-      const updatedIssues = { ...issues };
-      if (primaryIssues.length) updatedIssues[cloned.node.uuid] = primaryIssues;
-      if (pairedIssues.length) updatedIssues[clonedPaired.node.uuid] = pairedIssues;
-      dispatch(updateIssues(updatedIssues));
-    }
-
     let updatedAssets = mutators.addFlowResult(assetStore, cloned.node);
     updatedAssets = mutators.addFlowResult(updatedAssets, clonedPaired.node);
     dispatch(updateAssets(updatedAssets));
   } else {
     updatedNodes = mutators.mergeNode(updatedNodes, cloned);
     dispatch(updateNodes(updatedNodes));
-
-    const primaryIssues = detectCrossFlowIssues(cloned.node, assetStore);
-    if (primaryIssues.length) {
-      dispatch(updateIssues({ ...issues, [cloned.node.uuid]: primaryIssues }));
-    }
 
     dispatch(updateAssets(mutators.addFlowResult(assetStore, cloned.node)));
   }

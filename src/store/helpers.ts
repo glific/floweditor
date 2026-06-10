@@ -845,7 +845,7 @@ export const detectCrossFlowIssues = (node: FlowNode, assetStore: AssetStore): F
         issues.push({
           type: FlowIssueType.INVALID_RESULT,
           node_uuid: node.uuid,
-          action_uuid: actionUUID || null,
+          action_uuid: actionUUID ?? '',
           description:
             'Invalid result variable detected. Please check the result variable configuration.'
         });
