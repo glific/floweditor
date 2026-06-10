@@ -1,15 +1,28 @@
 import Flow from 'components/flow/Flow';
 import { FlowTypes, Types } from 'config/interfaces';
-import { Case, Category, FlowDefinition, FlowPosition, RouterTypes, SendMsg } from 'flowTypes';
 import {
+  Case,
+  Category,
+  Exit,
+  FlowDefinition,
+  FlowIssueType,
+  FlowPosition,
+  RouterTypes,
+  SendMsg
+} from 'flowTypes';
+import {
+  cloneNodeWithNewUUIDs,
   createEmptyNode,
+  detectCrossFlowIssues,
   getCollisions,
   getFlowComponents,
   getLocalizations,
   getOrderedNodes,
   getUniqueDestinations,
-  guessNodeType
+  guessNodeType,
+  resolveResultNames
 } from 'store/helpers';
+import { AssetStore, AssetType, RenderNode, RenderNodeMap } from 'store/flowContext';
 import {
   createAirtimeTransferNode,
   createCallResthookAction,
@@ -177,6 +190,251 @@ describe('helpers', () => {
         expect(ghost.node.router).toBeUndefined();
         expect(ghost.node.actions[0].type).toBe(Types.send_msg);
       });
+    });
+  });
+});
+
+describe('copy-paste helpers', () => {
+  const makeSimpleNode = (): RenderNode => ({
+    node: {
+      uuid: 'node-1',
+      actions: [{ uuid: 'action-1', type: Types.send_msg } as any],
+      exits: [{ uuid: 'exit-1', destination_uuid: 'other-node' }]
+    },
+    ui: { position: { left: 100, top: 200 }, type: Types.send_msg },
+    inboundConnections: { 'prev-node': 'prev-exit' },
+    ghost: true
+  });
+
+  const makeRouterNode = (): RenderNode => ({
+    node: {
+      uuid: 'router-node',
+      actions: [],
+      exits: [
+        { uuid: 'exit-a', destination_uuid: 'dest-a' },
+        { uuid: 'exit-b', destination_uuid: null }
+      ],
+      router: {
+        type: RouterTypes.switch,
+        result_name: 'my_result',
+        categories: [
+          { uuid: 'cat-1', name: 'Yes', exit_uuid: 'exit-a' },
+          { uuid: 'cat-2', name: 'No', exit_uuid: 'exit-b' }
+        ],
+        cases: [{ uuid: 'case-1', type: 'has_any_word' as any, category_uuid: 'cat-1' }],
+        operand: '@input.text',
+        default_category_uuid: 'cat-2'
+      } as any
+    },
+    ui: { position: { left: 0, top: 0 }, type: Types.wait_for_response },
+    inboundConnections: {}
+  });
+
+  describe('cloneNodeWithNewUUIDs', () => {
+    it('assigns new uuid to node', () => {
+      const source = makeSimpleNode();
+      const cloned = cloneNodeWithNewUUIDs(source);
+      expect(cloned.node.uuid).not.toBe(source.node.uuid);
+    });
+
+    it('assigns new uuid to each action', () => {
+      const source = makeSimpleNode();
+      const cloned = cloneNodeWithNewUUIDs(source);
+      expect(cloned.node.actions[0].uuid).not.toBe(source.node.actions[0].uuid);
+    });
+
+    it('assigns new uuid to each exit and nulls destination_uuid', () => {
+      const source = makeSimpleNode();
+      const cloned = cloneNodeWithNewUUIDs(source);
+      expect(cloned.node.exits[0].uuid).not.toBe(source.node.exits[0].uuid);
+      expect(cloned.node.exits[0].destination_uuid).toBeNull();
+    });
+
+    it('remaps category and case UUIDs on router nodes', () => {
+      const source = makeRouterNode();
+      const cloned = cloneNodeWithNewUUIDs(source);
+      const router = cloned.node.router as any;
+      expect(router.categories[0].uuid).not.toBe('cat-1');
+      expect(router.categories[0].exit_uuid).not.toBe('exit-a');
+      expect(router.cases[0].uuid).not.toBe('case-1');
+      expect(router.cases[0].category_uuid).not.toBe('cat-1');
+      expect(router.default_category_uuid).not.toBe('cat-2');
+    });
+
+    it('resets inboundConnections to empty object', () => {
+      const source = makeSimpleNode();
+      const cloned = cloneNodeWithNewUUIDs(source);
+      expect(cloned.inboundConnections).toEqual({});
+    });
+
+    it('deletes ghost property', () => {
+      const source = makeSimpleNode();
+      const cloned = cloneNodeWithNewUUIDs(source);
+      expect(cloned.ghost).toBeUndefined();
+    });
+
+    it('does not mutate the source node', () => {
+      const source = makeSimpleNode();
+      const originalUUID = source.node.uuid;
+      cloneNodeWithNewUUIDs(source);
+      expect(source.node.uuid).toBe(originalUUID);
+    });
+
+    it('remaps wait.timeout.category_uuid to the new category uuid', () => {
+      const source: RenderNode = {
+        node: {
+          uuid: 'wfr-node',
+          actions: [],
+          exits: [
+            { uuid: 'exit-yes', destination_uuid: null },
+            { uuid: 'exit-timeout', destination_uuid: null }
+          ],
+          router: {
+            type: RouterTypes.switch,
+            categories: [
+              { uuid: 'cat-yes', name: 'Yes', exit_uuid: 'exit-yes' },
+              { uuid: 'cat-timeout', name: 'Timeout', exit_uuid: 'exit-timeout' }
+            ],
+            cases: [] as any,
+            operand: '@input.text',
+            default_category_uuid: 'cat-yes',
+            wait: {
+              type: 'msg' as any,
+              timeout: { category_uuid: 'cat-timeout', seconds: 300 }
+            }
+          } as any
+        },
+        ui: { position: { left: 0, top: 0 }, type: Types.wait_for_response },
+        inboundConnections: {}
+      };
+
+      const cloned = cloneNodeWithNewUUIDs(source);
+      const router = cloned.node.router as any;
+      const newTimeoutCatUUID = router.wait.timeout.category_uuid;
+
+      expect(newTimeoutCatUUID).not.toBe('cat-timeout');
+      const matchingCategory = router.categories.find((c: any) => c.uuid === newTimeoutCatUUID);
+      expect(matchingCategory).toBeDefined();
+      expect(matchingCategory.name).toBe('Timeout');
+    });
+  });
+
+  describe('resolveResultNames', () => {
+    const emptyNodes: RenderNodeMap = {};
+
+    it('renames set_run_result action name with copy_of_ prefix', () => {
+      const node = {
+        uuid: 'n1',
+        actions: [{ uuid: 'a1', type: Types.set_run_result, name: 'my_result', value: '' } as any],
+        exits: [] as Exit[]
+      };
+      const resolved = resolveResultNames(node, emptyNodes);
+      expect((resolved.actions[0] as any).name).toBe('copy_of_my_result');
+    });
+
+    it('renames router result_name with copy_of_ prefix', () => {
+      const node = makeRouterNode().node;
+      const resolved = resolveResultNames(node, emptyNodes);
+      expect(resolved.router.result_name).toBe('copy_of_my_result');
+    });
+
+    it('increments to _01 when copy_of_ name already exists', () => {
+      const existingNode: RenderNode = {
+        node: {
+          uuid: 'existing',
+          actions: [
+            { uuid: 'a0', type: Types.set_run_result, name: 'copy_of_my_result', value: '' } as any
+          ],
+          exits: []
+        },
+        ui: { position: { left: 0, top: 0 }, type: Types.send_msg },
+        inboundConnections: {}
+      };
+      const node = {
+        uuid: 'n1',
+        actions: [{ uuid: 'a1', type: Types.set_run_result, name: 'my_result', value: '' } as any],
+        exits: [] as Exit[]
+      };
+      const resolved = resolveResultNames(node, { existing: existingNode });
+      expect((resolved.actions[0] as any).name).toBe('copy_of_my_result_01');
+    });
+
+    it('does not mutate the input node', () => {
+      const node = {
+        uuid: 'n1',
+        actions: [{ uuid: 'a1', type: Types.set_run_result, name: 'my_result', value: '' } as any],
+        exits: [] as Exit[]
+      };
+      resolveResultNames(node, emptyNodes);
+      expect((node.actions[0] as any).name).toBe('my_result');
+    });
+
+    it('treats names with spaces/hyphens as collisions when they snakify to the same key', () => {
+      // "copy of my_result" snakifies to "copy_of_my_result" — same as "copy_of_my_result"
+      const existingNode: RenderNode = {
+        node: {
+          uuid: 'existing',
+          actions: [
+            { uuid: 'a0', type: Types.set_run_result, name: 'copy of my_result', value: '' } as any
+          ],
+          exits: []
+        },
+        ui: { position: { left: 0, top: 0 }, type: Types.send_msg },
+        inboundConnections: {}
+      };
+      const node = {
+        uuid: 'n1',
+        actions: [{ uuid: 'a1', type: Types.set_run_result, name: 'my_result', value: '' } as any],
+        exits: [] as Exit[]
+      };
+      const resolved = resolveResultNames(node, { existing: existingNode });
+      // "copy_of_my_result" collides with "copy of my_result" after snakify, so should increment
+      expect((resolved.actions[0] as any).name).toBe('copy_of_my_result_01');
+    });
+  });
+
+  describe('detectCrossFlowIssues', () => {
+    const assetStoreWithResult = (key: string): AssetStore =>
+      ({
+        results: {
+          type: AssetType.Result,
+          items: { [key]: { id: key, name: key, type: AssetType.Result } }
+        }
+      } as any);
+
+    it('returns empty array when all @results references exist', () => {
+      const node = {
+        uuid: 'n1',
+        actions: [{ uuid: 'a1', type: Types.send_msg, text: 'Hello @results.my_result' } as any],
+        exits: [] as Exit[]
+      };
+      const issues = detectCrossFlowIssues(node, assetStoreWithResult('my_result'));
+      expect(issues).toHaveLength(0);
+    });
+
+    it('returns an issue for a missing @results reference', () => {
+      const node = {
+        uuid: 'n1',
+        actions: [{ uuid: 'a1', type: Types.send_msg, text: 'Hello @results.missing_var' } as any],
+        exits: [] as Exit[]
+      };
+      const issues = detectCrossFlowIssues(node, assetStoreWithResult('other_result'));
+      expect(issues).toHaveLength(1);
+      expect(issues[0].type).toBe(FlowIssueType.INVALID_RESULT);
+      expect(issues[0].node_uuid).toBe('n1');
+    });
+
+    it('does not flag the node own result name if it is not yet in assetStore', () => {
+      const node = {
+        uuid: 'n1',
+        actions: [
+          { uuid: 'a1', type: Types.set_run_result, name: 'fresh_result', value: '' } as any
+        ],
+        exits: [] as Exit[]
+      };
+      const emptyStore: AssetStore = { results: { type: AssetType.Result, items: {} } } as any;
+      const issues = detectCrossFlowIssues(node, emptyStore);
+      expect(issues).toHaveLength(0);
     });
   });
 });

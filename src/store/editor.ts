@@ -3,6 +3,11 @@ import ActionTypes, { UpdateEditorState } from 'store/actionTypes';
 import Constants from 'store/constants';
 import { Asset, RenderNode } from 'store/flowContext';
 
+export interface ToastMessage {
+  message: string;
+  duration?: number;
+}
+
 // tslint:disable:no-shadowed-variable
 export interface DragSelection {
   startX?: number;
@@ -77,6 +82,7 @@ export interface EditorState {
 
   scrollToNode: string;
   scrollToAction: string;
+  toast: ToastMessage | null;
 }
 
 export interface ModalMessage {
@@ -118,7 +124,8 @@ export const initialState: EditorState = {
   visible: true,
 
   scrollToNode: null,
-  scrollToAction: null
+  scrollToAction: null,
+  toast: null
 };
 
 // Action Creator

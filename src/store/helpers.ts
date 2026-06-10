@@ -9,6 +9,7 @@ import { getActivity } from 'external';
 import {
   AddLabels,
   AnyAction,
+  Case,
   Category,
   ChangeGroups,
   FlowDefinition,
@@ -32,6 +33,7 @@ import { Activity, EditorState, Warnings } from 'store/editor';
 import {
   Asset,
   AssetMap,
+  AssetStore,
   AssetType,
   RenderNode,
   RenderNodeMap,
@@ -732,4 +734,133 @@ export const fetchFlowActivity = (
       fetchFlowActivity(endpoint, dispatch, getState, uuid);
     }, 1000);
   }
+};
+
+export const cloneNodeWithNewUUIDs = (source: RenderNode): RenderNode => {
+  const cloned: RenderNode = JSON.parse(JSON.stringify(source));
+  const uuidMap: { [old: string]: string } = {};
+
+  uuidMap[cloned.node.uuid] = createUUID();
+  (cloned.node.actions || []).forEach((action: AnyAction) => {
+    uuidMap[action.uuid] = createUUID();
+  });
+  (cloned.node.exits || []).forEach(exit => {
+    uuidMap[exit.uuid] = createUUID();
+  });
+  const router = cloned.node.router as SwitchRouter;
+  if (router?.categories) {
+    router.categories.forEach((cat: Category) => {
+      uuidMap[cat.uuid] = createUUID();
+    });
+  }
+  if (router?.cases) {
+    router.cases.forEach((c: Case) => {
+      uuidMap[c.uuid] = createUUID();
+    });
+  }
+
+  cloned.node.uuid = uuidMap[cloned.node.uuid];
+  (cloned.node.actions || []).forEach((action: AnyAction) => {
+    action.uuid = uuidMap[action.uuid];
+  });
+  (cloned.node.exits || []).forEach(exit => {
+    exit.uuid = uuidMap[exit.uuid];
+    exit.destination_uuid = null;
+  });
+  if (router?.categories) {
+    router.categories.forEach((cat: Category) => {
+      cat.uuid = uuidMap[cat.uuid];
+      cat.exit_uuid = uuidMap[cat.exit_uuid];
+    });
+    if (router.wait?.timeout?.category_uuid) {
+      router.wait.timeout.category_uuid = uuidMap[router.wait.timeout.category_uuid];
+    }
+  }
+  if (router?.cases) {
+    router.cases.forEach((c: Case) => {
+      c.uuid = uuidMap[c.uuid];
+      c.category_uuid = uuidMap[c.category_uuid];
+    });
+    if (router.default_category_uuid) {
+      router.default_category_uuid = uuidMap[router.default_category_uuid];
+    }
+  }
+
+  cloned.inboundConnections = {};
+  delete cloned.ghost;
+  return cloned;
+};
+
+export const resolveResultNames = (node: FlowNode, existingNodes: RenderNodeMap): FlowNode => {
+  const cloned: FlowNode = JSON.parse(JSON.stringify(node));
+
+  const usedKeys = new Set<string>();
+  Object.values(existingNodes).forEach(rn => {
+    const routerName = getResultName(rn.node);
+    if (routerName) usedKeys.add(snakify(routerName));
+    rn.node.actions.forEach((action: any) => {
+      if (action.type === Types.set_run_result && action.name) {
+        usedKeys.add(snakify(action.name));
+      }
+    });
+  });
+
+  const nextName = (original: string): string => {
+    const base = `copy_of_${original}`;
+    if (!usedKeys.has(snakify(base))) return base;
+    let i = 1;
+    while (true) {
+      const candidate = `${base}_${String(i).padStart(2, '0')}`;
+      if (!usedKeys.has(snakify(candidate))) return candidate;
+      i++;
+    }
+  };
+
+  cloned.actions.forEach((action: any) => {
+    if (action.type === Types.set_run_result && action.name) {
+      action.name = nextName(action.name);
+      usedKeys.add(snakify(action.name));
+    }
+  });
+
+  if (cloned.router?.result_name) {
+    cloned.router.result_name = nextName(cloned.router.result_name);
+    usedKeys.add(snakify(cloned.router.result_name));
+  }
+
+  return cloned;
+};
+
+export const detectCrossFlowIssues = (node: FlowNode, assetStore: AssetStore): FlowIssue[] => {
+  const issues: FlowIssue[] = [];
+  const resultsRegex = /@results\.([a-zA-Z0-9_]+)/g;
+  const knownResults = assetStore?.results?.items || {};
+
+  const check = (text: string, actionUUID?: string) => {
+    let match: RegExpExecArray;
+    resultsRegex.lastIndex = 0;
+    while ((match = resultsRegex.exec(text)) !== null) {
+      const key = match[1];
+      if (!knownResults[key]) {
+        issues.push({
+          type: FlowIssueType.INVALID_RESULT,
+          node_uuid: node.uuid,
+          action_uuid: actionUUID ?? '',
+          description:
+            'Invalid result variable detected. Please check the result variable configuration.'
+        });
+      }
+    }
+  };
+
+  node.actions.forEach(action => {
+    check(JSON.stringify(action), action.uuid);
+  });
+
+  const switchRouter = node.router as SwitchRouter;
+  if (switchRouter?.operand) {
+    check(switchRouter.operand);
+  }
+
+  return issues;
 };

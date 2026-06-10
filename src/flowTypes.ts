@@ -131,7 +131,8 @@ export interface FlowMetadata {
 export enum FlowIssueType {
   MISSING_DEPENDENCY = 'missing_dependency',
   LEGACY_EXTRA = 'legacy_extra',
-  INVALID_REGEX = 'invalid_regex'
+  INVALID_REGEX = 'invalid_regex',
+  INVALID_RESULT = 'invalid_result'
 }
 
 export interface User {

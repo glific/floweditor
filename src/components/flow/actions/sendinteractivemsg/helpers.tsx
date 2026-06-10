@@ -16,7 +16,7 @@ export const initializeForm = (settings: NodeEditorSettings): SendInteractiveMsg
   if (settings.originalAction && settings.originalAction.type === Types.send_interactive_msg) {
     const action = settings.originalAction as SendInteractiveMsg;
     let { id, name, expression, params, paramsCount } = action;
-    const interactive_content = JSON.parse(action.text);
+    const interactive_content = action.text ? JSON.parse(action.text) : null;
 
     const labels = action.labels
       ? action.labels.map((label: Label) => {
