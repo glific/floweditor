@@ -52,6 +52,26 @@ describe(TitleBar.name, () => {
       });
     });
 
+    describe('copy icon', () => {
+      it('renders copy button with data-testid when onCopy is provided', () => {
+        const onCopy = jest.fn();
+        const { getByTestId } = render(<TitleBar {...baseProps} onCopy={onCopy} />);
+        expect(getByTestId('copy-icon')).toBeTruthy();
+      });
+
+      it('calls onCopy when copy button is clicked', () => {
+        const onCopy = jest.fn();
+        const { getByTestId } = render(<TitleBar {...baseProps} onCopy={onCopy} />);
+        fireEvent.mouseUp(getByTestId('copy-icon'));
+        expect(onCopy).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not render active copy button when onCopy is not provided', () => {
+        const { queryByTestId } = render(<TitleBar {...baseProps} />);
+        expect(queryByTestId('copy-icon')).toBeNull();
+      });
+    });
+
     describe('confirmation', () => {
       it('should render confirmation markup', () => {
         const { baseElement, getByTestId } = render(

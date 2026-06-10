@@ -83,4 +83,39 @@ describe(Canvas.name, () => {
 
     expect(onDragging).toMatchCallSnapshot();
   });
+
+  describe('Ctrl+V paste', () => {
+    it('calls pasteNode with snapped mouse position on Ctrl+V', () => {
+      const pasteNode = jest.fn();
+      const { getByTestId } = render(<Canvas {...baseProps} pasteNode={pasteNode} />);
+
+      // move mouse to a known canvas position
+      fireEvent.mouseMove(getByTestId('canvas'), { pageX: 120, pageY: 230 });
+
+      fireEvent.keyDown(document, { key: 'v', ctrlKey: true });
+      expect(pasteNode).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call pasteNode when nodeEditorOpen is true', () => {
+      const pasteNode = jest.fn();
+      render(<Canvas {...baseProps} pasteNode={pasteNode} nodeEditorOpen={true} />);
+
+      fireEvent.keyDown(document, { key: 'v', ctrlKey: true });
+      expect(pasteNode).not.toHaveBeenCalled();
+    });
+
+    it('does not call pasteNode when an input is focused', () => {
+      const pasteNode = jest.fn();
+      render(<Canvas {...baseProps} pasteNode={pasteNode} />);
+
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      input.focus();
+
+      fireEvent.keyDown(document, { key: 'v', ctrlKey: true });
+      expect(pasteNode).not.toHaveBeenCalled();
+
+      document.body.removeChild(input);
+    });
+  });
 });
