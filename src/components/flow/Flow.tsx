@@ -32,6 +32,8 @@ import {
   OnRemoveNodes,
   OnUpdateCanvasPositions,
   onUpdateCanvasPositions,
+  pasteNode,
+  PasteNode,
   resetNodeEditingState,
   UpdateConnection,
   updateConnection,
@@ -50,9 +52,11 @@ import {
 import Debug from 'utils/debug';
 
 import styles from './Flow.module.scss';
+import Toast from 'components/toast/Toast';
 import { Trans } from 'react-i18next';
 import { PopTabType } from 'config/interfaces';
 import i18n from 'config/i18n';
+import { ToastMessage } from 'store/editor';
 
 declare global {
   interface Window {
@@ -78,6 +82,8 @@ export interface FlowStoreProps {
   onOpenNodeEditor: OnOpenNodeEditor;
   onUpdateCanvasPositions: OnUpdateCanvasPositions;
   onRemoveNodes: OnRemoveNodes;
+  pasteNode: PasteNode;
+  toast: ToastMessage | null;
   resetNodeEditingState: NoParamsAC;
   onConnectionDrag: OnConnectionDrag;
   updateSticky: UpdateSticky;
@@ -429,8 +435,17 @@ export class Flow extends React.PureComponent<FlowStoreProps, {}> {
           onDoubleClick={this.handleDoubleClick}
           onUpdatePositions={this.props.onUpdateCanvasPositions}
           onLoaded={this.handleCanvasLoaded}
+          pasteNode={this.props.pasteNode}
+          nodeEditorOpen={!!this.props.nodeEditorSettings}
         ></Canvas>
         <div id="activity_recent_contacts"></div>
+        {this.props.toast && (
+          <Toast
+            message={this.props.toast.message}
+            duration={this.props.toast.duration}
+            onDismiss={() => this.props.mergeEditorState({ toast: null })}
+          />
+        )}
       </div>
     );
   }
@@ -439,7 +454,7 @@ export class Flow extends React.PureComponent<FlowStoreProps, {}> {
 /* istanbul ignore next */
 const mapStateToProps = ({
   flowContext: { definition, metadata, nodes },
-  editorState: { ghostNode, debug, translating, popped, dragActive },
+  editorState: { ghostNode, debug, translating, popped, dragActive, toast },
   // tslint:disable-next-line: no-shadowed-variable
   nodeEditor: { settings }
 }: AppState) => {
@@ -452,7 +467,8 @@ const mapStateToProps = ({
     debug,
     translating,
     popped,
-    dragActive
+    dragActive,
+    toast
   };
 };
 
@@ -467,12 +483,10 @@ const mapDispatchToProps = (dispatch: DispatchWithState) =>
       onUpdateCanvasPositions,
       onRemoveNodes,
       updateConnection,
-      updateSticky
+      updateSticky,
+      pasteNode
     },
     dispatch
   );
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Flow);
+export default connect(mapStateToProps, mapDispatchToProps)(Flow);

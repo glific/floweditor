@@ -37,6 +37,12 @@
     }
   }
 
+  .copy_button {
+    visibility: hidden;
+    width: 20px;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
   .remove_button {
     padding-right: 0px;
     visibility: hidden;
@@ -53,6 +59,10 @@
   }
 
   &:hover {
+    .copy_button {
+      visibility: visible;
+    }
+
     .remove_button {
       visibility: visible;
     }
