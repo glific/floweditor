@@ -7,6 +7,7 @@ import i18n from 'config/i18n';
 
 export interface TitleBarProps {
   nodeUUID?: string;
+  nodeType?: string;
   title: string;
   onRemoval(event: React.MouseEvent<HTMLElement>): any;
   __className?: string;
@@ -118,6 +119,8 @@ export default class TitleBar extends React.Component<TitleBarProps, TitleBarSta
             this.handleMouseUpCapture
           )}
           data-testid="copy-icon"
+          data-ph-capture-attribute-event-name="node_copied"
+          data-ph-capture-attribute-node-type={this.props.nodeType}
         >
           <temba-icon name="copy" size="1.2"></temba-icon>
         </div>

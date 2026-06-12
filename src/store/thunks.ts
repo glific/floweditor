@@ -1223,6 +1223,7 @@ export interface ClipboardPayload {
   primary: RenderNode;
   paired?: RenderNode;
   pairedOffset?: FlowPosition;
+  sourceFlowUUID?: string;
 }
 
 export type CopyNode = (nodeUUID: string) => Thunk<void>;
@@ -1233,13 +1234,13 @@ export const copyNode = (nodeUUID: string) => (
   getState: GetState
 ): void => {
   const {
-    flowContext: { nodes }
+    flowContext: { nodes, definition }
   } = getState();
 
   const primary = nodes[nodeUUID];
   if (!primary) return;
 
-  const payload: ClipboardPayload = { primary };
+  const payload: ClipboardPayload = { primary, sourceFlowUUID: definition?.uuid };
 
   if (primary.node.actions?.[0]?.type === Types.send_interactive_msg) {
     const pairedUUID = primary.node.exits?.[0]?.destination_uuid;
@@ -1254,6 +1255,7 @@ export const copyNode = (nodeUUID: string) => (
   }
 
   localStorage.setItem(CLIPBOARD_KEY, JSON.stringify(payload));
+
   dispatch(
     mergeEditorState({ toast: { message: 'Node copied. Ctrl+V to paste.', duration: 5000 } })
   );
@@ -1278,15 +1280,17 @@ export const pasteNode = (position: FlowPosition) => (
     return;
   }
 
-  const { primary, paired, pairedOffset } = payload;
+  const { primary, paired, pairedOffset, sourceFlowUUID } = payload;
 
   const {
-    flowContext: { nodes, assetStore }
+    flowContext: { nodes, assetStore, definition }
   } = getState();
 
   const cloned = cloneNodeWithNewUUIDs(primary);
   cloned.node = resolveResultNames(cloned.node, nodes);
   cloned.ui = { ...cloned.ui, position };
+
+  const isCrossFlow = !!sourceFlowUUID && sourceFlowUUID !== definition?.uuid;
 
   let updatedNodes = nodes;
 
@@ -1319,6 +1323,13 @@ export const pasteNode = (position: FlowPosition) => (
 
     dispatch(updateAssets(mutators.addFlowResult(assetStore, cloned.node)));
   }
+
+  const nodeType = primary.node.actions?.[0]?.type ?? primary.ui?.type ?? 'unknown';
+  (window as any).posthog?.capture('node_pasted', {
+    node_type: nodeType,
+    is_cross_flow: isCrossFlow,
+    flow_uuid: definition?.uuid
+  });
 
   markDirty();
   dispatch(mergeEditorState({ toast: null }));

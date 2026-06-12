@@ -201,6 +201,7 @@ export class ActionWrapper extends React.Component<ActionWrapperProps> {
       <>
         <TitleBar
           nodeUUID={this.props.nodeUUID}
+          nodeType={this.props.action.type}
           __className={titleBarClass}
           title={name}
           onRemoval={this.handleRemoval}
