@@ -119,7 +119,7 @@ export default class TitleBar extends React.Component<TitleBarProps, TitleBarSta
             this.handleMouseUpCapture
           )}
           data-testid="copy-icon"
-          data-ph-capture-attribute-event-name="node_copied"
+          data-ph-id="node-copy-btn"
           data-ph-capture-attribute-node-type={this.props.nodeType}
         >
           <temba-icon name="copy" size="1.2"></temba-icon>
@@ -144,6 +144,8 @@ export default class TitleBar extends React.Component<TitleBarProps, TitleBarSta
             this.handleMouseUpCapture
           )}
           data-testid={removeIconSpecId}
+          data-ph-id="node-remove-btn"
+          data-ph-capture-attribute-node-type={this.props.nodeType}
         >
           <temba-icon name="delete_small" size="1.2"></temba-icon>
         </div>
