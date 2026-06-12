@@ -377,7 +377,6 @@ export class NodeComp extends React.PureComponent<NodeProps> {
                   ]
                 }
                 nodeUUID={showLabel && this.props.nodeUUID}
-                nodeType={type}
                 showRemoval={!this.props.translating}
                 onRemoval={this.handleRemoval}
                 onCopy={!this.props.translating ? this.handleCopy : undefined}
