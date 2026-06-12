@@ -167,7 +167,11 @@ export default class TitleBar extends React.Component<TitleBarProps, TitleBarSta
             )}
             data-testid={confirmRemovalSpecId}
           >
-            <temba-icon name="delete_small" size="1.2"></temba-icon>
+            <temba-icon
+              name="delete_small"
+              size="1.2"
+              data-ph-capture-attribute-some-key="test"
+            ></temba-icon>
           </div>
         </div>
       );
