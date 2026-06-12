@@ -158,15 +158,21 @@ export class Flow extends React.PureComponent<FlowStoreProps, {}> {
     return win.isMobile && win.isMobile();
   }
 
-  private handleBeforeUnload(): void {
-    const { notPasted } = getCopyPasteSessionStats();
-    if (notPasted > 0) {
-      (window as any).posthog?.capture('node_copied_not_pasted', { count: notPasted });
+  private handleVisibilityChange(): void {
+    if (document.visibilityState === 'hidden') {
+      const { notPasted } = getCopyPasteSessionStats();
+      if (notPasted > 0) {
+        (window as any).posthog?.capture(
+          'node_copied_not_pasted',
+          { count: notPasted },
+          { transport: 'sendBeacon' }
+        );
+      }
     }
   }
 
   public componentDidMount(): void {
-    window.addEventListener('beforeunload', this.handleBeforeUnload);
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
     this.Plumber.bind('connection', (event: ConnectionEvent) =>
       this.props.updateConnection(event.sourceId, event.targetId)
     );
@@ -193,7 +199,7 @@ export class Flow extends React.PureComponent<FlowStoreProps, {}> {
   }
 
   public componentWillUnmount(): void {
-    window.removeEventListener('beforeunload', this.handleBeforeUnload);
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
     this.Plumber.reset();
     if ((window as any).activityTimeout) {
       clearTimeout((window as any).activityTimeout);
