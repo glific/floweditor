@@ -437,13 +437,15 @@ export const fetchFlow = (endpoints: Endpoints, uuid: string, forceSave = false)
 
   if (endpoints.copyNodeEnabled) {
     axios
-      .get(endpoints.copyNodeEnabled as string)
+      .get(endpoints.copyNodeEnabled)
       .then((response: any) => {
         dispatch(mergeEditorState({ copyNodeEnabled: !!response.data?.is_enabled }));
       })
       .catch(() => {
         dispatch(mergeEditorState({ copyNodeEnabled: false }));
       });
+  } else {
+    dispatch(mergeEditorState({ copyNodeEnabled: false }));
   }
 
   getFlowDetails(assetStore.revisions)
@@ -1257,7 +1259,8 @@ export const copyNode = (nodeUUID: string) => (
   const primary = nodes[nodeUUID];
   if (!primary) return;
 
-  let sourceLocalization = extractLocalizationForNode(definition.localization, primary);
+  const localization = definition?.localization || {};
+  let sourceLocalization = extractLocalizationForNode(localization, primary);
 
   const payload: ClipboardPayload = {
     primary,
@@ -1276,7 +1279,7 @@ export const copyNode = (nodeUUID: string) => (
       };
       sourceLocalization = mergeLocalizations(
         sourceLocalization,
-        extractLocalizationForNode(definition.localization, paired)
+        extractLocalizationForNode(localization, paired)
       );
       payload.sourceLocalization = sourceLocalization;
     }
@@ -1322,16 +1325,15 @@ export const pasteNode = (position: FlowPosition) => (
     flowContext: { nodes, assetStore, definition }
   } = getState();
 
+  const localization = definition?.localization || {};
+
   const cloned = cloneNodeWithNewUUIDs(primary);
   cloned.node = resolveResultNames(cloned.node, nodes);
   cloned.ui = { ...cloned.ui, position };
 
   const primaryUUIDMap = buildUUIDMap(primary, cloned);
-  const remappedPrimary = remapLocalization(
-    sourceLocalization || definition.localization,
-    primaryUUIDMap
-  );
-  let updatedLocalization = mergeLocalizations(definition.localization, remappedPrimary);
+  const remappedPrimary = remapLocalization(sourceLocalization || localization, primaryUUIDMap);
+  let updatedLocalization = mergeLocalizations(localization, remappedPrimary);
 
   let updatedNodes = nodes;
 
@@ -1351,7 +1353,7 @@ export const pasteNode = (position: FlowPosition) => (
     clonedPaired.inboundConnections = { [cloned.node.exits[0].uuid]: cloned.node.uuid };
 
     const remappedPaired = remapLocalization(
-      sourceLocalization || definition.localization,
+      sourceLocalization || localization,
       buildUUIDMap(paired, clonedPaired)
     );
     updatedLocalization = mergeLocalizations(updatedLocalization, remappedPaired);
@@ -1371,7 +1373,7 @@ export const pasteNode = (position: FlowPosition) => (
     dispatch(updateAssets(mutators.addFlowResult(assetStore, cloned.node)));
   }
 
-  if (updatedLocalization !== definition.localization) {
+  if (updatedLocalization !== localization) {
     dispatch(updateDefinition({ ...definition, localization: updatedLocalization }));
   }
 

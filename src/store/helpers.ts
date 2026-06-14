@@ -820,20 +820,20 @@ export const remapLocalization = (
   localization: LocalizationMap,
   uuidMap: Record<string, string>
 ): LocalizationMap => {
-  let changed = false;
   const result: LocalizationMap = {};
   Object.keys(localization).forEach(lang => {
     const langMap = localization[lang];
-    const newLangMap: { [uuid: string]: any } = { ...langMap };
+    const newLangMap: { [uuid: string]: any } = {};
     Object.keys(uuidMap).forEach(oldUUID => {
       if (langMap[oldUUID]) {
         newLangMap[uuidMap[oldUUID]] = langMap[oldUUID];
-        changed = true;
       }
     });
-    result[lang] = newLangMap;
+    if (Object.keys(newLangMap).length > 0) {
+      result[lang] = newLangMap;
+    }
   });
-  return changed ? result : localization;
+  return result;
 };
 
 export const extractLocalizationForNode = (

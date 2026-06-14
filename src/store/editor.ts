@@ -83,7 +83,7 @@ export interface EditorState {
   scrollToNode: string;
   scrollToAction: string;
   toast: ToastMessage | null;
-  copyNodeEnabled?: boolean;
+  copyNodeEnabled: boolean;
 }
 
 export interface ModalMessage {
@@ -126,7 +126,8 @@ export const initialState: EditorState = {
 
   scrollToNode: null,
   scrollToAction: null,
-  toast: null
+  toast: null,
+  copyNodeEnabled: false
 };
 
 // Action Creator
