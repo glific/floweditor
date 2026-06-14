@@ -1219,13 +1219,6 @@ export const updateTranslationFilters = (translationFilters: { categories: boole
 
 export const CLIPBOARD_KEY = 'glific_clipboard_node';
 
-let sessionCopyCount = 0;
-let sessionPasteCount = 0;
-
-export const getCopyPasteSessionStats = () => ({
-  notPasted: sessionCopyCount - sessionPasteCount
-});
-
 export interface ClipboardPayload {
   primary: RenderNode;
   paired?: RenderNode;
@@ -1263,7 +1256,6 @@ export const copyNode = (nodeUUID: string) => (
 
   localStorage.setItem(CLIPBOARD_KEY, JSON.stringify(payload));
 
-  sessionCopyCount++;
   const nodeType = primary.node.actions?.[0]?.type ?? primary.ui?.type ?? 'unknown';
   const actionCount = primary.node.actions?.length ?? 0;
   (window as any).posthog?.capture('node_copied', {
@@ -1339,12 +1331,12 @@ export const pasteNode = (position: FlowPosition) => (
     dispatch(updateAssets(mutators.addFlowResult(assetStore, cloned.node)));
   }
 
-  sessionPasteCount++;
   const nodeType = primary.node.actions?.[0]?.type ?? primary.ui?.type ?? 'unknown';
   (window as any).posthog?.capture('node_pasted', {
     node_type: nodeType,
     is_cross_flow: isCrossFlow,
-    flow_uuid: definition?.uuid
+    flow_uuid: definition?.uuid,
+    source_flow_uuid: isCrossFlow ? sourceFlowUUID : undefined
   });
 
   markDirty();

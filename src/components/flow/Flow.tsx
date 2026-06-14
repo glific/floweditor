@@ -34,7 +34,6 @@ import {
   onUpdateCanvasPositions,
   pasteNode,
   PasteNode,
-  getCopyPasteSessionStats,
   resetNodeEditingState,
   UpdateConnection,
   updateConnection,
@@ -158,21 +157,7 @@ export class Flow extends React.PureComponent<FlowStoreProps, {}> {
     return win.isMobile && win.isMobile();
   }
 
-  private handleVisibilityChange(): void {
-    if (document.visibilityState === 'hidden') {
-      const { notPasted } = getCopyPasteSessionStats();
-      if (notPasted > 0) {
-        (window as any).posthog?.capture(
-          'node_copied_not_pasted',
-          { count: notPasted },
-          { transport: 'sendBeacon' }
-        );
-      }
-    }
-  }
-
   public componentDidMount(): void {
-    document.addEventListener('visibilitychange', this.handleVisibilityChange);
     this.Plumber.bind('connection', (event: ConnectionEvent) =>
       this.props.updateConnection(event.sourceId, event.targetId)
     );
@@ -199,7 +184,6 @@ export class Flow extends React.PureComponent<FlowStoreProps, {}> {
   }
 
   public componentWillUnmount(): void {
-    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
     this.Plumber.reset();
     if ((window as any).activityTimeout) {
       clearTimeout((window as any).activityTimeout);
