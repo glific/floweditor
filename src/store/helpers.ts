@@ -26,7 +26,8 @@ import {
   WaitTypes,
   SendMsg,
   FlowIssue,
-  FlowIssueType
+  FlowIssueType,
+  LocalizationMap
 } from 'flowTypes';
 import Localization, { LocalizedObject } from 'services/Localization';
 import { Activity, EditorState, Warnings } from 'store/editor';
@@ -789,6 +790,85 @@ export const cloneNodeWithNewUUIDs = (source: RenderNode): RenderNode => {
   cloned.inboundConnections = {};
   delete cloned.ghost;
   return cloned;
+};
+
+export const buildUUIDMap = (source: RenderNode, cloned: RenderNode): Record<string, string> => {
+  const map: Record<string, string> = {};
+  map[source.node.uuid] = cloned.node.uuid;
+  (source.node.actions || []).forEach((a, i) => {
+    map[a.uuid] = cloned.node.actions[i].uuid;
+  });
+  (source.node.exits || []).forEach((e, i) => {
+    map[e.uuid] = cloned.node.exits[i].uuid;
+  });
+  const sr = source.node.router as SwitchRouter;
+  const cr = cloned.node.router as SwitchRouter;
+  if (sr?.categories) {
+    sr.categories.forEach((c, i) => {
+      map[c.uuid] = cr.categories[i].uuid;
+    });
+  }
+  if (sr?.cases) {
+    sr.cases.forEach((c, i) => {
+      map[c.uuid] = cr.cases[i].uuid;
+    });
+  }
+  return map;
+};
+
+export const remapLocalization = (
+  localization: LocalizationMap,
+  uuidMap: Record<string, string>
+): LocalizationMap => {
+  let changed = false;
+  const result: LocalizationMap = {};
+  Object.keys(localization).forEach(lang => {
+    const langMap = localization[lang];
+    const newLangMap: { [uuid: string]: any } = { ...langMap };
+    Object.keys(uuidMap).forEach(oldUUID => {
+      if (langMap[oldUUID]) {
+        newLangMap[uuidMap[oldUUID]] = langMap[oldUUID];
+        changed = true;
+      }
+    });
+    result[lang] = newLangMap;
+  });
+  return changed ? result : localization;
+};
+
+export const extractLocalizationForNode = (
+  localization: LocalizationMap,
+  node: RenderNode
+): LocalizationMap => {
+  const relevant = new Set<string>();
+  relevant.add(node.node.uuid);
+  (node.node.actions || []).forEach((a: any) => relevant.add(a.uuid));
+  (node.node.exits || []).forEach((e: any) => relevant.add(e.uuid));
+  const router = node.node.router as SwitchRouter;
+  if (router?.categories) router.categories.forEach(c => relevant.add(c.uuid));
+  if (router?.cases) router.cases.forEach(c => relevant.add(c.uuid));
+
+  const result: LocalizationMap = {};
+  Object.keys(localization).forEach(lang => {
+    const filtered: { [uuid: string]: any } = {};
+    relevant.forEach(uuid => {
+      if (localization[lang][uuid]) filtered[uuid] = localization[lang][uuid];
+    });
+    if (Object.keys(filtered).length > 0) result[lang] = filtered;
+  });
+  return result;
+};
+
+export const mergeLocalizations = (
+  base: LocalizationMap,
+  overlay: LocalizationMap
+): LocalizationMap => {
+  if (!overlay || Object.keys(overlay).length === 0) return base;
+  const result = { ...base };
+  Object.keys(overlay).forEach(lang => {
+    result[lang] = { ...(result[lang] || {}), ...overlay[lang] };
+  });
+  return result;
 };
 
 export const resolveResultNames = (node: FlowNode, existingNodes: RenderNodeMap): FlowNode => {

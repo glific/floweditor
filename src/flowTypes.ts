@@ -53,6 +53,7 @@ export interface Endpoints {
   validateMedia: string;
   interactives: string;
   sheets: string;
+  copyNodeEnabled?: string | boolean;
 }
 
 export interface FlowEditorConfig {

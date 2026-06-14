@@ -62,6 +62,10 @@
     padding: $action_padding;
   }
 
+  &.send_interactive_msg {
+    width: 200px;
+  }
+
   &.call_classifier {
     padding: $action_padding;
     width: inherit;
