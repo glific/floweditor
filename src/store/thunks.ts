@@ -1287,11 +1287,11 @@ export const copyNode = (nodeUUID: string) => (
 
   localStorage.setItem(CLIPBOARD_KEY, JSON.stringify(payload));
   dispatch(
-    mergeEditorState({ toast: { message: 'Node copied. Ctrl+V to paste.', duration: 5000 } })
+    mergeEditorState({ toast: { message: 'Node copied. Cmd+V to paste.', duration: 5000 } })
   );
 
   const nodeType = primary.node.actions?.[0]?.type ?? primary.ui?.type ?? 'unknown';
-  (window as any).posthog?.capture('node_copied', {
+  (window as any).posthog?.capture('flow_node_copied', {
     node_type: nodeType,
     flow_uuid: definition?.uuid
   });
@@ -1379,7 +1379,7 @@ export const pasteNode = (position: FlowPosition) => (
 
   const isCrossFlow = !!sourceFlowUUID && sourceFlowUUID !== definition?.uuid;
   const nodeType = primary.node.actions?.[0]?.type ?? primary.ui?.type ?? 'unknown';
-  (window as any).posthog?.capture('node_pasted', {
+  (window as any).posthog?.capture('flow_node_pasted', {
     node_type: nodeType,
     is_cross_flow: isCrossFlow,
     flow_uuid: definition?.uuid
