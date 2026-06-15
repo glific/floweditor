@@ -75,6 +75,7 @@ import {
 import AppState from 'store/state';
 import { createUUID, hasString, NODE_SPACING, timeEnd, timeStart, ACTIVITY_INTERVAL } from 'utils';
 import axios, { AxiosError } from 'axios';
+import { track } from 'store/tracking';
 import i18n from 'config/i18n';
 import { TembaStore } from 'temba-components';
 
@@ -1291,7 +1292,7 @@ export const copyNode = (nodeUUID: string) => (
   );
 
   const nodeType = primary.node.actions?.[0]?.type ?? primary.ui?.type ?? 'unknown';
-  (window as any).posthog?.capture('flow_node_copied', {
+  track('flow_node_copied', {
     node_type: nodeType,
     flow_uuid: definition?.uuid
   });
@@ -1379,7 +1380,7 @@ export const pasteNode = (position: FlowPosition) => (
 
   const isCrossFlow = !!sourceFlowUUID && sourceFlowUUID !== definition?.uuid;
   const nodeType = primary.node.actions?.[0]?.type ?? primary.ui?.type ?? 'unknown';
-  (window as any).posthog?.capture('flow_node_pasted', {
+  track('flow_node_pasted', {
     node_type: nodeType,
     is_cross_flow: isCrossFlow,
     flow_uuid: definition?.uuid

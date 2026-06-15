@@ -75,6 +75,7 @@ export interface FlowEditorConfig {
   onLoad?: () => void;
   onActivityClicked?: (uuid: string) => void;
   onChangeLanguage?: (code: string, name: string) => void;
+  onEvent?: (event: string, properties: Record<string, any>) => void;
 
   // help links
   help: { [key: string]: string };
