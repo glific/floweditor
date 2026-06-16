@@ -1275,7 +1275,7 @@ export const copyNode = (nodeUUID: string) => (
 
   localStorage.setItem(CLIPBOARD_KEY, JSON.stringify(payload));
   dispatch(
-    mergeEditorState({ toast: { message: 'Node copied. Cmd+V to paste.', duration: 5000 } })
+    mergeEditorState({ toast: { message: 'Node copied. Cmd/Ctrl+V to paste.', duration: 5000 } })
   );
 
   const nodeType = primary.node.actions?.[0]?.type ?? primary.ui?.type ?? 'unknown';
