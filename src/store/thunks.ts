@@ -16,6 +16,7 @@ import {
   FlowDefinition,
   FlowNode,
   FlowPosition,
+  LocalizationMap,
   SendMsg,
   SetContactField,
   SetRunResult,
@@ -48,6 +49,10 @@ import {
 } from 'store/flowContext';
 import {
   cloneNodeWithNewUUIDs,
+  buildUUIDMap,
+  remapLocalization,
+  extractLocalizationForNode,
+  mergeLocalizations,
   createEmptyNode,
   fetchFlowActivity,
   getActionIndex,
@@ -70,6 +75,7 @@ import {
 import AppState from 'store/state';
 import { createUUID, hasString, NODE_SPACING, timeEnd, timeStart, ACTIVITY_INTERVAL } from 'utils';
 import { AxiosError } from 'axios';
+import { track } from 'store/tracking';
 import i18n from 'config/i18n';
 import { TembaStore } from 'temba-components';
 
@@ -1223,6 +1229,8 @@ export interface ClipboardPayload {
   primary: RenderNode;
   paired?: RenderNode;
   pairedOffset?: FlowPosition;
+  sourceFlowUUID?: string;
+  sourceLocalization?: LocalizationMap;
 }
 
 export type CopyNode = (nodeUUID: string) => Thunk<void>;
@@ -1233,13 +1241,20 @@ export const copyNode = (nodeUUID: string) => (
   getState: GetState
 ): void => {
   const {
-    flowContext: { nodes }
+    flowContext: { nodes, definition }
   } = getState();
 
   const primary = nodes[nodeUUID];
   if (!primary) return;
 
-  const payload: ClipboardPayload = { primary };
+  const localization = definition?.localization || {};
+  let sourceLocalization = extractLocalizationForNode(localization, primary);
+
+  const payload: ClipboardPayload = {
+    primary,
+    sourceFlowUUID: definition?.uuid,
+    sourceLocalization
+  };
 
   if (primary.node.actions?.[0]?.type === Types.send_interactive_msg) {
     const pairedUUID = primary.node.exits?.[0]?.destination_uuid;
@@ -1250,13 +1265,24 @@ export const copyNode = (nodeUUID: string) => (
         left: paired.ui.position.left - primary.ui.position.left,
         top: paired.ui.position.top - primary.ui.position.top
       };
+      sourceLocalization = mergeLocalizations(
+        sourceLocalization,
+        extractLocalizationForNode(localization, paired)
+      );
+      payload.sourceLocalization = sourceLocalization;
     }
   }
 
   localStorage.setItem(CLIPBOARD_KEY, JSON.stringify(payload));
   dispatch(
-    mergeEditorState({ toast: { message: 'Node copied. Ctrl+V to paste.', duration: 5000 } })
+    mergeEditorState({ toast: { message: 'Node copied. Cmd/Ctrl+V to paste.', duration: 5000 } })
   );
+
+  const nodeType = primary.node.actions?.[0]?.type ?? primary.ui?.type ?? 'unknown';
+  track('flow_node_copied', {
+    node_type: nodeType,
+    flow_uuid: definition?.uuid
+  });
 };
 
 export const pasteNode = (position: FlowPosition) => (
@@ -1272,21 +1298,30 @@ export const pasteNode = (position: FlowPosition) => (
   } catch {
     dispatch(
       mergeEditorState({
-        toast: { message: 'Clipboard data is invalid. Please copy the node again.', duration: 5000 }
+        toast: {
+          message: 'Clipboard data is invalid. Please copy the node again.',
+          duration: 5000
+        }
       })
     );
     return;
   }
 
-  const { primary, paired, pairedOffset } = payload;
+  const { primary, paired, pairedOffset, sourceFlowUUID, sourceLocalization } = payload;
 
   const {
-    flowContext: { nodes, assetStore }
+    flowContext: { nodes, assetStore, definition }
   } = getState();
+
+  const localization = definition?.localization || {};
 
   const cloned = cloneNodeWithNewUUIDs(primary);
   cloned.node = resolveResultNames(cloned.node, nodes);
   cloned.ui = { ...cloned.ui, position };
+
+  const primaryUUIDMap = buildUUIDMap(primary, cloned);
+  const remappedPrimary = remapLocalization(sourceLocalization || localization, primaryUUIDMap);
+  let updatedLocalization = mergeLocalizations(localization, remappedPrimary);
 
   let updatedNodes = nodes;
 
@@ -1305,6 +1340,12 @@ export const pasteNode = (position: FlowPosition) => (
     cloned.node.exits[0].destination_uuid = clonedPaired.node.uuid;
     clonedPaired.inboundConnections = { [cloned.node.exits[0].uuid]: cloned.node.uuid };
 
+    const remappedPaired = remapLocalization(
+      sourceLocalization || localization,
+      buildUUIDMap(paired, clonedPaired)
+    );
+    updatedLocalization = mergeLocalizations(updatedLocalization, remappedPaired);
+
     updatedNodes = mutators.mergeNode(updatedNodes, cloned);
     updatedNodes = mutators.mergeNode(updatedNodes, clonedPaired);
 
@@ -1319,6 +1360,18 @@ export const pasteNode = (position: FlowPosition) => (
 
     dispatch(updateAssets(mutators.addFlowResult(assetStore, cloned.node)));
   }
+
+  if (updatedLocalization !== localization) {
+    dispatch(updateDefinition({ ...definition, localization: updatedLocalization }));
+  }
+
+  const isCrossFlow = !!sourceFlowUUID && sourceFlowUUID !== definition?.uuid;
+  const nodeType = primary.node.actions?.[0]?.type ?? primary.ui?.type ?? 'unknown';
+  track('flow_node_pasted', {
+    node_type: nodeType,
+    is_cross_flow: isCrossFlow,
+    flow_uuid: definition?.uuid
+  });
 
   markDirty();
   dispatch(mergeEditorState({ toast: null }));

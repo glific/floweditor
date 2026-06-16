@@ -112,6 +112,7 @@ export default class TitleBar extends React.Component<TitleBarProps, TitleBarSta
       return (
         <div
           className={styles.copy_button}
+          title={i18n.t('copy_node', 'Copy Node')}
           {...createClickHandler(
             this.props.onCopy,
             this.props.shouldCancelClick,

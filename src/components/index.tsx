@@ -16,6 +16,7 @@ import { connect, Provider as ReduxProvider } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import createStore from 'store/createStore';
 import { ModalMessage } from 'store/editor';
+import { initTracking } from 'store/tracking';
 import { Asset, Assets, AssetStore, RenderNodeMap, FlowIssueMap } from 'store/flowContext';
 import { getCurrentDefinition } from 'store/helpers';
 import AppState from 'store/state';
@@ -116,8 +117,10 @@ export class FlowEditor extends React.Component<FlowEditorStoreProps> {
   }
 
   public componentDidMount(): void {
-    const { endpoints, flow, forceSaveOnLoad } = this.context.config;
+    const { endpoints, flow, forceSaveOnLoad, onEvent, copyNodeEnabled } = this.context.config;
     this.props.fetchFlow(endpoints, flow, forceSaveOnLoad);
+    initTracking(onEvent);
+    this.props.mergeEditorState({ copyNodeEnabled: !!copyNodeEnabled });
 
     (window as any).editor = this;
   }
@@ -384,9 +387,6 @@ const mapDispatchToProps = (dispatch: DispatchWithState) =>
     dispatch
   );
 
-export const ConnectedFlowEditor = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(FlowEditor);
+export const ConnectedFlowEditor = connect(mapStateToProps, mapDispatchToProps)(FlowEditor);
 
 export default FlowEditorContainer;

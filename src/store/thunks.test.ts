@@ -902,7 +902,8 @@ describe('copy-paste thunks', () => {
     flowContext: {
       nodes: { 'node-sm': sendMsgNode, 'node-im': imNode, 'node-wfr': wfrNode },
       assetStore: { results: { type: AssetType.Result, items: {} } },
-      issues: {}
+      issues: {},
+      definition: boring
     }
   };
 
@@ -1024,7 +1025,8 @@ describe('copy-paste thunks', () => {
         flowContext: {
           nodes: { 'node-im': imWithResult, 'node-wfr': wfrWithSameResult },
           assetStore: { results: { type: AssetType.Result, items: {} } },
-          issues: {}
+          issues: {},
+          definition: boring
         }
       };
 
