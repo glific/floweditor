@@ -74,7 +74,7 @@ import {
 } from 'store/nodeEditor';
 import AppState from 'store/state';
 import { createUUID, hasString, NODE_SPACING, timeEnd, timeStart, ACTIVITY_INTERVAL } from 'utils';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { track } from 'store/tracking';
 import i18n from 'config/i18n';
 import { TembaStore } from 'temba-components';
