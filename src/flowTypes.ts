@@ -53,7 +53,6 @@ export interface Endpoints {
   validateMedia: string;
   interactives: string;
   sheets: string;
-  copyNodeEnabled?: string;
 }
 
 export interface FlowEditorConfig {
@@ -71,6 +70,8 @@ export interface FlowEditorConfig {
   headers?: any;
   brand: string;
   defaultTopic: { uuid: string; name: string };
+
+  copyNodeEnabled?: boolean;
 
   onLoad?: () => void;
   onActivityClicked?: (uuid: string) => void;

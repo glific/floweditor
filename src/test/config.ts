@@ -49,9 +49,9 @@ const config: FlowEditorConfig = {
     completion: '',
     simulateResume: '',
     interactives: '',
-    sheets: '',
-    copyNodeEnabled: '/copy-node-enabled'
+    sheets: ''
   },
+  copyNodeEnabled: true,
   onChangeLanguage: (code: string, name: string) => {}
 };
 

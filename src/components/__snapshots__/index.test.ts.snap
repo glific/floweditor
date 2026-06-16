@@ -9,7 +9,6 @@ Array [
     "classifiers": "/assets/classifiers.json",
     "completion": "",
     "contacts": "/assets/recipients.json",
-    "copyNodeEnabled": "/copy-node-enabled",
     "editor": "/flow/editor",
     "environment": "/assets/environment.json",
     "fields": "/assets/fields.json",

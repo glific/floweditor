@@ -117,9 +117,10 @@ export class FlowEditor extends React.Component<FlowEditorStoreProps> {
   }
 
   public componentDidMount(): void {
-    const { endpoints, flow, forceSaveOnLoad, onEvent } = this.context.config;
+    const { endpoints, flow, forceSaveOnLoad, onEvent, copyNodeEnabled } = this.context.config;
     this.props.fetchFlow(endpoints, flow, forceSaveOnLoad);
     initTracking(onEvent);
+    this.props.mergeEditorState({ copyNodeEnabled: !!copyNodeEnabled });
 
     (window as any).editor = this;
   }

@@ -436,19 +436,6 @@ export const fetchFlow = (endpoints: Endpoints, uuid: string, forceSave = false)
     fetchFlowActivity(endpoints.activity, dispatch, getState, uuid);
   };
 
-  if (endpoints.copyNodeEnabled) {
-    axios
-      .get(endpoints.copyNodeEnabled)
-      .then((response: any) => {
-        dispatch(mergeEditorState({ copyNodeEnabled: !!response.data?.is_enabled }));
-      })
-      .catch(() => {
-        dispatch(mergeEditorState({ copyNodeEnabled: false }));
-      });
-  } else {
-    dispatch(mergeEditorState({ copyNodeEnabled: false }));
-  }
-
   getFlowDetails(assetStore.revisions)
     .then((response: any) => {
       const details: FlowDetails = response.definition
