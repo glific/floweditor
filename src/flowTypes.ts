@@ -428,6 +428,7 @@ export interface SendInteractiveMsg extends Action {
   addAsset?: any;
   params?: any;
   paramsCount?: any;
+  isChecked?: boolean;
   attachment_url?: string;
   attachment_type?: string;
 }
