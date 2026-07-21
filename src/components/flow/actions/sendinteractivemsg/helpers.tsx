@@ -34,7 +34,7 @@ export const initializeForm = (settings: NodeEditorSettings): SendInteractiveMsg
       : [];
 
     while (listValues.length < 10) {
-      listValues.push({ value: { id: '', label: '' } });
+      listValues.push({ value: { id: '', label: '', description: '' } });
     }
     const returnValue: SendInteractiveMsgFormState = {
       interactives: { value: { id, interactive_content, name } },
@@ -43,12 +43,12 @@ export const initializeForm = (settings: NodeEditorSettings): SendInteractiveMsg
       },
       valid: true,
       listValues,
-      listValuesCount: paramsCount,
+      listValuesCount: { value: paramsCount || '' },
       attachment_url: { value: action.attachment_url || '' },
       attachment_type: { value: action.attachment_type || '' }
     };
 
-    if (paramsCount) {
+    if (action.isChecked || paramsCount) {
       returnValue.isChecked = true;
     }
 
@@ -67,9 +67,9 @@ export const initializeForm = (settings: NodeEditorSettings): SendInteractiveMsg
     labels: {
       value: []
     },
-    listValues: Array(10).fill({ value: { id: '', label: '' } }),
+    listValues: Array(10).fill({ value: { id: '', label: '', description: '' } }),
     valid: false,
-    listValuesCount: '',
+    listValuesCount: { value: '' },
     attachment_url: { value: '' },
     attachment_type: { value: '' }
   };
@@ -85,12 +85,13 @@ export const stateToAction = (
     .filter(listItem => listItem.value.label !== '')
     .map(listItem => listItem.value);
 
-  const paramsCount = state.listValuesCount;
+  const paramsCount = state.listValuesCount.value;
 
   if (state.expression) {
     result = {
       params,
       paramsCount,
+      isChecked: state.isChecked,
       name: state.interactives.value.name,
       expression: state.expression.value,
       type: Types.send_interactive_msg,
@@ -112,6 +113,8 @@ export const stateToAction = (
     type: Types.send_interactive_msg,
     uuid: getActionUUID(settings, Types.send_interactive_msg)
   };
+
+  result.isChecked = state.isChecked;
 
   if (state.isChecked) {
     result.params = params;

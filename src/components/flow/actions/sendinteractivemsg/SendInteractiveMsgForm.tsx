@@ -34,7 +34,7 @@ export interface SendInteractiveMsgFormState extends FormState {
   labels?: any;
   expression?: null | FormEntry;
   listValues?: any[];
-  listValuesCount?: string;
+  listValuesCount?: StringEntry;
   isChecked?: boolean;
   attachment_type?: StringEntry;
   attachment_url?: StringEntry;
@@ -83,8 +83,8 @@ export default class SendMsgForm extends React.Component<
 
           if (interactiveMsg.id !== this.state.interactives.value.id) {
             state.isChecked = false;
-            state.listValuesCount = '';
-            state.listValues = Array(10).fill({ value: { id: '', label: '' } });
+            state.listValuesCount = { value: '' };
+            state.listValues = Array(10).fill({ value: { id: '', label: '', description: '' } });
           }
 
           this.setState(state);
@@ -119,6 +119,18 @@ export default class SendMsgForm extends React.Component<
     return this.handleUpdate({ text: message }, submitting);
   }
 
+  public handleListCountUpdate(value: string, submitting = false): boolean {
+    const updates: Partial<SendInteractiveMsgFormState> = {
+      listValuesCount: validate(i18n.t('forms.number_of_variables', 'Number of variables'), value, [
+        shouldRequireIf(submitting && this.state.isChecked)
+      ])
+    };
+
+    const updated = mergeForm(this.state, updates) as SendInteractiveMsgFormState;
+    this.setState(updated);
+    return updated.valid;
+  }
+
   public handleLabelsChanged(selected: Asset[], submitting: boolean = false): boolean {
     const updates: Partial<AddLabelsFormState> = {
       labels: validate(i18n.t('forms.labels', 'Labels'), selected, [shouldRequireIf(submitting)])
@@ -151,6 +163,12 @@ export default class SendMsgForm extends React.Component<
     if (this.state.expression) {
       valid = true;
     }
+
+    if (this.state.isChecked) {
+      const countValid = this.handleListCountUpdate(this.state.listValuesCount.value, true);
+      valid = valid && countValid;
+    }
+
     if (valid) {
       this.props.updateAction(stateToAction(this.props.nodeSettings, this.state));
 
@@ -209,11 +227,15 @@ export default class SendMsgForm extends React.Component<
     );
   }
 
-  private handleAttachmentChanged(index: number, id: string, label: string): void {
+  private handleAttachmentChanged(
+    index: number,
+    key: 'id' | 'label' | 'description',
+    value: string
+  ): void {
     let { listValues }: any = this.state;
     listValues = mutate(listValues, {
       [index]: {
-        $set: { value: { id, label } }
+        value: { [key]: { $set: value } }
       }
     });
 
@@ -231,26 +253,44 @@ export default class SendMsgForm extends React.Component<
             name={i18n.t('forms.list_item_id', 'id')}
             style={TextInputStyle.normal}
             onChange={(id: string) => {
-              this.handleAttachmentChanged(index, id, value.label);
+              this.handleAttachmentChanged(index, 'id', id);
             }}
             entry={{ value: value.id }}
             autocomplete={true}
           />
         </div>
+        <div className={styles.id}>
+          <TextInputElement
+            placeholder={`variable ${index + 1}`}
+            name={i18n.t('forms.list_item_variable', 'variable')}
+            style={TextInputStyle.normal}
+            onChange={(label: string) => {
+              this.handleAttachmentChanged(index, 'label', label);
+            }}
+            entry={{ value: value.label }}
+            autocomplete={true}
+          />
+        </div>
         <TextInputElement
-          placeholder={`variable ${index + 1}`}
-          name={i18n.t('forms.list_item_variable', 'variable')}
+          placeholder={`description ${index + 1}`}
+          name={i18n.t('forms.list_item_description', 'description')}
           style={TextInputStyle.normal}
-          onChange={(label: string) => {
-            this.handleAttachmentChanged(index, value.id, label);
+          onChange={(description: string) => {
+            this.handleAttachmentChanged(index, 'description', description);
           }}
-          entry={{ value: value.label }}
+          entry={{ value: value.description }}
           autocomplete={true}
         />
       </div>
     );
 
-    const values = listValues.map((value, index) => renderListOption(value, index));
+    const interactiveContent = this.state.interactives.value.interactive_content;
+    const maxOptions =
+      interactiveContent && interactiveContent.type === 'list' ? listValues.length : 3;
+
+    const values = listValues
+      .slice(0, maxOptions)
+      .map((value, index) => renderListOption(value, index));
     return (
       <div>
         <div className={styles.list_container}>
@@ -260,9 +300,9 @@ export default class SendMsgForm extends React.Component<
               name={i18n.t('forms.list_item', '')}
               style={TextInputStyle.normal}
               onChange={(value: string) => {
-                this.setState({ listValuesCount: value });
+                this.handleListCountUpdate(value);
               }}
-              entry={{ value: this.state.listValuesCount }}
+              entry={this.state.listValuesCount}
               autocomplete={true}
             />
           </div>

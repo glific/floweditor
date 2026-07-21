@@ -35,12 +35,17 @@
 
 .id {
   margin-right: 4px;
+  flex: 1;
 }
 
 .listItem {
   display: flex;
-  width: 48% !important;
+  width: 100% !important;
   margin: 4px 4px;
+}
+
+.listItem > * {
+  flex: 1;
 }
 
 .list_container {
