@@ -58,7 +58,8 @@ export const stateToNode = (
   const { cases, exits, defaultCategory, timeoutCategory, caseConfig, categories } = resolveRoutes(
     state.cases,
     state.timeout > -1,
-    settings.originalNode.node
+    settings.originalNode.node,
+    state.defaultCategoryName || null
   );
 
   const optionalRouter: Pick<Router, 'result_name'> = {};

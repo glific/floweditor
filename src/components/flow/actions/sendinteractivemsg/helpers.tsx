@@ -128,6 +128,18 @@ export const stateToAction = (
   return result;
 };
 
+// the single category a custom_ui router routes every response through. The backend
+// (router.ex find_category/3) falls through to the router's default category when no
+// case matches, so a custom_ui_response - and any plain text reply from a contact on a
+// channel that cannot render custom UI - takes this exit.
+export const CUSTOM_UI_CATEGORY_NAME = 'Responded';
+
+// shown on the canvas node for a custom_ui interactive template
+export const CUSTOM_UI_LABEL = 'Custom UI';
+
+// shown when an interactive template carries no readable text at all
+export const UNSUPPORTED_MESSAGE = 'The interactive message cannot be previewed';
+
 export const stateToRouter = (
   settings: NodeEditorSettings,
   state: SendInteractiveMsgFormState,
@@ -138,6 +150,7 @@ export const stateToRouter = (
 
   const content = state.interactives.value.interactive_content;
   let options = [''];
+  let defaultCategoryName: string = null;
   if (content) {
     if (content.type === 'quick_reply')
       content.options.forEach((option: any) => {
@@ -165,6 +178,12 @@ export const stateToRouter = (
         valid: true
       };
       cases.push(values);
+    }
+    if (content.type === 'custom_ui') {
+      // no cases at all: every response falls through to the router's default category,
+      // which we name "Responded" below.
+      options = [];
+      defaultCategoryName = CUSTOM_UI_CATEGORY_NAME;
     }
   }
   const generateCases = options.map((option: string, index: number) => {
@@ -215,7 +234,8 @@ export const stateToRouter = (
     },
     timeout: -1,
     expression: '',
-    valid: true
+    valid: true,
+    defaultCategoryName
   };
 
   let renderedNode;
@@ -252,9 +272,23 @@ export const getHeader = (message: any) => {
       } else if (['image', 'video', 'file'].includes(message.content.type)) {
         header = '';
       }
+    } else if (message.type === 'custom_ui') {
+      header =
+        typeof message.component === 'string' && message.component
+          ? `${CUSTOM_UI_LABEL}: ${message.component}`
+          : CUSTOM_UI_LABEL;
     }
   }
+  // any other (unknown / future) type intentionally has no header
   return header;
+};
+
+// a plain string we can always fall back to so an unrecognized payload renders text
+// instead of leaving the node on a permanent loading spinner
+const getFallbackText = (message: any): string => {
+  const candidates = [message.fallback, message.body, message.text, message.title];
+  const text = candidates.find((value: any) => typeof value === 'string' && value.trim() !== '');
+  return text || UNSUPPORTED_MESSAGE;
 };
 
 export const getMsgBody = (message: any) => {
@@ -299,6 +333,11 @@ export const getMsgBody = (message: any) => {
           {message.body.text}
         </div>
       );
+    } else {
+      // custom_ui, whose envelope carries `fallback` as its human readable
+      // representation, plus any unknown / future interactive type: degrade to readable
+      // text rather than leaving the canvas node on an endless loading spinner
+      body = <div>{getFallbackText(message)}</div>;
     }
   }
   return body;

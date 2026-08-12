@@ -27,6 +27,9 @@ export interface ResponseRouterFormState extends FormState {
   resultName: StringEntry;
   timeout: number;
   expression: string;
+  // optional override for the name of the router's default category. When unset, the
+  // default is named by resolveRoutes ("Other" / "All Responses").
+  defaultCategoryName?: string;
 }
 
 export const leadInSpecId = 'lead-in';
