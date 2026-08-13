@@ -1,23 +1,40 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import {
-  CUSTOM_UI_CATEGORY_NAME,
-  CUSTOM_UI_LABEL,
+  BLOCKS_CATEGORY_NAME,
+  BLOCKS_LABEL,
+  BLOCKS_NO_TEXT_MESSAGE,
   UNSUPPORTED_MESSAGE,
+  deriveBodyText,
+  getComponentName,
   getHeader,
   getMsgBody,
   stateToRouter
 } from 'components/flow/actions/sendinteractivemsg/helpers';
 import { SwitchRouter } from 'flowTypes';
 
-const customUIContent = {
-  type: 'custom_ui',
-  version: '1',
-  component: 'glific/image_panel',
+const text = (value: string): any => ({ kind: 'text', value });
+const image = (value: string): any => ({ kind: 'image', value });
+
+// the stored (typed) form of a glific/image-panel template - blocks contract section 2 & 6
+const blocksContent = {
+  type: 'blocks',
+  version: 1,
+  component: 'glific/image-panel',
   props: {
     id: 'course',
-    options: [{ id: 'c1', image: 'https://example.com/a.png', label: 'Spoken English' }]
+    body: text('Pick a course'),
+    options: {
+      kind: 'list',
+      value: [
+        {
+          id: 'c1',
+          image: image('https://example.com/english.png'),
+          image_alt: text('Adult English class'),
+          label: text('Spoken English')
+        }
+      ]
+    }
   },
-  fallback: 'Pick a course',
   context: {}
 };
 
@@ -39,7 +56,7 @@ const getState = (interactiveContent: any): any => ({
   interactives: {
     value: {
       id: 1,
-      name: 'custom ui template',
+      name: 'blocks template',
       interactive_content: interactiveContent,
       translations: {}
     }
@@ -54,13 +71,13 @@ const assetStore: any = { results: { items: {} } };
 
 describe('SendInteractiveMsg.helpers', () => {
   describe('stateToRouter', () => {
-    it('should emit no cases and a single default "Responded" category for custom_ui', () => {
-      const renderNode = stateToRouter(getSettings(), getState(customUIContent), assetStore);
+    it('should emit no cases and a single default "Responded" category for blocks', () => {
+      const renderNode = stateToRouter(getSettings(), getState(blocksContent), assetStore);
       const router = renderNode.node.router as SwitchRouter;
 
       expect(router.cases).toEqual([]);
       expect(router.categories.length).toBe(1);
-      expect(router.categories[0].name).toBe(CUSTOM_UI_CATEGORY_NAME);
+      expect(router.categories[0].name).toBe(BLOCKS_CATEGORY_NAME);
       expect(router.default_category_uuid).toBe(router.categories[0].uuid);
       expect(renderNode.node.exits.length).toBe(1);
       expect(renderNode.node.exits[0].uuid).toBe(router.categories[0].exit_uuid);
@@ -82,13 +99,31 @@ describe('SendInteractiveMsg.helpers', () => {
     });
   });
 
-  describe('getHeader', () => {
-    it('should name the component for custom_ui', () => {
-      expect(getHeader(customUIContent)).toBe(`${CUSTOM_UI_LABEL}: glific/image_panel`);
+  describe('getComponentName', () => {
+    it('should give a friendly name to every built in block', () => {
+      expect(getComponentName('glific/image-panel')).toBe('Image panel');
+      expect(getComponentName('glific/carousel')).toBe('Carousel');
+      expect(getComponentName('glific/form')).toBe('Form');
+    });
+
+    it('should show a component outside the glific namespace verbatim', () => {
+      expect(getComponentName('tap/course-picker')).toBe('tap/course-picker');
     });
 
     it('should fall back to a bare label when the component is missing', () => {
-      expect(getHeader({ ...customUIContent, component: undefined })).toBe(CUSTOM_UI_LABEL);
+      expect(getComponentName(undefined)).toBe(BLOCKS_LABEL);
+      expect(getComponentName('')).toBe(BLOCKS_LABEL);
+      expect(getComponentName({ name: 'nope' })).toBe(BLOCKS_LABEL);
+    });
+  });
+
+  describe('getHeader', () => {
+    it('should name the component for blocks', () => {
+      expect(getHeader(blocksContent)).toBe('Image panel');
+    });
+
+    it('should fall back to a bare label when the component is missing', () => {
+      expect(getHeader({ ...blocksContent, component: undefined })).toBe(BLOCKS_LABEL);
     });
 
     it('should not return a header for an unknown type', () => {
@@ -96,17 +131,103 @@ describe('SendInteractiveMsg.helpers', () => {
     });
   });
 
+  describe('deriveBodyText', () => {
+    it('should join every text node in document order', () => {
+      expect(deriveBodyText(blocksContent)).toBe(
+        'Pick a course — Adult English class — Spoken English'
+      );
+    });
+
+    it('should recurse into list nodes and nested items', () => {
+      const carousel = {
+        type: 'blocks',
+        version: 1,
+        component: 'glific/carousel',
+        props: {
+          id: 'product',
+          body: text('Browse our courses'),
+          cards: {
+            kind: 'list',
+            value: [
+              { id: 'p1', title: text('Course A'), description: text('Six weeks') },
+              { id: 'p2', title: text('Course B') }
+            ]
+          }
+        }
+      };
+
+      expect(deriveBodyText(carousel)).toBe('Browse our courses — Course A — Six weeks — Course B');
+    });
+
+    it('should ignore non text kinds and structural values', () => {
+      const form = {
+        type: 'blocks',
+        version: 1,
+        component: 'glific/form',
+        props: {
+          id: 'signup',
+          fields: {
+            kind: 'list',
+            value: [
+              {
+                id: 'name',
+                label: text('Your name'),
+                required: { kind: 'boolean', value: true },
+                max: { kind: 'number', value: 20 },
+                help: { kind: 'url', value: 'https://example.com/help' },
+                icon: image('https://example.com/icon.png')
+              }
+            ]
+          }
+        }
+      };
+
+      expect(deriveBodyText(form)).toBe('Your name');
+    });
+
+    it('should keep a text node that opts out of translation', () => {
+      expect(
+        deriveBodyText({ props: { brand: { kind: 'text', value: 'Glific', translate: false } } })
+      ).toBe('Glific');
+    });
+
+    it('should treat an object with extra keys as a plain object and walk into it', () => {
+      const payload = {
+        props: { odd: { kind: 'text', value: 'skipped', extra: 1, inner: text('kept') } }
+      };
+      expect(deriveBodyText(payload)).toBe('kept');
+    });
+
+    it('should return an empty string for a payload with no text nodes', () => {
+      const customBlock = {
+        type: 'blocks',
+        version: 1,
+        component: 'tap/leaderboard',
+        props: { id: 'board', top: { kind: 'number', value: 10 } },
+        context: {}
+      };
+
+      expect(deriveBodyText(customBlock)).toBe('');
+      expect(deriveBodyText({})).toBe('');
+    });
+
+    it('should clamp the derived body to 500 characters', () => {
+      const long = { props: { body: text('a'.repeat(900)) } };
+      expect(deriveBodyText(long).length).toBe(500);
+    });
+  });
+
   describe('getMsgBody', () => {
-    it('should render the fallback text for custom_ui', () => {
-      const body = getMsgBody(customUIContent);
+    it('should render the derived text for blocks', () => {
+      const body = getMsgBody(blocksContent);
       expect(body).toBeTruthy();
       expect(renderToStaticMarkup(body)).toContain('Pick a course');
     });
 
-    it('should render something for custom_ui even without fallback text', () => {
-      const body = getMsgBody({ ...customUIContent, fallback: '' });
+    it('should render a placeholder for a block with no text nodes', () => {
+      const body = getMsgBody({ type: 'blocks', component: 'tap/leaderboard', props: { id: 'b' } });
       expect(body).toBeTruthy();
-      expect(renderToStaticMarkup(body)).toContain(UNSUPPORTED_MESSAGE);
+      expect(renderToStaticMarkup(body)).toContain(BLOCKS_NO_TEXT_MESSAGE);
     });
 
     it('should degrade to readable text for an unknown type', () => {

@@ -128,17 +128,24 @@ export const stateToAction = (
   return result;
 };
 
-// the single category a custom_ui router routes every response through. The backend
+// the single category a blocks router routes every response through. The backend
 // (router.ex find_category/3) falls through to the router's default category when no
-// case matches, so a custom_ui_response - and any plain text reply from a contact on a
-// channel that cannot render custom UI - takes this exit.
-export const CUSTOM_UI_CATEGORY_NAME = 'Responded';
+// case matches, so a blocks_response - and any plain text reply from a contact on a
+// channel that cannot render blocks - takes this exit.
+export const BLOCKS_CATEGORY_NAME = 'Responded';
 
-// shown on the canvas node for a custom_ui interactive template
-export const CUSTOM_UI_LABEL = 'Custom UI';
+// shown on the canvas node for a blocks template whose component we cannot name
+export const BLOCKS_LABEL = 'Blocks';
 
 // shown when an interactive template carries no readable text at all
 export const UNSUPPORTED_MESSAGE = 'The interactive message cannot be previewed';
+
+// shown on the canvas when a block payload has no text nodes to derive a body from
+export const BLOCKS_NO_TEXT_MESSAGE = 'This block has no text to preview';
+
+// blocks contract section 9: text node values joined with this, clamped to this length
+const DERIVED_BODY_SEPARATOR = ' — ';
+const DERIVED_BODY_MAX_LENGTH = 500;
 
 export const stateToRouter = (
   settings: NodeEditorSettings,
@@ -179,11 +186,11 @@ export const stateToRouter = (
       };
       cases.push(values);
     }
-    if (content.type === 'custom_ui') {
+    if (content.type === 'blocks') {
       // no cases at all: every response falls through to the router's default category,
       // which we name "Responded" below.
       options = [];
-      defaultCategoryName = CUSTOM_UI_CATEGORY_NAME;
+      defaultCategoryName = BLOCKS_CATEGORY_NAME;
     }
   }
   const generateCases = options.map((option: string, index: number) => {
@@ -261,6 +268,81 @@ export const stateToRouter = (
   return renderedNode;
 };
 
+// "glific/image-panel" -> "Image panel". A component outside the glific namespace is
+// org registered, so we have no friendly name for it and show it verbatim.
+export const getComponentName = (component: any): string => {
+  if (typeof component !== 'string' || component === '') {
+    return BLOCKS_LABEL;
+  }
+
+  if (!component.startsWith('glific/')) {
+    return component;
+  }
+
+  const name = component.slice('glific/'.length).replace(/-/g, ' ');
+  return name ? `${name.charAt(0).toUpperCase()}${name.slice(1)}` : BLOCKS_LABEL;
+};
+
+const isTypedNode = (value: any): boolean => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  const keys = Object.keys(value);
+  return (
+    keys.includes('kind') &&
+    keys.includes('value') &&
+    keys.every((key: string) => ['kind', 'value', 'translate'].includes(key))
+  );
+};
+
+const collectTextValues = (value: any, collected: string[]): void => {
+  if (Array.isArray(value)) {
+    value.forEach((element: any) => collectTextValues(element, collected));
+    return;
+  }
+
+  if (typeof value !== 'object' || value === null) {
+    return;
+  }
+
+  if (isTypedNode(value)) {
+    if (value.kind === 'text') {
+      if (typeof value.value === 'string' && value.value !== '') {
+        collected.push(value.value);
+      }
+    } else if (value.kind === 'list') {
+      collectTextValues(value.value, collected);
+    }
+    // every other kind holds a leaf that is never human readable text
+    return;
+  }
+
+  Object.keys(value).forEach((key: string) => collectTextValues(value[key], collected));
+};
+
+const clamp = (text: string, limit: number): string => {
+  if (text.length <= limit) {
+    return text;
+  }
+
+  // never split a surrogate pair
+  const end = text.charCodeAt(limit - 1) >= 0xd800 && text.charCodeAt(limit - 1) <= 0xdbff;
+  return text.slice(0, end ? limit - 1 : limit);
+};
+
+/**
+ * The derived body of the blocks contract, section 9: walk the stored (typed) payload in
+ * document order, join the value of every text node with an em dash, clamp to 500 chars.
+ * Returns an empty string when the payload carries no text - the same rule the backend and
+ * the console apply, so every surface derives an identical body.
+ */
+export const deriveBodyText = (message: any): string => {
+  const collected: string[] = [];
+  collectTextValues(message, collected);
+  return clamp(collected.join(DERIVED_BODY_SEPARATOR), DERIVED_BODY_MAX_LENGTH);
+};
+
 export const getHeader = (message: any) => {
   let header;
   if (message) {
@@ -272,11 +354,8 @@ export const getHeader = (message: any) => {
       } else if (['image', 'video', 'file'].includes(message.content.type)) {
         header = '';
       }
-    } else if (message.type === 'custom_ui') {
-      header =
-        typeof message.component === 'string' && message.component
-          ? `${CUSTOM_UI_LABEL}: ${message.component}`
-          : CUSTOM_UI_LABEL;
+    } else if (message.type === 'blocks') {
+      header = getComponentName(message.component);
     }
   }
   // any other (unknown / future) type intentionally has no header
@@ -333,10 +412,11 @@ export const getMsgBody = (message: any) => {
           {message.body.text}
         </div>
       );
+    } else if (message.type === 'blocks') {
+      body = <div>{deriveBodyText(message) || BLOCKS_NO_TEXT_MESSAGE}</div>;
     } else {
-      // custom_ui, whose envelope carries `fallback` as its human readable
-      // representation, plus any unknown / future interactive type: degrade to readable
-      // text rather than leaving the canvas node on an endless loading spinner
+      // any unknown / future interactive type: degrade to readable text rather than
+      // leaving the canvas node on an endless loading spinner
       body = <div>{getFallbackText(message)}</div>;
     }
   }
