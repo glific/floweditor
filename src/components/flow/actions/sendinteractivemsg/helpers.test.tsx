@@ -133,8 +133,12 @@ describe('SendInteractiveMsg.helpers', () => {
   });
 
   describe('deriveBodyText', () => {
-    it('should join every text node in document order', () => {
+    it('should join every text node in sorted key order', () => {
       expect(deriveBodyText(blocksContent)).toBe('Pick a course — Spoken English');
+    });
+
+    it('should visit the keys of a map sorted bytewise, not in authored order', () => {
+      expect(deriveBodyText({ props: { title: text('T'), body: text('B') } })).toBe('B — T');
     });
 
     it('should skip alt nodes, which are accessibility metadata and not body copy', () => {
@@ -165,7 +169,10 @@ describe('SendInteractiveMsg.helpers', () => {
         }
       };
 
-      expect(deriveBodyText(carousel)).toBe('Browse our courses — Course A — Six weeks — Course B');
+      // the card is authored title before description, but sorted key order puts
+      // "description" first - contract section 9, and what the backend already produces.
+      // list elements keep their array order, so card p1 still precedes card p2.
+      expect(deriveBodyText(carousel)).toBe('Browse our courses — Six weeks — Course A — Course B');
     });
 
     it('should ignore non text kinds and structural values', () => {
@@ -206,6 +213,31 @@ describe('SendInteractiveMsg.helpers', () => {
         props: { odd: { kind: 'text', value: 'skipped', extra: 1, inner: text('kept') } }
       };
       expect(deriveBodyText(payload)).toBe('kept');
+    });
+
+    it('should drop whitespace only text nodes rather than emit a stray separator', () => {
+      const payload = {
+        props: { a: text('   '), b: text('Hi'), c: text('\t\n'), d: text('') }
+      };
+
+      expect(deriveBodyText(payload)).toBe('Hi');
+    });
+
+    it('should never walk context, which is echoed back to the org verbatim', () => {
+      const payload = {
+        type: 'blocks',
+        version: 1,
+        component: 'tap/course-picker',
+        props: { body: text('Hi') },
+        context: { note: { kind: 'text', value: 'internal' }, nested: { deep: text('hidden') } }
+      };
+
+      expect(deriveBodyText(payload)).toBe('Hi');
+    });
+
+    it('should not derive text from the envelope keys outside props', () => {
+      expect(deriveBodyText({ type: 'blocks', component: 'glific/form' })).toBe('');
+      expect(deriveBodyText({ props: [text('list props are not a map')] })).toBe('');
     });
 
     it('should return an empty string for a payload with no text nodes', () => {

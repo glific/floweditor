@@ -296,6 +296,23 @@ const isTypedNode = (value: any): boolean => {
   );
 };
 
+// bytewise ascending, which is code point order. Plain string comparison in JS is UTF-16 code
+// unit order, and that disagrees with the backend's binary comparison above the BMP.
+const compareKeysBytewise = (left: string, right: string): number => {
+  const leftPoints = Array.from(left);
+  const rightPoints = Array.from(right);
+  const shared = Math.min(leftPoints.length, rightPoints.length);
+
+  for (let index = 0; index < shared; index++) {
+    const difference = leftPoints[index].codePointAt(0) - rightPoints[index].codePointAt(0);
+    if (difference !== 0) {
+      return difference;
+    }
+  }
+
+  return leftPoints.length - rightPoints.length;
+};
+
 const collectTextValues = (value: any, collected: string[]): void => {
   if (Array.isArray(value)) {
     value.forEach((element: any) => collectTextValues(element, collected));
@@ -308,7 +325,7 @@ const collectTextValues = (value: any, collected: string[]): void => {
 
   if (isTypedNode(value)) {
     if (value.kind === 'text') {
-      if (typeof value.value === 'string' && value.value !== '') {
+      if (typeof value.value === 'string' && value.value.trim() !== '') {
         collected.push(value.value);
       }
     } else if (value.kind === 'list') {
@@ -320,7 +337,9 @@ const collectTextValues = (value: any, collected: string[]): void => {
     return;
   }
 
-  Object.keys(value).forEach((key: string) => collectTextValues(value[key], collected));
+  Object.keys(value)
+    .sort(compareKeysBytewise)
+    .forEach((key: string) => collectTextValues(value[key], collected));
 };
 
 const clamp = (text: string, limit: number): string => {
@@ -334,15 +353,24 @@ const clamp = (text: string, limit: number): string => {
 };
 
 /**
- * The derived body of the blocks contract, section 9: walk the stored (typed) payload in
- * document order, join the value of every text node with an em dash, clamp to 500 chars.
- * `alt` nodes are skipped.
+ * The derived body of the blocks contract, section 9: walk the stored (typed) payload's `props`
+ * in sorted key order - at each map level visit keys sorted bytewise ascending, list elements
+ * keep their array order - and join the value of every text node with an em dash, clamped to
+ * 500 chars. `alt` nodes are skipped, and text nodes that are empty or whitespace only are
+ * dropped before the join so a blank authored field never yields a stray separator.
+ * `context` is never walked (section 2.2): an org may legitimately put text-node-shaped data
+ * there and expects it echoed back untouched.
  * Returns an empty string when the payload carries no text - the same rule the backend and
  * the console apply, so every surface derives an identical body.
  */
 export const deriveBodyText = (message: any): string => {
+  const props = message ? message.props : null;
+  if (typeof props !== 'object' || props === null || Array.isArray(props)) {
+    return '';
+  }
+
   const collected: string[] = [];
-  collectTextValues(message, collected);
+  collectTextValues(props, collected);
   return clamp(collected.join(DERIVED_BODY_SEPARATOR), DERIVED_BODY_MAX_LENGTH);
 };
 
