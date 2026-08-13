@@ -13,6 +13,7 @@ import {
 import { SwitchRouter } from 'flowTypes';
 
 const text = (value: string): any => ({ kind: 'text', value });
+const alt = (value: string): any => ({ kind: 'alt', value });
 const image = (value: string): any => ({ kind: 'image', value });
 
 // the stored (typed) form of a glific/image-panel template - blocks contract section 2 & 6
@@ -29,7 +30,7 @@ const blocksContent = {
         {
           id: 'c1',
           image: image('https://example.com/english.png'),
-          image_alt: text('Adult English class'),
+          image_alt: alt('Adult English class'),
           label: text('Spoken English')
         }
       ]
@@ -133,9 +134,11 @@ describe('SendInteractiveMsg.helpers', () => {
 
   describe('deriveBodyText', () => {
     it('should join every text node in document order', () => {
-      expect(deriveBodyText(blocksContent)).toBe(
-        'Pick a course — Adult English class — Spoken English'
-      );
+      expect(deriveBodyText(blocksContent)).toBe('Pick a course — Spoken English');
+    });
+
+    it('should skip alt nodes, which are accessibility metadata and not body copy', () => {
+      expect(deriveBodyText(blocksContent)).not.toContain('Adult English class');
     });
 
     it('should recurse into list nodes and nested items', () => {
@@ -149,7 +152,13 @@ describe('SendInteractiveMsg.helpers', () => {
           cards: {
             kind: 'list',
             value: [
-              { id: 'p1', title: text('Course A'), description: text('Six weeks') },
+              {
+                id: 'p1',
+                image: image('https://example.com/a.png'),
+                image_alt: alt('Students at desks'),
+                title: text('Course A'),
+                description: text('Six weeks')
+              },
               { id: 'p2', title: text('Course B') }
             ]
           }
@@ -172,6 +181,7 @@ describe('SendInteractiveMsg.helpers', () => {
               {
                 id: 'name',
                 label: text('Your name'),
+                label_alt: alt('The name we should call you'),
                 required: { kind: 'boolean', value: true },
                 max: { kind: 'number', value: 20 },
                 help: { kind: 'url', value: 'https://example.com/help' },

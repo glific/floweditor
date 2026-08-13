@@ -314,7 +314,9 @@ const collectTextValues = (value: any, collected: string[]): void => {
     } else if (value.kind === 'list') {
       collectTextValues(value.value, collected);
     }
-    // every other kind holds a leaf that is never human readable text
+    // `alt` is deliberately skipped even though it is translated prose: it is accessibility
+    // metadata, and this body is the staff conversation-list preview and the search index.
+    // Every other kind holds a leaf that is never human readable text.
     return;
   }
 
@@ -334,6 +336,7 @@ const clamp = (text: string, limit: number): string => {
 /**
  * The derived body of the blocks contract, section 9: walk the stored (typed) payload in
  * document order, join the value of every text node with an em dash, clamp to 500 chars.
+ * `alt` nodes are skipped.
  * Returns an empty string when the payload carries no text - the same rule the backend and
  * the console apply, so every surface derives an identical body.
  */
