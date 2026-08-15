@@ -47,7 +47,6 @@ export interface ActionWrapperStoreProps {
   moveActionUp: ActionAC;
   copyNode: CopyNode;
   scrollToAction: string;
-  copyNodeEnabled: boolean;
 }
 
 export type ActionWrapperProps = ActionWrapperPassedProps & ActionWrapperStoreProps;
@@ -208,11 +207,7 @@ export class ActionWrapper extends React.Component<ActionWrapperProps> {
           showRemoval={showRemoval}
           showMove={showMove}
           onMoveUp={this.handleMoveUp}
-          onCopy={
-            this.props.first && !this.props.translating && this.props.copyNodeEnabled
-              ? this.handleCopy
-              : undefined
-          }
+          onCopy={this.props.first && !this.props.translating ? this.handleCopy : undefined}
           shouldCancelClick={() => this.props.selected}
         />
         <div className={styles.body + ' ' + actionClass} data-spec={actionBodySpecId}>
@@ -245,14 +240,13 @@ const mapStateToProps = ({
     assetStore,
     definition: { localization }
   },
-  editorState: { language, translating, scrollToAction, copyNodeEnabled }
+  editorState: { language, translating, scrollToAction }
 }: AppState) => ({
   scrollToAction,
   assetStore,
   language,
   translating,
-  localization,
-  copyNodeEnabled: !!copyNodeEnabled
+  localization
 });
 
 /* istanbul ignore next */

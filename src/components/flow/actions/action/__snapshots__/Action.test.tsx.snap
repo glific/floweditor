@@ -114,7 +114,14 @@ exports[`ActionWrapper renders a base language 1`] = `
             </div>
             <div
               class="copy_button"
-            />
+              data-testid="copy-icon"
+              title="Copy Node"
+            >
+              <temba-icon
+                name="copy"
+                size="1.2"
+              />
+            </div>
             <div
               class="remove_button"
               data-testid="remove-icon"

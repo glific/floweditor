@@ -117,7 +117,15 @@ export class Canvas extends React.PureComponent<CanvasProps, CanvasState> {
       if (this.props.nodeEditorOpen) {
         return;
       }
-      const activeTag = (document.activeElement as HTMLElement)?.tagName?.toLowerCase();
+      // document.activeElement stops at a shadow host (e.g. temba-* web
+      // components) instead of resolving to the real focused element inside
+      // it, so walk into shadowRoot.activeElement to find the true target.
+      let active: Element | null = document.activeElement;
+      while (active && (active as any).shadowRoot && (active as any).shadowRoot.activeElement) {
+        active = (active as any).shadowRoot.activeElement;
+      }
+
+      const activeTag = active?.tagName?.toLowerCase();
       if (activeTag === 'input' || activeTag === 'textarea') {
         return;
       }
