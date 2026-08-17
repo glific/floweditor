@@ -8,7 +8,7 @@ import React from 'react';
 import { CanvasPositions, DragSelection } from 'store/editor';
 import { addPosition } from 'store/helpers';
 import { MergeEditorState } from 'store/thunks';
-import { COLLISION_FUDGE, snapPositionToGrid, throttle, snapToGrid } from 'utils';
+import { COLLISION_FUDGE, snapPositionToGrid, snapToGrid, throttle } from 'utils';
 
 import styles from './Canvas.module.scss';
 
@@ -115,10 +115,12 @@ export class Canvas extends React.PureComponent<CanvasProps, CanvasState> {
 
     if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
       if (this.props.nodeEditorOpen) {
+        event.stopPropagation();
         return;
       }
       const activeTag = (document.activeElement as HTMLElement)?.tagName?.toLowerCase();
       if (activeTag === 'input' || activeTag === 'textarea') {
+        event.stopPropagation();
         return;
       }
       if (this.props.pasteNode) {
