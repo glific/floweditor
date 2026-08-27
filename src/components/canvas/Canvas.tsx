@@ -113,7 +113,7 @@ export class Canvas extends React.PureComponent<CanvasProps, CanvasState> {
       }
     }
 
-    if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'v') {
       if (this.props.nodeEditorOpen) {
         return;
       }
@@ -126,7 +126,11 @@ export class Canvas extends React.PureComponent<CanvasProps, CanvasState> {
       }
 
       const activeTag = active?.tagName?.toLowerCase();
-      if (activeTag === 'input' || activeTag === 'textarea') {
+      if (
+        activeTag === 'input' ||
+        activeTag === 'textarea' ||
+        (active instanceof HTMLElement && active.isContentEditable)
+      ) {
         return;
       }
       if (this.props.pasteNode && localStorage.getItem(CLIPBOARD_KEY)) {

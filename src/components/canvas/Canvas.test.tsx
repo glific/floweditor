@@ -2,6 +2,7 @@ import { Canvas, CANVAS_PADDING, CanvasProps } from 'components/canvas/Canvas';
 import { CanvasDraggableProps } from 'components/canvas/CanvasDraggable';
 import React from 'react';
 import { fireEvent, render } from 'test/utils';
+import { CLIPBOARD_KEY } from 'store/thunks';
 import { createUUID } from 'utils';
 
 const ele = (selected: boolean): JSX.Element => <div>I am a draggable element</div>;
@@ -85,7 +86,13 @@ describe(Canvas.name, () => {
   });
 
   describe('Ctrl+V paste', () => {
+    afterEach(() => {
+      localStorage.removeItem(CLIPBOARD_KEY);
+    });
+
     it('calls pasteNode with snapped mouse position on Ctrl+V', () => {
+      localStorage.setItem(CLIPBOARD_KEY, JSON.stringify({ primary: {} }));
+
       const pasteNode = jest.fn();
       const { getByTestId } = render(<Canvas {...baseProps} pasteNode={pasteNode} />);
 
@@ -96,7 +103,17 @@ describe(Canvas.name, () => {
       expect(pasteNode).toHaveBeenCalledTimes(1);
     });
 
+    it('does not call pasteNode when clipboard is empty', () => {
+      const pasteNode = jest.fn();
+      render(<Canvas {...baseProps} pasteNode={pasteNode} />);
+
+      fireEvent.keyDown(document, { key: 'v', ctrlKey: true });
+      expect(pasteNode).not.toHaveBeenCalled();
+    });
+
     it('does not call pasteNode when nodeEditorOpen is true', () => {
+      localStorage.setItem(CLIPBOARD_KEY, JSON.stringify({ primary: {} }));
+
       const pasteNode = jest.fn();
       render(<Canvas {...baseProps} pasteNode={pasteNode} nodeEditorOpen={true} />);
 
@@ -105,6 +122,8 @@ describe(Canvas.name, () => {
     });
 
     it('does not call pasteNode when an input is focused', () => {
+      localStorage.setItem(CLIPBOARD_KEY, JSON.stringify({ primary: {} }));
+
       const pasteNode = jest.fn();
       render(<Canvas {...baseProps} pasteNode={pasteNode} />);
 
@@ -116,6 +135,34 @@ describe(Canvas.name, () => {
       expect(pasteNode).not.toHaveBeenCalled();
 
       document.body.removeChild(input);
+    });
+
+    it('does not call pasteNode when a contenteditable element is focused', () => {
+      localStorage.setItem(CLIPBOARD_KEY, JSON.stringify({ primary: {} }));
+
+      const pasteNode = jest.fn();
+      render(<Canvas {...baseProps} pasteNode={pasteNode} />);
+
+      const editable = document.createElement('div');
+      editable.tabIndex = 0;
+      Object.defineProperty(editable, 'isContentEditable', { value: true, configurable: true });
+      document.body.appendChild(editable);
+      editable.focus();
+
+      fireEvent.keyDown(document, { key: 'v', ctrlKey: true });
+      expect(pasteNode).not.toHaveBeenCalled();
+
+      document.body.removeChild(editable);
+    });
+
+    it('calls pasteNode on Ctrl+Shift+V (uppercase key)', () => {
+      localStorage.setItem(CLIPBOARD_KEY, JSON.stringify({ primary: {} }));
+
+      const pasteNode = jest.fn();
+      render(<Canvas {...baseProps} pasteNode={pasteNode} />);
+
+      fireEvent.keyDown(document, { key: 'V', ctrlKey: true, shiftKey: true });
+      expect(pasteNode).toHaveBeenCalledTimes(1);
     });
   });
 });
