@@ -7,7 +7,7 @@ import mutate from 'immutability-helper';
 import React from 'react';
 import { CanvasPositions, DragSelection } from 'store/editor';
 import { addPosition } from 'store/helpers';
-import { MergeEditorState } from 'store/thunks';
+import { CLIPBOARD_KEY, MergeEditorState } from 'store/thunks';
 import { COLLISION_FUDGE, snapPositionToGrid, throttle, snapToGrid } from 'utils';
 
 import styles from './Canvas.module.scss';
@@ -129,7 +129,7 @@ export class Canvas extends React.PureComponent<CanvasProps, CanvasState> {
       if (activeTag === 'input' || activeTag === 'textarea') {
         return;
       }
-      if (this.props.pasteNode) {
+      if (this.props.pasteNode && localStorage.getItem(CLIPBOARD_KEY)) {
         event.preventDefault();
         const snapped = snapToGrid(this.mouseX, this.mouseY);
         this.props.pasteNode(snapped);
