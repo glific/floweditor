@@ -165,4 +165,53 @@ describe(Canvas.name, () => {
       expect(pasteNode).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('Backspace delete', () => {
+    it('removes selected nodes on Backspace', () => {
+      const onRemoveNodes = jest.fn();
+      const ref = React.createRef<Canvas>();
+      render(<Canvas {...baseProps} onRemoveNodes={onRemoveNodes} ref={ref} />);
+
+      ref.current!.setState({ selected: { [createUUID()]: { left: 0, top: 0 } } });
+
+      fireEvent.keyDown(document, { key: 'Backspace' });
+      expect(onRemoveNodes).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not remove selected nodes on Backspace when an input is focused', () => {
+      const onRemoveNodes = jest.fn();
+      const ref = React.createRef<Canvas>();
+      render(<Canvas {...baseProps} onRemoveNodes={onRemoveNodes} ref={ref} />);
+
+      ref.current!.setState({ selected: { [createUUID()]: { left: 0, top: 0 } } });
+
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      input.focus();
+
+      fireEvent.keyDown(document, { key: 'Backspace' });
+      expect(onRemoveNodes).not.toHaveBeenCalled();
+
+      document.body.removeChild(input);
+    });
+
+    it('does not remove selected nodes on Backspace when a contenteditable element is focused', () => {
+      const onRemoveNodes = jest.fn();
+      const ref = React.createRef<Canvas>();
+      render(<Canvas {...baseProps} onRemoveNodes={onRemoveNodes} ref={ref} />);
+
+      ref.current!.setState({ selected: { [createUUID()]: { left: 0, top: 0 } } });
+
+      const editable = document.createElement('div');
+      editable.tabIndex = 0;
+      Object.defineProperty(editable, 'isContentEditable', { value: true, configurable: true });
+      document.body.appendChild(editable);
+      editable.focus();
+
+      fireEvent.keyDown(document, { key: 'Backspace' });
+      expect(onRemoveNodes).not.toHaveBeenCalled();
+
+      document.body.removeChild(editable);
+    });
+  });
 });
