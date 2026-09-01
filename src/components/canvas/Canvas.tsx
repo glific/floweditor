@@ -7,7 +7,7 @@ import mutate from 'immutability-helper';
 import React from 'react';
 import { CanvasPositions, DragSelection } from 'store/editor';
 import { addPosition } from 'store/helpers';
-import { MergeEditorState } from 'store/thunks';
+import { CLIPBOARD_KEY, MergeEditorState } from 'store/thunks';
 import { COLLISION_FUDGE, snapPositionToGrid, throttle, snapToGrid } from 'utils';
 
 import styles from './Canvas.module.scss';
@@ -105,23 +105,36 @@ export class Canvas extends React.PureComponent<CanvasProps, CanvasState> {
     this.props.onLoaded();
   }
 
+  private isFocusInEditableField(): boolean {
+    let active: Element | null = document.activeElement;
+    while (active && (active as any).shadowRoot && (active as any).shadowRoot.activeElement) {
+      active = (active as any).shadowRoot.activeElement;
+    }
+
+    const activeTag = active?.tagName?.toLowerCase();
+    return (
+      activeTag === 'input' ||
+      activeTag === 'textarea' ||
+      (active instanceof HTMLElement && active.isContentEditable)
+    );
+  }
+
   private handleKeyDown(event: any): void {
-    if (this.state.selected && event.key === 'Backspace') {
+    if (this.state.selected && event.key === 'Backspace' && !this.isFocusInEditableField()) {
       const nodeUUIDs = Object.keys(this.state.selected);
       if (nodeUUIDs.length > 0) {
         this.props.onRemoveNodes(Object.keys(this.state.selected));
       }
     }
 
-    if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'v') {
       if (this.props.nodeEditorOpen) {
         return;
       }
-      const activeTag = (document.activeElement as HTMLElement)?.tagName?.toLowerCase();
-      if (activeTag === 'input' || activeTag === 'textarea') {
+      if (this.isFocusInEditableField()) {
         return;
       }
-      if (this.props.pasteNode) {
+      if (this.props.pasteNode && localStorage.getItem(CLIPBOARD_KEY)) {
         event.preventDefault();
         const snapped = snapToGrid(this.mouseX, this.mouseY);
         this.props.pasteNode(snapped);

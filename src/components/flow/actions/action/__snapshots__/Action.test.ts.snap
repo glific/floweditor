@@ -17,6 +17,7 @@ exports[`ActionWrapper render should display hybrid style 1`] = `
   >
     <TitleBar
       __className="send_msg"
+      onCopy={[Function]}
       onMoveUp={[Function]}
       onRemoval={[Function]}
       shouldCancelClick={[Function]}
@@ -132,7 +133,7 @@ exports[`ActionWrapper render should render self, children with base props 1`] =
 Object {
   "__className": "send_msg",
   "nodeUUID": undefined,
-  "onCopy": undefined,
+  "onCopy": [Function],
   "onMoveUp": [Function],
   "onRemoval": [Function],
   "shouldCancelClick": [Function],
@@ -159,6 +160,7 @@ exports[`ActionWrapper render should render self, children with base props 2`] =
   >
     <TitleBar
       __className="send_msg"
+      onCopy={[Function]}
       onMoveUp={[Function]}
       onRemoval={[Function]}
       shouldCancelClick={[Function]}

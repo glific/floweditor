@@ -51,7 +51,6 @@ const config: FlowEditorConfig = {
     interactives: '',
     sheets: ''
   },
-  copyNodeEnabled: true,
   onChangeLanguage: (code: string, name: string) => {}
 };
 

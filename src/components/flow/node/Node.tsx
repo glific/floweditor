@@ -81,7 +81,6 @@ export interface NodeStoreProps {
   mergeEditorState: MergeEditorState;
   scrollToNode: string;
   scrollToAction: string;
-  copyNodeEnabled: boolean;
 }
 
 export type NodeProps = NodePassedProps & NodeStoreProps;
@@ -380,11 +379,7 @@ export class NodeComp extends React.PureComponent<NodeProps> {
                 nodeUUID={showLabel && this.props.nodeUUID}
                 showRemoval={!this.props.translating}
                 onRemoval={this.handleRemoval}
-                onCopy={
-                  !this.props.translating && this.props.copyNodeEnabled
-                    ? this.handleCopy
-                    : undefined
-                }
+                onCopy={!this.props.translating ? this.handleCopy : undefined}
                 shouldCancelClick={this.handleShouldCancelClick}
                 title={title}
               />
@@ -509,8 +504,7 @@ const mapStateToProps = (
       activity,
       language,
       scrollToAction,
-      scrollToNode,
-      copyNodeEnabled
+      scrollToNode
     }
   }: AppState,
   props: NodePassedProps
@@ -548,8 +542,7 @@ const mapStateToProps = (
     renderNode,
     simulating,
     scrollToNode: scrollNode,
-    scrollToAction: scrollAction,
-    copyNodeEnabled: !!copyNodeEnabled
+    scrollToAction: scrollAction
   };
 };
 
