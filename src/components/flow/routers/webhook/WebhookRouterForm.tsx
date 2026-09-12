@@ -11,6 +11,7 @@ import {
   stateToNode,
   getDefaultBody,
   isValidJson,
+  isWaitTimeWithinCap,
   fetchWebhookOptions
 } from 'components/flow/routers/webhook/helpers';
 import { createResultNameInput } from 'components/flow/routers/widgets';
@@ -205,7 +206,7 @@ export default class WebhookRouterForm extends React.Component<
       if (isFunction && keys.body.trim() === '') {
         updates.body = { value: keys.body };
       } else {
-        updates.body = validate('POST body', keys.body, [isValidJson()]);
+        updates.body = validate('POST body', keys.body, [isValidJson(), isWaitTimeWithinCap()]);
       }
     }
 
