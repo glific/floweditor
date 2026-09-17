@@ -2,7 +2,10 @@
 
 .titlebar {
   padding: 0px;
-  width: auto;
+  width: 0;
+  min-width: 100%;
+  box-sizing: border-box;
+
   color: #fff;
 
   font-weight: normal;
