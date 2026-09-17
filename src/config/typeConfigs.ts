@@ -30,6 +30,8 @@ import StartSessionForm from 'components/flow/actions/startsession/StartSessionF
 import TransferAirtimeComp from 'components/flow/actions/transferairtime/TransferAirtime';
 import UpdateContactComp from 'components/flow/actions/updatecontact/UpdateContact';
 import UpdateContactForm from 'components/flow/actions/updatecontact/UpdateContactForm';
+import UpdateContactFieldsComp from 'components/flow/actions/updatecontactfields/UpdateContactFields';
+import UpdateContactFieldsForm from 'components/flow/actions/updatecontactfields/UpdateContactFieldsForm';
 import AirtimeRouterForm from 'components/flow/routers/airtime/AirtimeRouterForm';
 import DialRouterForm from 'components/flow/routers/dial/DialRouterForm';
 import DigitsRouterForm from 'components/flow/routers/digits/DigitsRouterForm';
@@ -363,6 +365,16 @@ export const typeConfigList: Type[] = [
     description: i18n.t('actions.set_contact_field.description', 'Update the contact'),
     form: UpdateContactForm,
     component: UpdateContactComp
+  },
+  {
+    type: Types.set_contact_fields,
+    name: i18n.t('actions.set_contact_fields.name', 'Update Contact Fields'),
+    description: i18n.t(
+      'actions.set_contact_fields.description',
+      'Update several contact fields at once'
+    ),
+    form: UpdateContactFieldsForm,
+    component: UpdateContactFieldsComp
   },
   {
     type: Types.send_email,

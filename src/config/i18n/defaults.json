@@ -61,6 +61,10 @@
       "description": "Update the contact",
       "name": "Update Contact"
     },
+    "set_contact_fields": {
+      "description": "Update several contact fields at once",
+      "name": "Update Contact Fields"
+    },
     "set_run_result": {
       "description": "Save a result for this flow",
       "name": "Save Flow Result"
@@ -231,7 +235,9 @@
 
     "enter_a_subject": "Enter a subject",
     "enter_a_url": "Enter a URL",
+    "duplicate_contact_fields": "Only the last value will be saved for: [[fields]]",
     "enter_field_value": "Enter a new value for [[field]]",
+    "enter_field_value_short": "Value",
     "enter_flow_parameters_summary": "<0>[[flow]]</0> expects the following parameters to be set by this flow. These can be set using a <4>Save Flow Result</4> action or directly below.",
     "enter_flow_parameters_tab": "Parameters",
     "enter_new_name": "Enter a new name for the contact",
@@ -296,6 +302,8 @@
     "select_intent": "Select intent",
     "select_language": "Select the language to use for this contact",
     "select_result": "Select Result",
+    "select_contact_field": "Select a field",
+    "select_contact_fields_to_update": "Select the contact fields to update",
     "select_what_to_update": "Select what to update",
     "select_who_to_start": "Select who should be started in the flow",
     "send_msg_facebook_topic_placeholder": "Select a topic to use over Facebook",

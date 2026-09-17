@@ -1,0 +1,268 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UpdateContactFieldsForm render should render existing rows plus a trailing empty one 1`] = `
+<Dialog
+  buttons={
+    Object {
+      "primary": Object {
+        "name": "Ok",
+        "onClick": [Function],
+      },
+      "secondary": Object {
+        "name": "Cancel",
+        "onClick": [Function],
+      },
+    }
+  }
+  headerClass="set_contact_fields"
+  title="Update Contact Fields"
+>
+  <TypeList
+    __className=""
+    initialType={
+      Object {
+        "component": [Function],
+        "description": "Update several contact fields at once",
+        "form": [Function],
+        "name": "Update Contact Fields",
+        "type": "set_contact_fields",
+      }
+    }
+    onChange={[MockFunction]}
+  />
+  <p>
+    Select the contact fields to update
+  </p>
+  <div
+    className="rows"
+  >
+    <div
+      className="row"
+      data-testid="field-row-0"
+      key="763e4844-3e1b-407a-a1b5-5fdfcd308b41"
+    >
+      <div
+        className="field_select"
+      >
+        <TembaSelectElement
+          allowCreate={true}
+          createArbitraryOption={[Function]}
+          createPrefix="Create Field: "
+          endpoint="/assets/fields.json"
+          entry={
+            Object {
+              "value": Object {
+                "key": "age",
+                "label": "Age",
+              },
+            }
+          }
+          key="field_select_763e4844-3e1b-407a-a1b5-5fdfcd308b41"
+          name="Contact Field"
+          onChange={[Function]}
+          placeholder="Select a field"
+          searchable={true}
+          valueKey="key"
+        />
+      </div>
+      <div
+        className="field_value"
+      >
+        <TextInputElement
+          autocomplete={true}
+          entry={
+            Object {
+              "value": "25",
+            }
+          }
+          name="Field Value"
+          onChange={[Function]}
+          placeholder="Value"
+        />
+      </div>
+      <div
+        className="remove_icon"
+      >
+        <temba-icon
+          data-testid="remove-field-0"
+          name="delete_small"
+          onClick={[Function]}
+        />
+      </div>
+    </div>
+    <div
+      className="row"
+      data-testid="field-row-1"
+      key="477ac8b4-25e2-483a-8686-2d1332c4da1c"
+    >
+      <div
+        className="field_select"
+      >
+        <TembaSelectElement
+          allowCreate={true}
+          createArbitraryOption={[Function]}
+          createPrefix="Create Field: "
+          endpoint="/assets/fields.json"
+          entry={
+            Object {
+              "value": Object {
+                "key": "district",
+                "label": "District",
+              },
+            }
+          }
+          key="field_select_477ac8b4-25e2-483a-8686-2d1332c4da1c"
+          name="Contact Field"
+          onChange={[Function]}
+          placeholder="Select a field"
+          searchable={true}
+          valueKey="key"
+        />
+      </div>
+      <div
+        className="field_value"
+      >
+        <TextInputElement
+          autocomplete={true}
+          entry={
+            Object {
+              "value": "Pune",
+            }
+          }
+          name="Field Value"
+          onChange={[Function]}
+          placeholder="Value"
+        />
+      </div>
+      <div
+        className="remove_icon"
+      >
+        <temba-icon
+          data-testid="remove-field-1"
+          name="delete_small"
+          onClick={[Function]}
+        />
+      </div>
+    </div>
+    <div
+      className="row"
+      data-testid="field-row-2"
+      key="1e47a1e1-3c67-4df5-adf1-da542c789adb"
+    >
+      <div
+        className="field_select"
+      >
+        <TembaSelectElement
+          allowCreate={true}
+          createArbitraryOption={[Function]}
+          createPrefix="Create Field: "
+          endpoint="/assets/fields.json"
+          entry={
+            Object {
+              "value": null,
+            }
+          }
+          key="field_select_1e47a1e1-3c67-4df5-adf1-da542c789adb"
+          name="Contact Field"
+          onChange={[Function]}
+          placeholder="Select a field"
+          searchable={true}
+          valueKey="key"
+        />
+      </div>
+      <div
+        className="field_value"
+      >
+        <TextInputElement
+          autocomplete={true}
+          entry={
+            Object {
+              "value": "",
+            }
+          }
+          name="Field Value"
+          onChange={[Function]}
+          placeholder="Value"
+        />
+      </div>
+      <div
+        className="remove_icon"
+      >
+        <temba-icon
+          data-testid="remove-field-2"
+          name="delete_small"
+          onClick={[Function]}
+        />
+      </div>
+    </div>
+  </div>
+</Dialog>
+`;
+
+exports[`UpdateContactFieldsForm updates should drop a removed row 1`] = `
+Array [
+  Object {
+    "fields": Array [
+      Object {
+        "field": Object {
+          "key": "district",
+          "name": "District",
+        },
+        "value": "Pune",
+      },
+    ],
+    "type": "set_contact_fields",
+    "uuid": "b1f332f3-bdd3-4891-aec5-1843a712dbf1",
+  },
+]
+`;
+
+exports[`UpdateContactFieldsForm updates should save an updated value 1`] = `
+Array [
+  Object {
+    "fields": Array [
+      Object {
+        "field": Object {
+          "key": "age",
+          "name": "Age",
+        },
+        "value": "@results.age",
+      },
+      Object {
+        "field": Object {
+          "key": "district",
+          "name": "District",
+        },
+        "value": "Pune",
+      },
+    ],
+    "type": "set_contact_fields",
+    "uuid": "b1f332f3-bdd3-4891-aec5-1843a712dbf1",
+  },
+]
+`;
+
+exports[`UpdateContactFieldsForm updates should save one entry per filled row 1`] = `
+Array [
+  Object {
+    "fields": Array [
+      Object {
+        "field": Object {
+          "key": "age",
+          "name": "Age",
+        },
+        "value": "25",
+      },
+      Object {
+        "field": Object {
+          "key": "district",
+          "name": "District",
+        },
+        "value": "Pune",
+      },
+    ],
+    "type": "set_contact_fields",
+    "uuid": "b1f332f3-bdd3-4891-aec5-1843a712dbf1",
+  },
+]
+`;

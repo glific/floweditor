@@ -339,6 +339,16 @@ export interface SetContactField extends Action {
   value: string;
 }
 
+export interface ContactFieldEntry {
+  field: Field;
+  value: string;
+}
+
+export interface SetContactFields extends Action {
+  type: Types.set_contact_fields;
+  fields: ContactFieldEntry[];
+}
+
 export interface SetContactName extends Action {
   type: Types.set_contact_name;
   name: string;
@@ -612,6 +622,7 @@ export type AnyAction =
   | Action
   | ChangeGroups
   | SetContactField
+  | SetContactFields
   | SetContactName
   | SetRunResult
   | SendMsg

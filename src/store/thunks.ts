@@ -1,5 +1,6 @@
 import { determineTypeConfig } from 'components/flow/helpers';
 import { getResultName } from 'components/flow/node/helpers';
+import { fieldToAsset } from 'components/flow/actions/updatecontact/helpers';
 import { getSwitchRouter } from 'components/flow/routers/helpers';
 import { SaveResult } from 'components/revisions/RevisionExplorer';
 import { FlowTypes, Type, Types } from 'config/interfaces';
@@ -19,6 +20,7 @@ import {
   LocalizationMap,
   SendMsg,
   SetContactField,
+  SetContactFields,
   SetRunResult,
   StickyNote,
   FlowDetails
@@ -875,6 +877,27 @@ export const onUpdateAction = (
         [field.key]: field.name
       })
     );
+  }
+
+  // Add every contact field of a bulk update to our store.
+  if (action && action.type === Types.set_contact_fields) {
+    const fields = (action as SetContactFields).fields || [];
+
+    if (fields.length) {
+      updatedAssets = mutators.addAssets(
+        'fields',
+        assetStore,
+        fields.map(entry => fieldToAsset(entry.field))
+      );
+
+      dispatch(updateAssets(updatedAssets, 'fields'));
+      dispatch(
+        updateContactFields({
+          ...contactFields,
+          ...fields.reduce((acc, entry) => ({ ...acc, [entry.field.key]: entry.field.name }), {})
+        })
+      );
+    }
   }
 
   markDirty(0);

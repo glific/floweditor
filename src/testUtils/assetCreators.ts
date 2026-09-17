@@ -38,6 +38,7 @@ import {
   SendMsg,
   SetContactChannel,
   SetContactField,
+  SetContactFields,
   SetContactLanguage,
   SetContactStatus,
   SetContactProperty,
@@ -323,6 +324,21 @@ export const createSetContactFieldAction = ({
   field,
   value,
   type: Types.set_contact_field
+});
+
+export const createSetContactFieldsAction = ({
+  uuid = utils.createUUID(),
+  fields = [
+    { field: { key: 'age', name: 'Age' }, value: '25' },
+    { field: { key: 'district', name: 'District' }, value: 'Pune' }
+  ]
+}: {
+  uuid?: string;
+  fields?: { field: Field; value: string }[];
+} = {}): SetContactFields => ({
+  uuid,
+  fields,
+  type: Types.set_contact_fields
 });
 
 export const createSetContactLanguageAction = ({

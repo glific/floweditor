@@ -1,0 +1,42 @@
+.rows {
+  margin-top: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-top: 4px;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.field_select {
+  flex: 1 1 45%;
+  min-width: 0;
+  padding-right: 8px;
+}
+
+.field_value {
+  flex: 1 1 55%;
+  min-width: 0;
+}
+
+.remove_icon {
+  color: #aaa;
+  cursor: pointer;
+  flex: 0 0 auto;
+  margin-left: 4px;
+  padding-top: 8px;
+}
+
+.row:last-child .remove_icon {
+  opacity: 0;
+  cursor: default;
+}
+
+.duplicate_warning {
+  color: #e6a000;
+  font-size: 12px;
+  margin-top: 4px;
+}
