@@ -15,7 +15,7 @@ exports[`UpdateContactFieldsForm render should render existing rows plus a trail
     }
   }
   headerClass="set_contact_fields"
-  title="Update Contact Fields"
+  title="Update Multiple Contact Fields"
 >
   <TypeList
     __className=""
@@ -24,7 +24,7 @@ exports[`UpdateContactFieldsForm render should render existing rows plus a trail
         "component": [Function],
         "description": "Update several contact fields at once",
         "form": [Function],
-        "name": "Update Contact Fields",
+        "name": "Update Multiple Contact Fields",
         "type": "set_contact_fields",
       }
     }

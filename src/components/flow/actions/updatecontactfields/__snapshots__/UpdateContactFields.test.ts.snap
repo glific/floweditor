@@ -1,0 +1,253 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UpdateContactFieldsComp render should cap the rows and count the remainder 1`] = `
+<div
+  className="fields"
+>
+  <div
+    className="field"
+    key="field_0-0"
+  >
+    <div
+      className="name"
+    >
+      <span
+        className="emphasize"
+      >
+        Field 0
+      </span>
+    </div>
+    <div
+      className="equals"
+    >
+      =
+    </div>
+    <div
+      className="value"
+    >
+      <span
+        className="emphasize"
+      >
+        value 0
+      </span>
+    </div>
+  </div>
+  <div
+    className="field"
+    key="field_1-1"
+  >
+    <div
+      className="name"
+    >
+      <span
+        className="emphasize"
+      >
+        Field 1
+      </span>
+    </div>
+    <div
+      className="equals"
+    >
+      =
+    </div>
+    <div
+      className="value"
+    >
+      <span
+        className="emphasize"
+      >
+        value 1
+      </span>
+    </div>
+  </div>
+  <div
+    className="field"
+    key="field_2-2"
+  >
+    <div
+      className="name"
+    >
+      <span
+        className="emphasize"
+      >
+        Field 2
+      </span>
+    </div>
+    <div
+      className="equals"
+    >
+      =
+    </div>
+    <div
+      className="value"
+    >
+      <span
+        className="emphasize"
+      >
+        value 2
+      </span>
+    </div>
+  </div>
+  <div
+    className="field"
+    key="field_3-3"
+  >
+    <div
+      className="name"
+    >
+      <span
+        className="emphasize"
+      >
+        Field 3
+      </span>
+    </div>
+    <div
+      className="equals"
+    >
+      =
+    </div>
+    <div
+      className="value"
+    >
+      <span
+        className="emphasize"
+      >
+        value 3
+      </span>
+    </div>
+  </div>
+  <div
+    className="field"
+    key="field_4-4"
+  >
+    <div
+      className="name"
+    >
+      <span
+        className="emphasize"
+      >
+        Field 4
+      </span>
+    </div>
+    <div
+      className="equals"
+    >
+      =
+    </div>
+    <div
+      className="value"
+    >
+      <span
+        className="emphasize"
+      >
+        value 4
+      </span>
+    </div>
+  </div>
+  <div
+    className="more"
+  >
+    +
+    7
+     more
+  </div>
+</div>
+`;
+
+exports[`UpdateContactFieldsComp render should mark an empty value as not set 1`] = `
+<div
+  className="fields"
+>
+  <div
+    className="field"
+    key="age-0"
+  >
+    <div
+      className="name"
+    >
+      <span
+        className="emphasize"
+      >
+        Age
+      </span>
+    </div>
+    <div
+      className="equals"
+    >
+      =
+    </div>
+    <div
+      className="value"
+    >
+      <span
+        className="unset"
+      >
+        not set
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`UpdateContactFieldsComp render should render every field when under the cap 1`] = `
+<div
+  className="fields"
+>
+  <div
+    className="field"
+    key="age-0"
+  >
+    <div
+      className="name"
+    >
+      <span
+        className="emphasize"
+      >
+        Age
+      </span>
+    </div>
+    <div
+      className="equals"
+    >
+      =
+    </div>
+    <div
+      className="value"
+    >
+      <span
+        className="emphasize"
+      >
+        25
+      </span>
+    </div>
+  </div>
+  <div
+    className="field"
+    key="district-1"
+  >
+    <div
+      className="name"
+    >
+      <span
+        className="emphasize"
+      >
+        District
+      </span>
+    </div>
+    <div
+      className="equals"
+    >
+      =
+    </div>
+    <div
+      className="value"
+    >
+      <span
+        className="emphasize"
+      >
+        Pune
+      </span>
+    </div>
+  </div>
+</div>
+`;
