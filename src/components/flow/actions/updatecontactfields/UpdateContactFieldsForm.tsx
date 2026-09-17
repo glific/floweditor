@@ -39,12 +39,17 @@ export default class UpdateContactFieldsForm extends React.Component<
     });
   }
 
-  /** Keeps exactly one trailing empty row so there is always somewhere to add a field */
+  /**
+   * Keeps exactly one trailing empty row so there is always somewhere to add a field.
+   * Reuses the existing empty row rather than building a new one, so its React key is
+   * stable and a value typed there before a field is picked survives the update.
+   */
   private setRows(rows: FieldRow[]): void {
     const filled = rows.filter(row => !isEmptyRow(row));
+    const trailing = rows.find(isEmptyRow) || createEmptyRow();
 
     this.setState({
-      rows: [...filled, createEmptyRow()],
+      rows: [...filled, trailing],
       valid: filled.length > 0
     });
   }
@@ -65,10 +70,6 @@ export default class UpdateContactFieldsForm extends React.Component<
 
   private handleRemoveRow(uuid: string): void {
     this.setRows(this.state.rows.filter(row => row.uuid !== uuid));
-  }
-
-  public handleFieldAdded(field: Asset): void {
-    this.props.addAsset('fields', field);
   }
 
   public handleCreateAssetFromInput(input: string): any {
