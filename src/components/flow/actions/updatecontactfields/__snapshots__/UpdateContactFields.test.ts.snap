@@ -196,3 +196,32 @@ exports[`UpdateContactFieldsComp render should render every field when under the
   </div>
 </div>
 `;
+
+exports[`UpdateContactFieldsComp render should render the language name rather than the iso code 1`] = `
+<div
+  className="fields"
+>
+  <div
+    className="field"
+    key="language-0"
+  >
+    <div
+      className="node_asset"
+    >
+      Set 
+      <span
+        className="emphasize"
+      >
+        Language
+      </span>
+       to 
+      <span
+        className="emphasize"
+      >
+        Hindi
+      </span>
+      .
+    </div>
+  </div>
+</div>
+`;

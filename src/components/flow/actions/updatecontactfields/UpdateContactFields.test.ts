@@ -1,9 +1,24 @@
 import UpdateContactFieldsComp, {
   MAX_TO_SHOW
 } from 'components/flow/actions/updatecontactfields/UpdateContactFields';
-import { SetContactFields } from 'flowTypes';
+import { ContactProperties, SetContactFields } from 'flowTypes';
+import { AssetType } from 'store/flowContext';
 import { composeComponentTestUtils } from 'testUtils';
 import { createSetContactFieldsAction } from 'testUtils/assetCreators';
+
+const languageAction = (): SetContactFields => {
+  const action = createSetContactFieldsAction();
+
+  action.fields = [
+    {
+      field: { key: 'language', name: 'Language' },
+      value: 'hi',
+      type: ContactProperties.Language
+    }
+  ];
+
+  return action;
+};
 
 const fieldsAction = (count: number): SetContactFields => {
   const action = createSetContactFieldsAction();
@@ -68,6 +83,24 @@ describe(UpdateContactFieldsComp.name, () => {
       const { wrapper } = setup(true, { $set: action });
       expect(wrapper.find('.field').text()).toContain('Clear');
       expect(wrapper).toMatchSnapshot();
+    });
+
+    it('should render the language name rather than the iso code', () => {
+      const { wrapper } = setup(true, {
+        $set: {
+          ...languageAction(),
+          languages: { hi: { id: 'hi', name: 'Hindi', type: AssetType.Language } }
+        }
+      });
+
+      expect(wrapper.find('.field').text()).toContain('Hindi');
+      expect(wrapper).toMatchSnapshot();
+    });
+
+    it('should fall back to the iso code for an unknown language', () => {
+      const { wrapper } = setup(true, { $set: languageAction() });
+
+      expect(wrapper.find('.field').text()).toContain('hi');
     });
 
     it('should render repeated field keys without colliding', () => {
