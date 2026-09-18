@@ -61,8 +61,18 @@ exports[`UpdateContactFieldsForm render should render existing rows plus a trail
           key="field_select_763e4844-3e1b-407a-a1b5-5fdfcd308b41"
           name="Contact Field"
           onChange={[Function]}
+          options={
+            Array [
+              Object {
+                "id": "language",
+                "name": "Language",
+                "type": "property",
+              },
+            ]
+          }
           placeholder="Select a field"
           searchable={true}
+          sortFunction={[Function]}
           valueKey="key"
         />
       </div>
@@ -115,8 +125,18 @@ exports[`UpdateContactFieldsForm render should render existing rows plus a trail
           key="field_select_477ac8b4-25e2-483a-8686-2d1332c4da1c"
           name="Contact Field"
           onChange={[Function]}
+          options={
+            Array [
+              Object {
+                "id": "language",
+                "name": "Language",
+                "type": "property",
+              },
+            ]
+          }
           placeholder="Select a field"
           searchable={true}
+          sortFunction={[Function]}
           valueKey="key"
         />
       </div>
@@ -166,8 +186,18 @@ exports[`UpdateContactFieldsForm render should render existing rows plus a trail
           key="field_select_1e47a1e1-3c67-4df5-adf1-da542c789adb"
           name="Contact Field"
           onChange={[Function]}
+          options={
+            Array [
+              Object {
+                "id": "language",
+                "name": "Language",
+                "type": "property",
+              },
+            ]
+          }
           placeholder="Select a field"
           searchable={true}
+          sortFunction={[Function]}
           valueKey="key"
         />
       </div>
@@ -204,6 +234,39 @@ Array [
           "name": "District",
         },
         "value": "Pune",
+      },
+    ],
+    "type": "set_contact_fields",
+    "uuid": "b1f332f3-bdd3-4891-aec5-1843a712dbf1",
+  },
+]
+`;
+
+exports[`UpdateContactFieldsForm updates should save a language row with its property type 1`] = `
+Array [
+  Object {
+    "fields": Array [
+      Object {
+        "field": Object {
+          "key": "age",
+          "name": "Age",
+        },
+        "value": "25",
+      },
+      Object {
+        "field": Object {
+          "key": "district",
+          "name": "District",
+        },
+        "value": "Pune",
+      },
+      Object {
+        "field": Object {
+          "key": "language",
+          "name": "Language",
+        },
+        "type": "language",
+        "value": "hin",
       },
     ],
     "type": "set_contact_fields",

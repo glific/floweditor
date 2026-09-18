@@ -217,6 +217,25 @@ describe(UpdateContactFieldsForm.name, () => {
       expect(rows.find((row: any) => row.uuid === second.uuid)).toBeUndefined();
     });
 
+    it('should save a language row with its property type', () => {
+      const trailing = form.instance.state.rows[form.instance.state.rows.length - 1];
+
+      form.instance.handleFieldChanged(trailing.uuid, {
+        id: 'language',
+        name: 'Language',
+        type: 'property'
+      });
+
+      const languageRow = form.instance.state.rows.find(
+        (row: any) => row.field.value && row.field.value.id === 'language'
+      );
+
+      form.instance.handleValueChanged(languageRow.uuid, 'hin');
+      form.instance.handleSave();
+
+      expect(form.props.updateAction).toMatchCallSnapshot();
+    });
+
     it('should cancel changes', () => {
       form.instance.getButtons().secondary.onClick();
       expect(form.props.updateAction).not.toBeCalled();

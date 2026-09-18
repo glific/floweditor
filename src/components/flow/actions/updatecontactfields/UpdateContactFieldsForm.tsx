@@ -1,15 +1,21 @@
 import { react as bindCallbacks } from 'auto-bind';
 import Dialog, { ButtonSet } from 'components/dialog/Dialog';
 import {
+  BULK_CONTACT_PROPERTIES,
   createEmptyRow,
   duplicateKeys,
   FieldRow,
   initializeForm,
   isConsentRow,
   isEmptyRow,
+  isLanguageRow,
   stateToAction,
   UpdateContactFieldsFormState
 } from 'components/flow/actions/updatecontactfields/helpers';
+import {
+  getLanguageForCode,
+  sortFieldsAndProperties
+} from 'components/flow/actions/updatecontact/helpers';
 import { CONTACT_CONSENT_OPTIONS } from 'components/flow/actions/updatecontact/UpdateContactForm';
 import SelectElement, { SelectOption } from 'components/form/select/SelectElement';
 import { ActionFormProps } from 'components/flow/props';
@@ -159,6 +165,8 @@ export default class UpdateContactFieldsForm extends React.Component<
             valueKey="key"
             searchable={true}
             onChange={(selection: Asset) => this.handleFieldChanged(row.uuid, selection)}
+            sortFunction={sortFieldsAndProperties}
+            options={BULK_CONTACT_PROPERTIES}
             allowCreate={true}
             createPrefix={i18n.t('create_field', 'Create Field') + ': '}
             createArbitraryOption={this.handleCreateAssetFromInput}
@@ -178,8 +186,34 @@ export default class UpdateContactFieldsForm extends React.Component<
     );
   }
 
-  /** The value widget varies for the field - consent is a fixed set of options */
+  private languageValue(row: FieldRow): any {
+    const iso = row.value.value;
+
+    return iso
+      ? { iso, name: getLanguageForCode(iso, this.props.assetStore.languages.items) }
+      : null;
+  }
+
+  /** The value widget varies for the field - consent and language are fixed sets */
   private renderValueWidget(row: FieldRow): JSX.Element {
+    if (isLanguageRow(row)) {
+      return (
+        <TembaSelectElement
+          key={'language_select_' + row.uuid}
+          name={i18n.t('forms.language', 'Language')}
+          placeholder={i18n.t(
+            'forms.select_language',
+            'Select the language to use for this contact'
+          )}
+          endpoint={this.context.config.endpoints.languages}
+          entry={{ value: this.languageValue(row) }}
+          valueKey="iso"
+          shouldExclude={(language: any) => language.iso === 'base'}
+          onChange={(language: any) => this.handleValueChanged(row.uuid, language.iso)}
+        />
+      );
+    }
+
     if (isConsentRow(row)) {
       return (
         <SelectElement

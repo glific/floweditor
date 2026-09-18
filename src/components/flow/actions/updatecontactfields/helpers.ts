@@ -1,6 +1,8 @@
 import { getActionUUID } from 'components/flow/actions/helpers';
+import { LANGUAGE_PROPERTY } from 'components/flow/props';
 import { Types } from 'config/interfaces';
-import { ContactFieldEntry, SetContactFields } from 'flowTypes';
+import { ContactFieldEntry, ContactProperties, SetContactFields } from 'flowTypes';
+import { Asset, AssetType } from 'store/flowContext';
 import { FormState, NodeEditorSettings, StringEntry, FormEntry } from 'store/nodeEditor';
 import { createUUID } from 'utils';
 
@@ -34,7 +36,7 @@ export const initializeForm = (settings: NodeEditorSettings): UpdateContactField
     (action.fields || []).forEach((entry: ContactFieldEntry) => {
       rows.push({
         uuid: createUUID(),
-        field: { value: { key: entry.field.key, label: entry.field.name } },
+        field: { value: assetForEntry(entry) },
         value: { value: entry.value }
       });
     });
@@ -45,6 +47,12 @@ export const initializeForm = (settings: NodeEditorSettings): UpdateContactField
   return { rows, valid: rows.some(row => !isEmptyRow(row)) };
 };
 
+const assetForEntry = (entry: ContactFieldEntry): any =>
+  BULK_CONTACT_PROPERTIES.find((property: Asset) => property.id === entry.type) || {
+    key: entry.field.key,
+    label: entry.field.name
+  };
+
 export const stateToAction = (
   settings: NodeEditorSettings,
   state: UpdateContactFieldsFormState
@@ -54,12 +62,34 @@ export const stateToAction = (
   fields: state.rows.filter(row => !isEmptyRow(row)).map(rowToEntry)
 });
 
-const rowToEntry = (row: FieldRow): ContactFieldEntry => ({
-  field: { key: row.field.value.key, name: getFieldName(row.field.value) },
-  value: row.value.value
-});
+const rowToEntry = (row: FieldRow): ContactFieldEntry => {
+  const property = rowProperty(row);
+
+  const entry: ContactFieldEntry = {
+    field: { key: property || row.field.value.key, name: getFieldName(row.field.value) },
+    value: row.value.value
+  };
+
+  return property ? { ...entry, type: property } : entry;
+};
 
 export const CONSENT_FIELD_KEY = 'settings';
+
+/**
+ * Contact properties the bulk node can set. Channel and status are deliberately left
+ * out: neither has any backend handling, so offering them only produces flows that
+ * fail to publish.
+ */
+export const BULK_CONTACT_PROPERTIES: Asset[] = [LANGUAGE_PROPERTY];
+
+/** The contact property a row sets, or null when the row is an ordinary field */
+export const rowProperty = (row: FieldRow): string =>
+  !isEmptyRow(row) && row.field.value.type === AssetType.ContactProperty
+    ? row.field.value.id
+    : null;
+
+export const isLanguageRow = (row: FieldRow): boolean =>
+  rowProperty(row) === ContactProperties.Language;
 
 /** The consent field is not a real field - it drives opt in / opt out */
 export const isConsentRow = (row: FieldRow): boolean =>

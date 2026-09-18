@@ -342,6 +342,8 @@ export interface SetContactField extends Action {
 export interface ContactFieldEntry {
   field: Field;
   value: string;
+  /** set for a contact property row (e.g. language); absent for an ordinary field */
+  type?: string;
 }
 
 export interface SetContactFields extends Action {
