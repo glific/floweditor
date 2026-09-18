@@ -59,6 +59,12 @@ const rowToEntry = (row: FieldRow): ContactFieldEntry => ({
   value: row.value.value
 });
 
+export const CONSENT_FIELD_KEY = 'settings';
+
+/** The consent field is not a real field - it drives opt in / opt out */
+export const isConsentRow = (row: FieldRow): boolean =>
+  !isEmptyRow(row) && row.field.value.key === CONSENT_FIELD_KEY;
+
 /** Field keys used more than once - the backend keeps only the last of them */
 export const duplicateKeys = (rows: FieldRow[]): string[] => {
   const seen: string[] = [];

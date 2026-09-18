@@ -9,27 +9,21 @@ exports[`UpdateContactFieldsComp render should cap the rows and count the remain
     key="field_0-0"
   >
     <div
-      className="name"
+      className="node_asset"
     >
+      Set 
       <span
         className="emphasize"
       >
         Field 0
       </span>
-    </div>
-    <div
-      className="equals"
-    >
-      =
-    </div>
-    <div
-      className="value"
-    >
+       to 
       <span
         className="emphasize"
       >
         value 0
       </span>
+      .
     </div>
   </div>
   <div
@@ -37,27 +31,21 @@ exports[`UpdateContactFieldsComp render should cap the rows and count the remain
     key="field_1-1"
   >
     <div
-      className="name"
+      className="node_asset"
     >
+      Set 
       <span
         className="emphasize"
       >
         Field 1
       </span>
-    </div>
-    <div
-      className="equals"
-    >
-      =
-    </div>
-    <div
-      className="value"
-    >
+       to 
       <span
         className="emphasize"
       >
         value 1
       </span>
+      .
     </div>
   </div>
   <div
@@ -65,27 +53,21 @@ exports[`UpdateContactFieldsComp render should cap the rows and count the remain
     key="field_2-2"
   >
     <div
-      className="name"
+      className="node_asset"
     >
+      Set 
       <span
         className="emphasize"
       >
         Field 2
       </span>
-    </div>
-    <div
-      className="equals"
-    >
-      =
-    </div>
-    <div
-      className="value"
-    >
+       to 
       <span
         className="emphasize"
       >
         value 2
       </span>
+      .
     </div>
   </div>
   <div
@@ -93,27 +75,21 @@ exports[`UpdateContactFieldsComp render should cap the rows and count the remain
     key="field_3-3"
   >
     <div
-      className="name"
+      className="node_asset"
     >
+      Set 
       <span
         className="emphasize"
       >
         Field 3
       </span>
-    </div>
-    <div
-      className="equals"
-    >
-      =
-    </div>
-    <div
-      className="value"
-    >
+       to 
       <span
         className="emphasize"
       >
         value 3
       </span>
+      .
     </div>
   </div>
   <div
@@ -121,27 +97,21 @@ exports[`UpdateContactFieldsComp render should cap the rows and count the remain
     key="field_4-4"
   >
     <div
-      className="name"
+      className="node_asset"
     >
+      Set 
       <span
         className="emphasize"
       >
         Field 4
       </span>
-    </div>
-    <div
-      className="equals"
-    >
-      =
-    </div>
-    <div
-      className="value"
-    >
+       to 
       <span
         className="emphasize"
       >
         value 4
       </span>
+      .
     </div>
   </div>
   <div
@@ -154,7 +124,7 @@ exports[`UpdateContactFieldsComp render should cap the rows and count the remain
 </div>
 `;
 
-exports[`UpdateContactFieldsComp render should mark an empty value as not set 1`] = `
+exports[`UpdateContactFieldsComp render should render an empty value as clearing the field 1`] = `
 <div
   className="fields"
 >
@@ -162,28 +132,15 @@ exports[`UpdateContactFieldsComp render should mark an empty value as not set 1`
     className="field"
     key="age-0"
   >
-    <div
-      className="name"
-    >
+    <div>
+      Clear
+       
       <span
         className="emphasize"
       >
         Age
       </span>
-    </div>
-    <div
-      className="equals"
-    >
-      =
-    </div>
-    <div
-      className="value"
-    >
-      <span
-        className="unset"
-      >
-        not set
-      </span>
+      .
     </div>
   </div>
 </div>
@@ -198,27 +155,21 @@ exports[`UpdateContactFieldsComp render should render every field when under the
     key="age-0"
   >
     <div
-      className="name"
+      className="node_asset"
     >
+      Set 
       <span
         className="emphasize"
       >
         Age
       </span>
-    </div>
-    <div
-      className="equals"
-    >
-      =
-    </div>
-    <div
-      className="value"
-    >
+       to 
       <span
         className="emphasize"
       >
         25
       </span>
+      .
     </div>
   </div>
   <div
@@ -226,27 +177,21 @@ exports[`UpdateContactFieldsComp render should render every field when under the
     key="district-1"
   >
     <div
-      className="name"
+      className="node_asset"
     >
+      Set 
       <span
         className="emphasize"
       >
         District
       </span>
-    </div>
-    <div
-      className="equals"
-    >
-      =
-    </div>
-    <div
-      className="value"
-    >
+       to 
       <span
         className="emphasize"
       >
         Pune
       </span>
+      .
     </div>
   </div>
 </div>

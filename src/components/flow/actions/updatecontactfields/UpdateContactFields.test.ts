@@ -61,12 +61,12 @@ describe(UpdateContactFieldsComp.name, () => {
       expect(wrapper.find('.more').length).toEqual(0);
     });
 
-    it('should mark an empty value as not set', () => {
+    it('should render an empty value as clearing the field', () => {
       const action = createSetContactFieldsAction();
       action.fields = [{ field: { key: 'age', name: 'Age' }, value: '' }];
 
       const { wrapper } = setup(true, { $set: action });
-      expect(wrapper.find('.unset').text()).toEqual('not set');
+      expect(wrapper.find('.field').text()).toContain('Clear');
       expect(wrapper).toMatchSnapshot();
     });
 

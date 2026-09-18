@@ -6,6 +6,7 @@ import {
   stateToAction
 } from 'components/flow/actions/updatecontactfields/helpers';
 import { Types } from 'config/interfaces';
+import { NodeEditorSettings } from 'store/nodeEditor';
 import { mock } from 'testUtils';
 import { createSetContactFieldsAction } from 'testUtils/assetCreators';
 import * as utils from 'utils';
@@ -15,7 +16,10 @@ mock(utils, 'createUUID', utils.seededUUIDs());
 describe('updatecontactfields helpers', () => {
   it('initializes a row per existing entry, plus an empty one', () => {
     const action = createSetContactFieldsAction();
-    const state = initializeForm({ originalNode: null, originalAction: action });
+    const state = initializeForm({
+      originalNode: null,
+      originalAction: action
+    } as NodeEditorSettings);
 
     expect(state.rows.length).toEqual(3);
     expect(state.rows[0].field.value.key).toEqual('age');
@@ -26,7 +30,7 @@ describe('updatecontactfields helpers', () => {
 
   it('round trips through stateToAction, dropping empty rows', () => {
     const action = createSetContactFieldsAction();
-    const settings = { originalNode: null, originalAction: action };
+    const settings: NodeEditorSettings = { originalNode: null, originalAction: action };
     const state = initializeForm(settings);
 
     const result = stateToAction(settings, state);

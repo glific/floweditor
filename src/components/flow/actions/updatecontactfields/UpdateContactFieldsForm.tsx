@@ -5,20 +5,24 @@ import {
   duplicateKeys,
   FieldRow,
   initializeForm,
+  isConsentRow,
   isEmptyRow,
   stateToAction,
   UpdateContactFieldsFormState
 } from 'components/flow/actions/updatecontactfields/helpers';
+import { CONTACT_CONSENT_OPTIONS } from 'components/flow/actions/updatecontact/UpdateContactForm';
+import SelectElement, { SelectOption } from 'components/form/select/SelectElement';
 import { ActionFormProps } from 'components/flow/props';
 import TextInputElement from 'components/form/textinput/TextInputElement';
 import TypeList from 'components/nodeeditor/TypeList';
+import { shouldRequireIf, validate } from 'store/validators';
 import { fakePropType } from 'config/ConfigProvider';
 import i18n from 'config/i18n';
 import * as React from 'react';
 import { Asset } from 'store/flowContext';
 import TembaSelectElement from 'temba/TembaSelectElement';
 
-import { renderIssues } from '../helpers';
+import { hasErrors, renderIssues } from '../helpers';
 import styles from './UpdateContactFieldsForm.module.scss';
 
 export default class UpdateContactFieldsForm extends React.Component<
@@ -41,12 +45,14 @@ export default class UpdateContactFieldsForm extends React.Component<
 
   /**
    * Keeps exactly one trailing empty row so there is always somewhere to add a field.
-   * Reuses the existing empty row rather than building a new one, so its React key is
-   * stable and a value typed there before a field is picked survives the update.
+   * Only the row already at the end is reused, so its React key is stable and a value
+   * typed there survives; taking the first empty row instead would move an emptied
+   * middle row to the bottom and discard whatever was in the real trailing row.
    */
   private setRows(rows: FieldRow[]): void {
     const filled = rows.filter(row => !isEmptyRow(row));
-    const trailing = rows.find(isEmptyRow) || createEmptyRow();
+    const last = rows[rows.length - 1];
+    const trailing = last && isEmptyRow(last) ? last : createEmptyRow();
 
     this.setState({
       rows: [...filled, trailing],
@@ -56,10 +62,29 @@ export default class UpdateContactFieldsForm extends React.Component<
 
   private handleFieldChanged(uuid: string, selection: Asset): void {
     this.setRows(
-      this.state.rows.map(row =>
-        row.uuid === uuid ? { ...row, field: { value: selection } } : row
-      )
+      this.state.rows.map(row => {
+        if (row.uuid !== uuid) {
+          return row;
+        }
+
+        const updated = { ...row, field: { value: selection } };
+
+        // a free text value is not a valid consent option, so fall back to the first one
+        if (isConsentRow(updated) && !this.consentOption(updated.value.value)) {
+          return { ...updated, value: { value: CONTACT_CONSENT_OPTIONS[0].value } };
+        }
+
+        return updated;
+      })
     );
+  }
+
+  private consentOption(value: string): SelectOption {
+    return CONTACT_CONSENT_OPTIONS.find((option: SelectOption) => option.value === value);
+  }
+
+  private handleConsentChanged(uuid: string, option: SelectOption): void {
+    this.handleValueChanged(uuid, option.value);
   }
 
   private handleValueChanged(uuid: string, value: string): void {
@@ -76,11 +101,39 @@ export default class UpdateContactFieldsForm extends React.Component<
     return { label: input, value_type: 'text' };
   }
 
+  /**
+   * Re-runs each filled row through the validators with submitting set, the same way
+   * the single field form checks its language and channel entries on save.
+   */
+  private validateRows(): boolean {
+    let valid = false;
+
+    const rows = this.state.rows.map((row: FieldRow) => {
+      if (isEmptyRow(row)) {
+        return row;
+      }
+
+      const value = validate(i18n.t('forms.field_value', 'Field Value'), row.value.value, [
+        shouldRequireIf(true)
+      ]);
+
+      valid = valid || !hasErrors(value);
+
+      return { ...row, value };
+    });
+
+    this.setState({ rows, valid });
+
+    return valid && rows.every((row: FieldRow) => isEmptyRow(row) || !hasErrors(row.value));
+  }
+
   private handleSave(): void {
-    if (this.state.valid) {
-      this.props.updateAction(stateToAction(this.props.nodeSettings, this.state));
-      this.props.onClose(false);
+    if (!this.validateRows()) {
+      return;
     }
+
+    this.props.updateAction(stateToAction(this.props.nodeSettings, this.state));
+    this.props.onClose(false);
   }
 
   private getButtons(): ButtonSet {
@@ -111,23 +164,42 @@ export default class UpdateContactFieldsForm extends React.Component<
             createArbitraryOption={this.handleCreateAssetFromInput}
           />
         </div>
-        <div className={styles.field_value}>
-          <TextInputElement
-            name={i18n.t('forms.field_value', 'Field Value')}
-            placeholder={i18n.t('forms.enter_field_value_short', 'Value')}
-            onChange={(value: string) => this.handleValueChanged(row.uuid, value)}
-            entry={row.value}
-            autocomplete={true}
-          />
-        </div>
+        <div className={styles.field_value}>{this.renderValueWidget(row)}</div>
         <div className={styles.remove_icon}>
-          <temba-icon
-            data-testid={'remove-field-' + index}
-            name="delete_small"
-            onClick={() => this.handleRemoveRow(row.uuid)}
-          ></temba-icon>
+          {isEmptyRow(row) ? null : (
+            <temba-icon
+              data-testid={'remove-field-' + index}
+              name="delete_small"
+              onClick={() => this.handleRemoveRow(row.uuid)}
+            ></temba-icon>
+          )}
         </div>
       </div>
+    );
+  }
+
+  /** The value widget varies for the field - consent is a fixed set of options */
+  private renderValueWidget(row: FieldRow): JSX.Element {
+    if (isConsentRow(row)) {
+      return (
+        <SelectElement
+          key={'consent_select_' + row.uuid}
+          name={i18n.t('forms.settings', 'Consent Status')}
+          entry={{ value: this.consentOption(row.value.value) }}
+          onChange={(option: SelectOption) => this.handleConsentChanged(row.uuid, option)}
+          options={CONTACT_CONSENT_OPTIONS}
+        />
+      );
+    }
+
+    return (
+      <TextInputElement
+        name={i18n.t('forms.field_value', 'Field Value')}
+        placeholder={i18n.t('forms.enter_field_value_short', 'Value')}
+        onChange={(value: string) => this.handleValueChanged(row.uuid, value)}
+        entry={row.value}
+        autocomplete={true}
+      />
     );
   }
 

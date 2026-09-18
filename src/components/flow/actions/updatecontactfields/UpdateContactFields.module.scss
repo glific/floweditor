@@ -5,36 +5,7 @@
 }
 
 .field {
-  display: flex;
-  align-items: baseline;
   overflow: hidden;
-}
-
-.name {
-  flex: 0 1 auto;
-  max-width: 50%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.equals {
-  flex: 0 0 auto;
-  padding: 0 4px;
-  color: $placeholder_color;
-}
-
-.value {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.unset {
-  color: $placeholder_color;
-  font-style: italic;
 }
 
 .more {

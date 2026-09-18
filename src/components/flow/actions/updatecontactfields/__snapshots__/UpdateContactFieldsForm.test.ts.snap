@@ -188,13 +188,7 @@ exports[`UpdateContactFieldsForm render should render existing rows plus a trail
       </div>
       <div
         className="remove_icon"
-      >
-        <temba-icon
-          data-testid="remove-field-2"
-          name="delete_small"
-          onClick={[Function]}
-        />
-      </div>
+      />
     </div>
   </div>
 </Dialog>
@@ -260,6 +254,38 @@ Array [
           "name": "District",
         },
         "value": "Pune",
+      },
+    ],
+    "type": "set_contact_fields",
+    "uuid": "b1f332f3-bdd3-4891-aec5-1843a712dbf1",
+  },
+]
+`;
+
+exports[`UpdateContactFieldsForm updates should save the chosen consent value 1`] = `
+Array [
+  Object {
+    "fields": Array [
+      Object {
+        "field": Object {
+          "key": "age",
+          "name": "Age",
+        },
+        "value": "25",
+      },
+      Object {
+        "field": Object {
+          "key": "district",
+          "name": "District",
+        },
+        "value": "Pune",
+      },
+      Object {
+        "field": Object {
+          "key": "settings",
+          "name": "Consent status",
+        },
+        "value": "optout",
       },
     ],
     "type": "set_contact_fields",
