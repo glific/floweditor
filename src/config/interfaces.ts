@@ -124,7 +124,8 @@ export enum FeatureFilter {
   HAS_OPTINS = 'optins',
   HAS_GROUPS = 'groups',
   HAS_LLM = 'llm',
-  HAS_START_SESSION = 'start_session'
+  HAS_START_SESSION = 'start_session',
+  HAS_BULK_CONTACT_FIELDS = 'bulk_contact_fields'
 }
 
 export interface FlowTypeVisibility {

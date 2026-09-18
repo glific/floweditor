@@ -189,6 +189,7 @@ Array [
   Object {
     "component": [Function],
     "description": "Update several contact fields at once",
+    "filter": "bulk_contact_fields",
     "form": [Function],
     "name": "Update Multiple Contact Fields",
     "type": "set_contact_fields",
@@ -798,6 +799,7 @@ Object {
   "set_contact_fields": Object {
     "component": [Function],
     "description": "Update several contact fields at once",
+    "filter": "bulk_contact_fields",
     "form": [Function],
     "name": "Update Multiple Contact Fields",
     "type": "set_contact_fields",

@@ -374,6 +374,7 @@ export const typeConfigList: Type[] = [
       'Update several contact fields at once'
     ),
     form: UpdateContactFieldsForm,
+    filter: FeatureFilter.HAS_BULK_CONTACT_FIELDS,
     component: UpdateContactFieldsComp
   },
   {
