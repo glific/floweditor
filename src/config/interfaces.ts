@@ -21,6 +21,7 @@ export enum Types {
   remove_contact_groups = 'remove_contact_groups',
   set_contact_channel = 'set_contact_channel',
   set_contact_field = 'set_contact_field',
+  set_contact_fields = 'set_contact_fields',
   set_contact_name = 'set_contact_name',
   set_contact_language = 'set_contact_language',
   set_contact_status = 'set_contact_status',
@@ -123,7 +124,8 @@ export enum FeatureFilter {
   HAS_OPTINS = 'optins',
   HAS_GROUPS = 'groups',
   HAS_LLM = 'llm',
-  HAS_START_SESSION = 'start_session'
+  HAS_START_SESSION = 'start_session',
+  HAS_BULK_CONTACT_FIELDS = 'bulk_contact_fields'
 }
 
 export interface FlowTypeVisibility {

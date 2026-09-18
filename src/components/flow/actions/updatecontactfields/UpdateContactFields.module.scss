@@ -1,0 +1,14 @@
+@import 'variables.module.scss';
+
+.fields {
+  text-align: left;
+}
+
+.field {
+  overflow: hidden;
+}
+
+.more {
+  color: $placeholder_color;
+  padding-top: 2px;
+}

@@ -18,6 +18,7 @@ import {
   HintTypes,
   RouterTypes,
   SetContactField,
+  SetContactFields,
   SetRunResult,
   StickyNote,
   SwitchRouter,
@@ -594,6 +595,14 @@ export const getFlowComponents = (definition: FlowDefinition): FlowComponents =>
           id: fieldAction.field.key,
           type: AssetType.Field
         };
+      } else if (action.type === Types.set_contact_fields) {
+        for (const entry of (action as SetContactFields).fields || []) {
+          fields[entry.field.key] = {
+            name: entry.field.name,
+            id: entry.field.key,
+            type: AssetType.Field
+          };
+        }
       } else if (action.type === Types.add_input_labels) {
         for (const label of (action as AddLabels).labels) {
           labels[label.uuid] = {
@@ -654,6 +663,12 @@ export const extractContactFields = (nodes: FlowNode[]): Asset[] =>
     actions.forEach(action => {
       if (action.type === Types.set_contact_field) {
         fieldList.push(fieldToAsset((action as SetContactField).field));
+      }
+
+      if (action.type === Types.set_contact_fields) {
+        ((action as SetContactFields).fields || []).forEach(entry =>
+          fieldList.push(fieldToAsset(entry.field))
+        );
       }
     });
     return fieldList;

@@ -188,6 +188,14 @@ Array [
   },
   Object {
     "component": [Function],
+    "description": "Update several contact fields at once",
+    "filter": "bulk_contact_fields",
+    "form": [Function],
+    "name": "Update Multiple Contact Fields",
+    "type": "set_contact_fields",
+  },
+  Object {
+    "component": [Function],
     "description": "Send an email",
     "form": [Function],
     "localization": [Function],
@@ -787,6 +795,14 @@ Object {
     "form": [Function],
     "name": "Update Contact",
     "type": "set_contact_field",
+  },
+  "set_contact_fields": Object {
+    "component": [Function],
+    "description": "Update several contact fields at once",
+    "filter": "bulk_contact_fields",
+    "form": [Function],
+    "name": "Update Multiple Contact Fields",
+    "type": "set_contact_fields",
   },
   "set_contact_language": Object {
     "aliases": Array [
