@@ -20,6 +20,7 @@ import {
   SetContactField,
   SetContactFields,
   SetRunResult,
+  SetRunResults,
   StickyNote,
   SwitchRouter,
   UIMetaData,
@@ -628,6 +629,24 @@ export const getFlowComponents = (definition: FlowDefinition): FlowComponents =>
             references: [{ nodeUUID: node.uuid, actionUUID: action.uuid }]
           };
         }
+      } else if (action.type === Types.set_run_results) {
+        for (const entry of (action as SetRunResults).results || []) {
+          const key = snakify(entry.name);
+
+          if (key in results) {
+            results[key].references.push({
+              nodeUUID: node.uuid,
+              actionUUID: action.uuid
+            });
+          } else {
+            results[key] = {
+              name: entry.name,
+              id: key,
+              type: AssetType.Result,
+              references: [{ nodeUUID: node.uuid, actionUUID: action.uuid }]
+            };
+          }
+        }
       }
     }
 
@@ -897,6 +916,14 @@ export const resolveResultNames = (node: FlowNode, existingNodes: RenderNodeMap)
       if (action.type === Types.set_run_result && action.name) {
         usedKeys.add(snakify(action.name));
       }
+
+      if (action.type === Types.set_run_results) {
+        (action.results || []).forEach((entry: any) => {
+          if (entry.name) {
+            usedKeys.add(snakify(entry.name));
+          }
+        });
+      }
     });
   });
 
@@ -915,6 +942,15 @@ export const resolveResultNames = (node: FlowNode, existingNodes: RenderNodeMap)
     if (action.type === Types.set_run_result && action.name) {
       action.name = nextName(action.name);
       usedKeys.add(snakify(action.name));
+    }
+
+    if (action.type === Types.set_run_results) {
+      (action.results || []).forEach((entry: any) => {
+        if (entry.name) {
+          entry.name = nextName(entry.name);
+          usedKeys.add(snakify(entry.name));
+        }
+      });
     }
   });
 

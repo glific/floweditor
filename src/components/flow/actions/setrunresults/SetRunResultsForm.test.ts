@@ -1,9 +1,10 @@
-import UpdateContactFieldsForm from 'components/flow/actions/updatecontactfields/UpdateContactFieldsForm';
+import { resultAsset } from 'components/flow/actions/setrunresults/helpers';
+import SetRunResultsForm from 'components/flow/actions/setrunresults/SetRunResultsForm';
 import { ActionFormProps } from 'components/flow/props';
 import { composeComponentTestUtils, mock } from 'testUtils';
 import {
-  createSetContactFieldsAction,
   createAddGroupsAction,
+  createSetRunResultsAction,
   getActionFormProps
 } from 'testUtils/assetCreators';
 import * as utils from 'utils';
@@ -11,11 +12,11 @@ import * as utils from 'utils';
 mock(utils, 'createUUID', utils.seededUUIDs());
 
 const { setup } = composeComponentTestUtils<ActionFormProps>(
-  UpdateContactFieldsForm,
-  getActionFormProps(createSetContactFieldsAction())
+  SetRunResultsForm,
+  getActionFormProps(createSetRunResultsAction())
 );
 
-describe(UpdateContactFieldsForm.name, () => {
+describe(SetRunResultsForm.name, () => {
   describe('render', () => {
     it('should render existing rows plus a trailing empty one', () => {
       const { wrapper, instance } = setup(true);
@@ -50,14 +51,14 @@ describe(UpdateContactFieldsForm.name, () => {
       // two filled rows plus the trailing empty one
       expect(instance.state.rows.length).toEqual(3);
       expect(wrapper.find('temba-icon').length).toEqual(2);
-      expect(wrapper.find('[data-testid="remove-field-2"]').length).toEqual(0);
+      expect(wrapper.find('[data-testid="remove-result-2"]').length).toEqual(0);
     });
 
     it('should render on every filled row', () => {
       const { wrapper } = setup(true);
 
-      expect(wrapper.find('[data-testid="remove-field-0"]').length).toEqual(1);
-      expect(wrapper.find('[data-testid="remove-field-1"]').length).toEqual(1);
+      expect(wrapper.find('[data-testid="remove-result-0"]').length).toEqual(1);
+      expect(wrapper.find('[data-testid="remove-result-1"]').length).toEqual(1);
     });
   });
 
@@ -68,10 +69,10 @@ describe(UpdateContactFieldsForm.name, () => {
       form = setup(true, { $merge: { updateAction: jest.fn(), onClose: jest.fn() } });
     });
 
-    it('should append a new empty row once a field is picked', () => {
+    it('should append a new empty row once a result is named', () => {
       const emptyRow = form.instance.state.rows[form.instance.state.rows.length - 1];
 
-      form.instance.handleFieldChanged(emptyRow.uuid, { key: 'gender', label: 'Gender' });
+      form.instance.handleNameChanged(emptyRow.uuid, resultAsset('Gender'));
 
       expect(form.instance.state.rows.length).toEqual(4);
       expect(form.instance.state.valid).toBeTruthy();
@@ -82,11 +83,21 @@ describe(UpdateContactFieldsForm.name, () => {
       expect(form.props.updateAction).toMatchCallSnapshot();
     });
 
-    it('should save an updated value', () => {
+    it('should save an updated value and category', () => {
       const firstRow = form.instance.state.rows[0];
       form.instance.handleValueChanged(firstRow.uuid, '@results.age');
+      form.instance.handleCategoryChanged(firstRow.uuid, 'Adult');
       form.instance.handleSave();
       expect(form.props.updateAction).toMatchCallSnapshot();
+    });
+
+    it('should save a blank value, which clears the result', () => {
+      const firstRow = form.instance.state.rows[0];
+      form.instance.handleValueChanged(firstRow.uuid, '');
+      form.instance.handleSave();
+
+      expect(form.props.updateAction).toBeCalled();
+      expect(form.props.updateAction.mock.calls[0][0].results[0].value).toEqual('');
     });
 
     it('should drop a removed row', () => {
@@ -111,92 +122,38 @@ describe(UpdateContactFieldsForm.name, () => {
       expect(form.props.onClose).not.toBeCalled();
     });
 
-    it('should default a consent row to the first option', () => {
-      const emptyRow = form.instance.state.rows[form.instance.state.rows.length - 1];
-
-      form.instance.handleFieldChanged(emptyRow.uuid, { key: 'settings', label: 'Consent status' });
-
-      const consentRow = form.instance.state.rows.find(
-        (row: any) => row.field.value && row.field.value.key === 'settings'
-      );
-
-      expect(consentRow.value.value).toEqual('optin');
-    });
-
-    it('should save the chosen consent value', () => {
-      const emptyRow = form.instance.state.rows[form.instance.state.rows.length - 1];
-
-      form.instance.handleFieldChanged(emptyRow.uuid, { key: 'settings', label: 'Consent status' });
-
-      const consentRow = form.instance.state.rows.find(
-        (row: any) => row.field.value && row.field.value.key === 'settings'
-      );
-
-      form.instance.handleConsentChanged(consentRow.uuid, { name: 'Opt out', value: 'optout' });
-      form.instance.handleSave();
-
-      expect(form.props.updateAction).toMatchCallSnapshot();
-    });
-
-    it('should keep a valid consent value when the row is re-picked', () => {
-      const emptyRow = form.instance.state.rows[form.instance.state.rows.length - 1];
-
-      form.instance.handleFieldChanged(emptyRow.uuid, { key: 'settings', label: 'Consent status' });
-
-      let consentRow = form.instance.state.rows.find(
-        (row: any) => row.field.value && row.field.value.key === 'settings'
-      );
-
-      form.instance.handleConsentChanged(consentRow.uuid, { name: 'Opt out', value: 'optout' });
-      form.instance.handleFieldChanged(consentRow.uuid, {
-        key: 'settings',
-        label: 'Consent status'
-      });
-
-      consentRow = form.instance.state.rows.find(
-        (row: any) => row.field.value && row.field.value.key === 'settings'
-      );
-
-      expect(consentRow.value.value).toEqual('optout');
-    });
-
-    it('should save a blank value, which clears the field', () => {
-      const firstRow = form.instance.state.rows[0];
-      form.instance.handleValueChanged(firstRow.uuid, '');
+    it('should not save a result name that starts with a number', () => {
+      const trailing = form.instance.state.rows[form.instance.state.rows.length - 1];
+      form.instance.handleNameChanged(trailing.uuid, resultAsset('1st place'));
 
       form.props.updateAction.mockClear();
       form.props.onClose.mockClear();
       form.instance.handleSave();
 
-      // a blank value clears that field, exactly as the single field node does
-      expect(form.props.updateAction).toBeCalled();
-      expect(form.props.updateAction.mock.calls[0][0].fields[0].value).toEqual('');
-      expect(form.props.onClose).toBeCalled();
+      const flagged = form.instance.state.rows.find(
+        (row: any) => row.name.value && row.name.value.name === '1st place'
+      );
+
+      expect(flagged.name.validationFailures.length).toBeGreaterThan(0);
+      expect(form.props.updateAction).not.toBeCalled();
+      expect(form.props.onClose).not.toBeCalled();
     });
 
-    it('should save when every filled row has a blank value', () => {
-      form.instance.state.rows
-        .filter((row: any) => row.field.value)
-        .forEach((row: any) => form.instance.handleValueChanged(row.uuid, ''));
+    it('should not save a result name with punctuation', () => {
+      const trailing = form.instance.state.rows[form.instance.state.rows.length - 1];
+      form.instance.handleNameChanged(trailing.uuid, resultAsset('bad!name'));
 
       form.props.updateAction.mockClear();
       form.instance.handleSave();
 
-      expect(form.instance.state.valid).toBeTruthy();
-      expect(form.props.updateAction).toBeCalled();
-      expect(
-        form.props.updateAction.mock.calls[0][0].fields.every((entry: any) => entry.value === '')
-      ).toBeTruthy();
+      expect(form.props.updateAction).not.toBeCalled();
     });
 
     it('should keep a value typed into the trailing row when another row changes', () => {
       const trailing = form.instance.state.rows[form.instance.state.rows.length - 1];
 
       form.instance.handleValueChanged(trailing.uuid, 'typed early');
-      form.instance.handleFieldChanged(form.instance.state.rows[0].uuid, {
-        key: 'gender',
-        label: 'Gender'
-      });
+      form.instance.handleNameChanged(form.instance.state.rows[0].uuid, resultAsset('Gender'));
 
       const stillTrailing = form.instance.state.rows[form.instance.state.rows.length - 1];
 
@@ -208,8 +165,8 @@ describe(UpdateContactFieldsForm.name, () => {
       const [first, second, trailing] = form.instance.state.rows;
 
       form.instance.handleValueChanged(trailing.uuid, 'typed in trailing');
-      // clearing the field empties the row without touching the others
-      form.instance.handleFieldChanged(first.uuid, null);
+      // clearing the name empties the row without touching the others
+      form.instance.handleNameChanged(first.uuid, null);
 
       const rows = form.instance.state.rows;
 
@@ -223,7 +180,7 @@ describe(UpdateContactFieldsForm.name, () => {
     it('should not move an emptied middle row to the bottom', () => {
       const [first, second] = form.instance.state.rows;
 
-      form.instance.handleFieldChanged(second.uuid, null);
+      form.instance.handleNameChanged(second.uuid, null);
 
       const rows = form.instance.state.rows;
 
@@ -231,23 +188,12 @@ describe(UpdateContactFieldsForm.name, () => {
       expect(rows.find((row: any) => row.uuid === second.uuid)).toBeUndefined();
     });
 
-    it('should save a language row with its property type', () => {
+    it('should warn about repeated result names', () => {
       const trailing = form.instance.state.rows[form.instance.state.rows.length - 1];
+      form.instance.handleNameChanged(trailing.uuid, resultAsset('Name'));
 
-      form.instance.handleFieldChanged(trailing.uuid, {
-        id: 'language',
-        name: 'Language',
-        type: 'property'
-      });
-
-      const languageRow = form.instance.state.rows.find(
-        (row: any) => row.field.value && row.field.value.id === 'language'
-      );
-
-      form.instance.handleValueChanged(languageRow.uuid, 'hin');
-      form.instance.handleSave();
-
-      expect(form.props.updateAction).toMatchCallSnapshot();
+      const wrapper = form.instance.render();
+      expect(JSON.stringify(wrapper)).toContain('duplicate-warning');
     });
 
     it('should cancel changes', () => {

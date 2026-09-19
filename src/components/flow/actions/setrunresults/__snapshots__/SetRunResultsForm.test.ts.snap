@@ -1,0 +1,303 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SetRunResultsForm render should render existing rows plus a trailing empty one 1`] = `
+<Dialog
+  buttons={
+    Object {
+      "primary": Object {
+        "name": "Ok",
+        "onClick": [Function],
+      },
+      "secondary": Object {
+        "name": "Cancel",
+        "onClick": [Function],
+      },
+    }
+  }
+  headerClass="set_run_results"
+  title="Save Multiple Flow Results"
+>
+  <TypeList
+    __className=""
+    initialType={
+      Object {
+        "component": [Function],
+        "description": "Save multiple results",
+        "filter": "bulk_contact_fields",
+        "form": [Function],
+        "name": "Save Multiple Flow Results",
+        "type": "set_run_results",
+      }
+    }
+    onChange={[MockFunction]}
+  />
+  <p>
+    Select the results to save for this flow
+  </p>
+  <div
+    className="rows"
+  >
+    <div
+      className="row"
+      data-testid="result-row-0"
+      key="763e4844-3e1b-407a-a1b5-5fdfcd308b41"
+    >
+      <div
+        className="result_select"
+      >
+        <TembaSelectElement
+          createArbitraryOption={[Function]}
+          createPrefix="New: "
+          entry={
+            Object {
+              "value": Object {
+                "id": "name",
+                "name": "Name",
+                "type": "result",
+              },
+            }
+          }
+          key="result_select_763e4844-3e1b-407a-a1b5-5fdfcd308b41"
+          name="Result"
+          nameKey="name"
+          onChange={[Function]}
+          options={Array []}
+          placeholder="Select Result"
+          searchable={true}
+          valueKey="value"
+        />
+      </div>
+      <div
+        className="result_value"
+      >
+        <TextInputElement
+          autocomplete={true}
+          entry={
+            Object {
+              "value": "Grace",
+            }
+          }
+          name="Value"
+          onChange={[Function]}
+          placeholder="Value"
+        />
+      </div>
+      <div
+        className="result_category"
+      >
+        <TextInputElement
+          autocomplete={false}
+          entry={
+            Object {
+              "value": "",
+            }
+          }
+          maxLength={36}
+          name="Category"
+          onChange={[Function]}
+          placeholder="Optional"
+        />
+      </div>
+      <div
+        className="remove_icon"
+      >
+        <temba-icon
+          data-testid="remove-result-0"
+          name="delete_small"
+          onClick={[Function]}
+        />
+      </div>
+    </div>
+    <div
+      className="row"
+      data-testid="result-row-1"
+      key="477ac8b4-25e2-483a-8686-2d1332c4da1c"
+    >
+      <div
+        className="result_select"
+      >
+        <TembaSelectElement
+          createArbitraryOption={[Function]}
+          createPrefix="New: "
+          entry={
+            Object {
+              "value": Object {
+                "id": "age",
+                "name": "Age",
+                "type": "result",
+              },
+            }
+          }
+          key="result_select_477ac8b4-25e2-483a-8686-2d1332c4da1c"
+          name="Result"
+          nameKey="name"
+          onChange={[Function]}
+          options={Array []}
+          placeholder="Select Result"
+          searchable={true}
+          valueKey="value"
+        />
+      </div>
+      <div
+        className="result_value"
+      >
+        <TextInputElement
+          autocomplete={true}
+          entry={
+            Object {
+              "value": "25",
+            }
+          }
+          name="Value"
+          onChange={[Function]}
+          placeholder="Value"
+        />
+      </div>
+      <div
+        className="result_category"
+      >
+        <TextInputElement
+          autocomplete={false}
+          entry={
+            Object {
+              "value": "Young Adult",
+            }
+          }
+          maxLength={36}
+          name="Category"
+          onChange={[Function]}
+          placeholder="Optional"
+        />
+      </div>
+      <div
+        className="remove_icon"
+      >
+        <temba-icon
+          data-testid="remove-result-1"
+          name="delete_small"
+          onClick={[Function]}
+        />
+      </div>
+    </div>
+    <div
+      className="row"
+      data-testid="result-row-2"
+      key="1e47a1e1-3c67-4df5-adf1-da542c789adb"
+    >
+      <div
+        className="result_select"
+      >
+        <TembaSelectElement
+          createArbitraryOption={[Function]}
+          createPrefix="New: "
+          entry={
+            Object {
+              "value": null,
+            }
+          }
+          key="result_select_1e47a1e1-3c67-4df5-adf1-da542c789adb"
+          name="Result"
+          nameKey="name"
+          onChange={[Function]}
+          options={Array []}
+          placeholder="Select Result"
+          searchable={true}
+          valueKey="value"
+        />
+      </div>
+      <div
+        className="result_value"
+      >
+        <TextInputElement
+          autocomplete={true}
+          entry={
+            Object {
+              "value": "",
+            }
+          }
+          name="Value"
+          onChange={[Function]}
+          placeholder="Value"
+        />
+      </div>
+      <div
+        className="result_category"
+      >
+        <TextInputElement
+          autocomplete={false}
+          entry={
+            Object {
+              "value": "",
+            }
+          }
+          maxLength={36}
+          name="Category"
+          onChange={[Function]}
+          placeholder="Optional"
+        />
+      </div>
+      <div
+        className="remove_icon"
+      />
+    </div>
+  </div>
+</Dialog>
+`;
+
+exports[`SetRunResultsForm updates should drop a removed row 1`] = `
+Array [
+  Object {
+    "results": Array [
+      Object {
+        "category": "Young Adult",
+        "name": "Age",
+        "value": "25",
+      },
+    ],
+    "type": "set_run_results",
+    "uuid": "b1f332f3-bdd3-4891-aec5-1843a712dbf1",
+  },
+]
+`;
+
+exports[`SetRunResultsForm updates should save an updated value and category 1`] = `
+Array [
+  Object {
+    "results": Array [
+      Object {
+        "category": "Adult",
+        "name": "Name",
+        "value": "@results.age",
+      },
+      Object {
+        "category": "Young Adult",
+        "name": "Age",
+        "value": "25",
+      },
+    ],
+    "type": "set_run_results",
+    "uuid": "b1f332f3-bdd3-4891-aec5-1843a712dbf1",
+  },
+]
+`;
+
+exports[`SetRunResultsForm updates should save one entry per filled row 1`] = `
+Array [
+  Object {
+    "results": Array [
+      Object {
+        "category": "",
+        "name": "Name",
+        "value": "Grace",
+      },
+      Object {
+        "category": "Young Adult",
+        "name": "Age",
+        "value": "25",
+      },
+    ],
+    "type": "set_run_results",
+    "uuid": "b1f332f3-bdd3-4891-aec5-1843a712dbf1",
+  },
+]
+`;

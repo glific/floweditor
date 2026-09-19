@@ -1,0 +1,43 @@
+.rows {
+  margin-top: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-top: 4px;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.result_select {
+  flex: 1 1 34%;
+  min-width: 0;
+  padding-right: 8px;
+}
+
+.result_value {
+  flex: 1 1 41%;
+  min-width: 0;
+  padding-right: 8px;
+}
+
+.result_category {
+  flex: 1 1 25%;
+  min-width: 0;
+}
+
+.remove_icon {
+  color: #aaa;
+  cursor: pointer;
+  flex: 0 0 auto;
+  margin-left: 4px;
+  padding-top: 8px;
+}
+
+.duplicate_warning {
+  color: #e6a000;
+  font-size: 12px;
+  margin-top: 4px;
+}

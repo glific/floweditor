@@ -22,7 +22,7 @@ exports[`UpdateContactFieldsForm render should render existing rows plus a trail
     initialType={
       Object {
         "component": [Function],
-        "description": "Update several contact fields at once",
+        "description": "Update multiple contact fields",
         "filter": "bulk_contact_fields",
         "form": [Function],
         "name": "Update Multiple Contact Fields",

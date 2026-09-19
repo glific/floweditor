@@ -188,7 +188,7 @@ Array [
   },
   Object {
     "component": [Function],
-    "description": "Update several contact fields at once",
+    "description": "Update multiple contact fields",
     "filter": "bulk_contact_fields",
     "form": [Function],
     "name": "Update Multiple Contact Fields",
@@ -217,6 +217,14 @@ Array [
     "form": [Function],
     "name": "Save Flow Result",
     "type": "set_run_result",
+  },
+  Object {
+    "component": [Function],
+    "description": "Save multiple results",
+    "filter": "bulk_contact_fields",
+    "form": [Function],
+    "name": "Save Multiple Flow Results",
+    "type": "set_run_results",
   },
   Object {
     "component": [Function],
@@ -798,7 +806,7 @@ Object {
   },
   "set_contact_fields": Object {
     "component": [Function],
-    "description": "Update several contact fields at once",
+    "description": "Update multiple contact fields",
     "filter": "bulk_contact_fields",
     "form": [Function],
     "name": "Update Multiple Contact Fields",
@@ -857,6 +865,14 @@ Object {
     "form": [Function],
     "name": "Save Flow Result",
     "type": "set_run_result",
+  },
+  "set_run_results": Object {
+    "component": [Function],
+    "description": "Save multiple results",
+    "filter": "bulk_contact_fields",
+    "form": [Function],
+    "name": "Save Multiple Flow Results",
+    "type": "set_run_results",
   },
   "set_wa_group_field": Object {
     "component": [Function],

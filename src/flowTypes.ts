@@ -500,6 +500,17 @@ export interface SetRunResult extends Action {
   category?: string;
 }
 
+export interface RunResultEntry {
+  name: string;
+  value: string;
+  category?: string;
+}
+
+export interface SetRunResults extends Action {
+  type: Types.set_run_results;
+  results: RunResultEntry[];
+}
+
 export interface SetContactProfile extends Action {
   profile_type: string;
   value: any;
@@ -627,6 +638,7 @@ export type AnyAction =
   | SetContactFields
   | SetContactName
   | SetRunResult
+  | SetRunResults
   | SendMsg
   | SendInteractiveMsg
   | SetPreferredChannel

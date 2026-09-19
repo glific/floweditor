@@ -21,14 +21,13 @@ import SelectElement, { SelectOption } from 'components/form/select/SelectElemen
 import { ActionFormProps } from 'components/flow/props';
 import TextInputElement from 'components/form/textinput/TextInputElement';
 import TypeList from 'components/nodeeditor/TypeList';
-import { shouldRequireIf, validate } from 'store/validators';
 import { fakePropType } from 'config/ConfigProvider';
 import i18n from 'config/i18n';
 import * as React from 'react';
 import { Asset } from 'store/flowContext';
 import TembaSelectElement from 'temba/TembaSelectElement';
 
-import { hasErrors, renderIssues } from '../helpers';
+import { renderIssues } from '../helpers';
 import styles from './UpdateContactFieldsForm.module.scss';
 
 export default class UpdateContactFieldsForm extends React.Component<
@@ -108,29 +107,15 @@ export default class UpdateContactFieldsForm extends React.Component<
   }
 
   /**
-   * Re-runs each filled row through the validators with submitting set, the same way
-   * the single field form checks its language and channel entries on save.
+   * Only picking the field is required. A filled row saves whatever its value, and a
+   * blank one clears that field - the single field node allows the same thing.
    */
   private validateRows(): boolean {
-    let valid = false;
+    const valid = this.state.rows.some((row: FieldRow) => !isEmptyRow(row));
 
-    const rows = this.state.rows.map((row: FieldRow) => {
-      if (isEmptyRow(row)) {
-        return row;
-      }
+    this.setState({ valid });
 
-      const value = validate(i18n.t('forms.field_value', 'Field Value'), row.value.value, [
-        shouldRequireIf(true)
-      ]);
-
-      valid = valid || !hasErrors(value);
-
-      return { ...row, value };
-    });
-
-    this.setState({ rows, valid });
-
-    return valid && rows.every((row: FieldRow) => isEmptyRow(row) || !hasErrors(row.value));
+    return valid;
   }
 
   private handleSave(): void {
