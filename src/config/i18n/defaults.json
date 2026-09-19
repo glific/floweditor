@@ -62,8 +62,8 @@
       "name": "Update Contact"
     },
     "set_contact_fields": {
-      "description": "Update several contact fields at once",
-      "name": "Update Multiple Contact Fields"
+      "description": "Bulk update contact fields",
+      "name": "Update Contact Fields"
     },
     "set_run_result": {
       "description": "Save a result for this flow",
@@ -213,6 +213,7 @@
     "channel_type": "Channel Type",
     "classifier": "Classifier",
     "clear": "Clear",
+    "clear_contact_field_hint": "Leave a value empty to clear that field",
     "confidence": "confidence",
     "contact_field": "Contact Field",
     "wa_group_field": "WhatsApp Group Field",

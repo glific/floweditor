@@ -26,6 +26,7 @@ import { fakePropType } from 'config/ConfigProvider';
 import i18n from 'config/i18n';
 import * as React from 'react';
 import { Asset } from 'store/flowContext';
+import { FormEntry } from 'store/nodeEditor';
 import TembaSelectElement from 'temba/TembaSelectElement';
 
 import { hasErrors, renderIssues } from '../helpers';
@@ -108,29 +109,32 @@ export default class UpdateContactFieldsForm extends React.Component<
   }
 
   /**
-   * Re-runs each filled row through the validators with submitting set, the same way
-   * the single field form checks its language and channel entries on save.
+   * Re-runs the rows through the validators with submitting set, the same way the single
+   * field form checks its language entry on save. Only the language property needs a
+   * value: leaving an ordinary field empty clears it, as it does on the single field node.
    */
   private validateRows(): boolean {
-    let valid = false;
-
     const rows = this.state.rows.map((row: FieldRow) => {
-      if (isEmptyRow(row)) {
-        return row;
+      if (isEmptyRow(row) || !isLanguageRow(row)) {
+        // drop any failure left over from when the row was a language row
+        return { ...row, value: { value: row.value.value } };
       }
 
-      const value = validate(i18n.t('forms.field_value', 'Field Value'), row.value.value, [
-        shouldRequireIf(true)
-      ]);
-
-      valid = valid || !hasErrors(value);
-
-      return { ...row, value };
+      return {
+        ...row,
+        value: validate(i18n.t('forms.language', 'Language'), row.value.value, [
+          shouldRequireIf(true)
+        ])
+      };
     });
+
+    const valid =
+      rows.some((row: FieldRow) => !isEmptyRow(row)) &&
+      rows.every((row: FieldRow) => !hasErrors(row.value));
 
     this.setState({ rows, valid });
 
-    return valid && rows.every((row: FieldRow) => isEmptyRow(row) || !hasErrors(row.value));
+    return valid;
   }
 
   private handleSave(): void {
@@ -186,12 +190,20 @@ export default class UpdateContactFieldsForm extends React.Component<
     );
   }
 
-  private languageValue(row: FieldRow): any {
+  /**
+   * The select wants the language asset rather than the iso code the row stores, so the
+   * entry is rebuilt around it - the failures are carried over so an empty language
+   * still reports itself the way the single field form does.
+   */
+  private languageEntry(row: FieldRow): FormEntry {
     const iso = row.value.value;
 
-    return iso
-      ? { iso, name: getLanguageForCode(iso, this.props.assetStore.languages.items) }
-      : null;
+    return {
+      value: iso
+        ? { iso, name: getLanguageForCode(iso, this.props.assetStore.languages.items) }
+        : null,
+      validationFailures: row.value.validationFailures
+    };
   }
 
   /** The value widget varies for the field - consent and language are fixed sets */
@@ -206,7 +218,7 @@ export default class UpdateContactFieldsForm extends React.Component<
             'Select the language to use for this contact'
           )}
           endpoint={this.context.config.endpoints.languages}
-          entry={{ value: this.languageValue(row) }}
+          entry={this.languageEntry(row)}
           valueKey="iso"
           shouldExclude={(language: any) => language.iso === 'base'}
           onChange={(language: any) => this.handleValueChanged(row.uuid, language.iso)}
@@ -267,6 +279,10 @@ export default class UpdateContactFieldsForm extends React.Component<
 
         <div className={styles.rows}>
           {this.state.rows.map((row: FieldRow, index: number) => this.renderRow(row, index))}
+        </div>
+
+        <div className={styles.hint} data-testid="clear-hint">
+          {i18n.t('forms.clear_contact_field_hint', 'Leave a value empty to clear that field')}
         </div>
 
         {this.renderDuplicateWarning()}
