@@ -221,6 +221,12 @@ exports[`UpdateContactFieldsForm render should render existing rows plus a trail
       />
     </div>
   </div>
+  <div
+    className="hint"
+    data-testid="clear-hint"
+  >
+    Leave a value empty to clear that field
+  </div>
 </Dialog>
 `;
 
@@ -267,6 +273,31 @@ Array [
         },
         "type": "language",
         "value": "hin",
+      },
+    ],
+    "type": "set_contact_fields",
+    "uuid": "b1f332f3-bdd3-4891-aec5-1843a712dbf1",
+  },
+]
+`;
+
+exports[`UpdateContactFieldsForm updates should save a row whose value is blank so the field is cleared 1`] = `
+Array [
+  Object {
+    "fields": Array [
+      Object {
+        "field": Object {
+          "key": "age",
+          "name": "Age",
+        },
+        "value": "",
+      },
+      Object {
+        "field": Object {
+          "key": "district",
+          "name": "District",
+        },
+        "value": "Pune",
       },
     ],
     "type": "set_contact_fields",

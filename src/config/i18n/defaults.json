@@ -213,6 +213,7 @@
     "channel_type": "Channel Type",
     "classifier": "Classifier",
     "clear": "Clear",
+    "clear_contact_field_hint": "Leave a value empty to clear that field",
     "confidence": "confidence",
     "contact_field": "Contact Field",
     "wa_group_field": "WhatsApp Group Field",
