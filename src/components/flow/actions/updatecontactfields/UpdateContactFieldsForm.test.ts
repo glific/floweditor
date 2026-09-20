@@ -160,7 +160,7 @@ describe(UpdateContactFieldsForm.name, () => {
       expect(consentRow.value.value).toEqual('optout');
     });
 
-    it('should not save a row whose value is blank', () => {
+    it('should save a row whose value is blank so the field is cleared', () => {
       const firstRow = form.instance.state.rows[0];
       form.instance.handleValueChanged(firstRow.uuid, '');
 
@@ -168,11 +168,79 @@ describe(UpdateContactFieldsForm.name, () => {
       form.props.onClose.mockClear();
       form.instance.handleSave();
 
-      // the blank row is flagged rather than silently written as an empty value
-      const flagged = form.instance.state.rows[0];
-      expect(flagged.value.validationFailures.length).toBeGreaterThan(0);
+      expect(form.instance.state.valid).toBeTruthy();
+      expect(form.props.updateAction).toMatchCallSnapshot();
+      expect(form.props.onClose).toBeCalled();
+    });
+
+    it('should not save a language row without a value', () => {
+      const emptyRow = form.instance.state.rows[form.instance.state.rows.length - 1];
+
+      form.instance.handleFieldChanged(emptyRow.uuid, {
+        id: 'language',
+        key: 'language',
+        name: 'Language',
+        type: 'property'
+      });
+
+      form.props.updateAction.mockClear();
+      form.props.onClose.mockClear();
+      form.instance.handleSave();
+
+      const languageRow = form.instance.state.rows.find(
+        (row: any) => row.field.value && row.field.value.id === 'language'
+      );
+
+      // language cannot be cleared, so an empty one is flagged instead
+      expect(languageRow.value.validationFailures.length).toBeGreaterThan(0);
       expect(form.props.updateAction).not.toBeCalled();
       expect(form.props.onClose).not.toBeCalled();
+
+      // and the failure reaches the select rather than silently blocking the save
+      form.wrapper.update();
+
+      const languageSelect = form.wrapper
+        .find('TembaSelectElement')
+        .filterWhere((node: any) => node.prop('name') === 'Language');
+
+      expect(languageSelect.length).toEqual(1);
+      expect(languageSelect.prop('entry').validationFailures.length).toBeGreaterThan(0);
+    });
+
+    it('should not save a consent row loaded without a value', () => {
+      // the picker always defaults a fresh consent row, so an empty one can only arrive
+      // from an already saved action - it must not reach the backend, where an empty
+      // consent resets whatever preferences the contact already has
+      const loaded = setup(true, {
+        $merge: {
+          updateAction: jest.fn(),
+          onClose: jest.fn(),
+          nodeSettings: {
+            originalNode: null,
+            originalAction: createSetContactFieldsAction({
+              fields: [{ field: { key: 'settings', name: 'Consent status' }, value: '' }]
+            })
+          }
+        }
+      });
+
+      loaded.instance.handleSave();
+
+      const consentRow = loaded.instance.state.rows[0];
+
+      expect(consentRow.value.validationFailures.length).toBeGreaterThan(0);
+      expect(loaded.props.updateAction).not.toBeCalled();
+      expect(loaded.props.onClose).not.toBeCalled();
+
+      // and the failure reaches the select rather than silently blocking the save
+      loaded.wrapper.update();
+
+      const consentSelect = loaded.wrapper
+        .find('SelectElement')
+        .filterWhere((node: any) => node.prop('name') === 'Consent Status');
+
+      expect(consentSelect.length).toEqual(1);
+      expect(consentSelect.prop('entry').validationFailures.length).toBeGreaterThan(0);
     });
 
     it('should keep a value typed into the trailing row when another row changes', () => {

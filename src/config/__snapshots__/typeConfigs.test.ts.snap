@@ -188,10 +188,10 @@ Array [
   },
   Object {
     "component": [Function],
-    "description": "Update several contact fields at once",
+    "description": "Bulk update contact fields",
     "filter": "bulk_contact_fields",
     "form": [Function],
-    "name": "Update Multiple Contact Fields",
+    "name": "Update Contact Fields",
     "type": "set_contact_fields",
   },
   Object {
@@ -798,10 +798,10 @@ Object {
   },
   "set_contact_fields": Object {
     "component": [Function],
-    "description": "Update several contact fields at once",
+    "description": "Bulk update contact fields",
     "filter": "bulk_contact_fields",
     "form": [Function],
-    "name": "Update Multiple Contact Fields",
+    "name": "Update Contact Fields",
     "type": "set_contact_fields",
   },
   "set_contact_language": Object {

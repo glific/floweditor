@@ -37,7 +37,7 @@ export const initializeForm = (settings: NodeEditorSettings): UpdateContactField
       rows.push({
         uuid: createUUID(),
         field: { value: assetForEntry(entry) },
-        value: { value: entry.value }
+        value: { value: entry.value || '' }
       });
     });
   }

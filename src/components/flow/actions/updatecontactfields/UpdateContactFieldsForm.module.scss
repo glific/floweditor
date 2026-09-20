@@ -5,6 +5,17 @@
   padding-top: 4px;
 }
 
+/**
+ * FormElement anchors its error tooltip with position: fixed, so it is placed against the
+ * viewport and the scroll offset of .rows is ignored - the message ends up stranded below
+ * the dialog and does not track the field as the list scrolls. Anchoring it to the
+ * FormElement instead, which is already position: relative, puts it back under the widget
+ * it belongs to. Matched on a substring because the class name is hashed in a build.
+ */
+.rows .row :global([class*='error_list']) {
+  position: absolute;
+}
+
 .row {
   display: flex;
   align-items: flex-start;
@@ -28,6 +39,12 @@
   flex: 0 0 auto;
   margin-left: 4px;
   padding-top: 8px;
+}
+
+.hint {
+  color: #999;
+  font-size: 12px;
+  margin-top: 4px;
 }
 
 .duplicate_warning {
