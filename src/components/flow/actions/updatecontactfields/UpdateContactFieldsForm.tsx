@@ -110,21 +110,29 @@ export default class UpdateContactFieldsForm extends React.Component<
 
   /**
    * Re-runs the rows through the validators with submitting set, the same way the single
-   * field form checks its language entry on save. Only the language property needs a
-   * value: leaving an ordinary field empty clears it, as it does on the single field node.
+   * field form checks its language entry on save. Only language and consent need a value:
+   * leaving an ordinary field empty clears it, as it does on the single field node.
+   *
+   * Neither of those can be cleared. An empty language is ignored by the backend, and an
+   * empty consent is worse than ignored - it resets whatever preferences the contact
+   * already has, so it must never reach a saved action.
    */
   private validateRows(): boolean {
     const rows = this.state.rows.map((row: FieldRow) => {
-      if (isEmptyRow(row) || !isLanguageRow(row)) {
-        // drop any failure left over from when the row was a language row
+      const required = isLanguageRow(row)
+        ? i18n.t('forms.language', 'Language')
+        : isConsentRow(row)
+        ? i18n.t('forms.settings', 'Consent Status')
+        : null;
+
+      if (isEmptyRow(row) || !required) {
+        // drop any failure left over from when the row was a language or consent row
         return { ...row, value: { value: row.value.value } };
       }
 
       return {
         ...row,
-        value: validate(i18n.t('forms.language', 'Language'), row.value.value, [
-          shouldRequireIf(true)
-        ])
+        value: validate(required, row.value.value, [shouldRequireIf(true)])
       };
     });
 
@@ -231,7 +239,10 @@ export default class UpdateContactFieldsForm extends React.Component<
         <SelectElement
           key={'consent_select_' + row.uuid}
           name={i18n.t('forms.settings', 'Consent Status')}
-          entry={{ value: this.consentOption(row.value.value) }}
+          entry={{
+            value: this.consentOption(row.value.value),
+            validationFailures: row.value.validationFailures
+          }}
           onChange={(option: SelectOption) => this.handleConsentChanged(row.uuid, option)}
           options={CONTACT_CONSENT_OPTIONS}
         />

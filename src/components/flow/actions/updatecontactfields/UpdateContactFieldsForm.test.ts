@@ -207,6 +207,42 @@ describe(UpdateContactFieldsForm.name, () => {
       expect(languageSelect.prop('entry').validationFailures.length).toBeGreaterThan(0);
     });
 
+    it('should not save a consent row loaded without a value', () => {
+      // the picker always defaults a fresh consent row, so an empty one can only arrive
+      // from an already saved action - it must not reach the backend, where an empty
+      // consent resets whatever preferences the contact already has
+      const loaded = setup(true, {
+        $merge: {
+          updateAction: jest.fn(),
+          onClose: jest.fn(),
+          nodeSettings: {
+            originalNode: null,
+            originalAction: createSetContactFieldsAction({
+              fields: [{ field: { key: 'settings', name: 'Consent status' }, value: '' }]
+            })
+          }
+        }
+      });
+
+      loaded.instance.handleSave();
+
+      const consentRow = loaded.instance.state.rows[0];
+
+      expect(consentRow.value.validationFailures.length).toBeGreaterThan(0);
+      expect(loaded.props.updateAction).not.toBeCalled();
+      expect(loaded.props.onClose).not.toBeCalled();
+
+      // and the failure reaches the select rather than silently blocking the save
+      loaded.wrapper.update();
+
+      const consentSelect = loaded.wrapper
+        .find('SelectElement')
+        .filterWhere((node: any) => node.prop('name') === 'Consent Status');
+
+      expect(consentSelect.length).toEqual(1);
+      expect(consentSelect.prop('entry').validationFailures.length).toBeGreaterThan(0);
+    });
+
     it('should keep a value typed into the trailing row when another row changes', () => {
       const trailing = form.instance.state.rows[form.instance.state.rows.length - 1];
 
