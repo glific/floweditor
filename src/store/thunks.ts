@@ -22,6 +22,7 @@ import {
   SetContactField,
   SetContactFields,
   SetRunResult,
+  SetRunResults,
   StickyNote,
   FlowDetails
 } from 'flowTypes';
@@ -592,6 +593,17 @@ export const removeAction = (nodeUUID: string, action: AnyAction) => (
     dispatch(updateAssets(updatedAssets));
   }
 
+  if (action.type === Types.set_run_results) {
+    const reference = { nodeUUID, actionUUID: action.uuid };
+
+    const updatedAssets = ((action as SetRunResults).results || []).reduce(
+      (assets, entry) => mutators.removeResultFromStore(entry.name, assets, reference),
+      assetStore
+    );
+
+    dispatch(updateAssets(updatedAssets));
+  }
+
   // If it's our last action, then nuke the node
   if (renderNode.node.actions.length === 1) {
     const updated = dispatch(removeNode(renderNode.node));
@@ -813,6 +825,15 @@ export const onUpdateAction = (
     });
   }
 
+  if (originalAction && originalAction.type === Types.set_run_results) {
+    const reference = { nodeUUID: originalNode.node.uuid, actionUUID: action.uuid };
+
+    updatedAssets = ((originalAction as SetRunResults).results || []).reduce(
+      (assets, entry) => mutators.removeResultFromStore(entry.name, assets, reference),
+      updatedAssets
+    );
+  }
+
   let updatedNodes = nodes;
   const creatingNewNode = !!(originalNode !== null && originalNode.ghost);
 
@@ -861,6 +882,17 @@ export const onUpdateAction = (
       nodeUUID,
       actionUUID: action.uuid
     });
+    dispatch(updateAssets(updatedAssets));
+  }
+
+  if (action.type === Types.set_run_results) {
+    const reference = { nodeUUID, actionUUID: action.uuid };
+
+    updatedAssets = ((action as SetRunResults).results || []).reduce(
+      (assets, entry) => mutators.addResultToStore(entry.name, assets, reference) || assets,
+      updatedAssets
+    );
+
     dispatch(updateAssets(updatedAssets));
   }
 

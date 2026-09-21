@@ -1,0 +1,14 @@
+@import 'variables.module.scss';
+
+.results {
+  text-align: left;
+}
+
+.result {
+  overflow: hidden;
+}
+
+.more {
+  color: $placeholder_color;
+  padding-top: 2px;
+}

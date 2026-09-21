@@ -28,6 +28,9 @@
   word-wrap: break-word;
   width: auto;
 
+  box-sizing: border-box;
+  min-width: 100%;
+
   &.add_contact_urn,
   &.add_input_labels,
   &.send_msg,
@@ -57,15 +60,10 @@
   &.link_google_sheet,
   &.request_optin,
   &.enter_flow,
-  &.set_wa_group_field {
+  &.set_wa_group_field,
+  &.set_contact_fields,
+  &.set_run_results {
     width: $node_min_width - $action_padding * 2;
-    padding: $action_padding;
-  }
-
-  &.set_contact_fields {
-    width: 0;
-    min-width: 100%;
-    box-sizing: border-box;
     padding: $action_padding;
   }
 

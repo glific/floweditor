@@ -26,6 +26,7 @@ export enum Types {
   set_contact_language = 'set_contact_language',
   set_contact_status = 'set_contact_status',
   set_run_result = 'set_run_result',
+  set_run_results = 'set_run_results',
   set_contact_profile = 'set_contact_profile',
   call_classifier = 'call_classifier',
   call_resthook = 'call_resthook',
@@ -125,7 +126,8 @@ export enum FeatureFilter {
   HAS_GROUPS = 'groups',
   HAS_LLM = 'llm',
   HAS_START_SESSION = 'start_session',
-  HAS_BULK_CONTACT_FIELDS = 'bulk_contact_fields'
+  HAS_BULK_CONTACT_FIELDS = 'bulk_contact_fields',
+  HAS_BULK_FLOW_RESULTS = 'bulk_flow_results'
 }
 
 export interface FlowTypeVisibility {

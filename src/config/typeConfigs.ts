@@ -30,6 +30,8 @@ import StartSessionForm from 'components/flow/actions/startsession/StartSessionF
 import TransferAirtimeComp from 'components/flow/actions/transferairtime/TransferAirtime';
 import UpdateContactComp from 'components/flow/actions/updatecontact/UpdateContact';
 import UpdateContactForm from 'components/flow/actions/updatecontact/UpdateContactForm';
+import SetRunResultsComp from 'components/flow/actions/setrunresults/SetRunResults';
+import SetRunResultsForm from 'components/flow/actions/setrunresults/SetRunResultsForm';
 import UpdateContactFieldsComp from 'components/flow/actions/updatecontactfields/UpdateContactFields';
 import UpdateContactFieldsForm from 'components/flow/actions/updatecontactfields/UpdateContactFieldsForm';
 import AirtimeRouterForm from 'components/flow/routers/airtime/AirtimeRouterForm';
@@ -390,6 +392,14 @@ export const typeConfigList: Type[] = [
     description: i18n.t('actions.set_run_result.description', 'Save a result for this flow'),
     form: SetRunResultForm,
     component: SetRunResultComp
+  },
+  {
+    type: Types.set_run_results,
+    name: i18n.t('actions.set_run_results.name', 'Save Flow Results'),
+    description: i18n.t('actions.set_run_results.description', 'Save multiple results'),
+    form: SetRunResultsForm,
+    filter: FeatureFilter.HAS_BULK_FLOW_RESULTS,
+    component: SetRunResultsComp
   },
 
   {

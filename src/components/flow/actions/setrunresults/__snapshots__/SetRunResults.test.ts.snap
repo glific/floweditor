@@ -1,0 +1,175 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SetRunResultsComp render should cap the rows and count the remainder 1`] = `
+<div
+  className="results"
+>
+  <div
+    className="result"
+    key="result_0-0"
+  >
+    <div>
+      Save 
+      <span
+        className="emphasize"
+      >
+        value 0
+      </span>
+       as 
+      <span
+        className="emphasize"
+      >
+        result_0
+      </span>
+    </div>
+  </div>
+  <div
+    className="result"
+    key="result_1-1"
+  >
+    <div>
+      Save 
+      <span
+        className="emphasize"
+      >
+        value 1
+      </span>
+       as 
+      <span
+        className="emphasize"
+      >
+        result_1
+      </span>
+    </div>
+  </div>
+  <div
+    className="result"
+    key="result_2-2"
+  >
+    <div>
+      Save 
+      <span
+        className="emphasize"
+      >
+        value 2
+      </span>
+       as 
+      <span
+        className="emphasize"
+      >
+        result_2
+      </span>
+    </div>
+  </div>
+  <div
+    className="result"
+    key="result_3-3"
+  >
+    <div>
+      Save 
+      <span
+        className="emphasize"
+      >
+        value 3
+      </span>
+       as 
+      <span
+        className="emphasize"
+      >
+        result_3
+      </span>
+    </div>
+  </div>
+  <div
+    className="result"
+    key="result_4-4"
+  >
+    <div>
+      Save 
+      <span
+        className="emphasize"
+      >
+        value 4
+      </span>
+       as 
+      <span
+        className="emphasize"
+      >
+        result_4
+      </span>
+    </div>
+  </div>
+  <div
+    className="more"
+  >
+    +
+    7
+     more
+  </div>
+</div>
+`;
+
+exports[`SetRunResultsComp render should render an empty value as clearing the result 1`] = `
+<div
+  className="results"
+>
+  <div
+    className="result"
+    key="Name-0"
+  >
+    <div>
+      Clear value for 
+      <span
+        className="emphasize"
+      >
+        Name
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SetRunResultsComp render should render every result when under the cap 1`] = `
+<div
+  className="results"
+>
+  <div
+    className="result"
+    key="Name-0"
+  >
+    <div>
+      Save 
+      <span
+        className="emphasize"
+      >
+        Grace
+      </span>
+       as 
+      <span
+        className="emphasize"
+      >
+        Name
+      </span>
+    </div>
+  </div>
+  <div
+    className="result"
+    key="Age-1"
+  >
+    <div>
+      Save 
+      <span
+        className="emphasize"
+      >
+        25
+      </span>
+       as 
+      <span
+        className="emphasize"
+      >
+        Age
+      </span>
+    </div>
+  </div>
+</div>
+`;

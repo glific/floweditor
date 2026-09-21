@@ -69,6 +69,10 @@
       "description": "Save a result for this flow",
       "name": "Save Flow Result"
     },
+    "set_run_results": {
+      "description": "Save multiple results",
+      "name": "Save Flow Results"
+    },
     "split_by_contact_field": {
       "description": "Split by a contact field",
       "name": "Split by Contact Field"
@@ -237,8 +241,10 @@
     "enter_a_subject": "Enter a subject",
     "enter_a_url": "Enter a URL",
     "duplicate_contact_fields": "Only the last value will be saved for: [[fields]]",
+    "duplicate_results": "Only the last value will be saved for: [[results]]",
     "enter_field_value": "Enter a new value for [[field]]",
     "enter_field_value_short": "Value",
+    "enter_result_value_short": "Value",
     "enter_flow_parameters_summary": "<0>[[flow]]</0> expects the following parameters to be set by this flow. These can be set using a <4>Save Flow Result</4> action or directly below.",
     "enter_flow_parameters_tab": "Parameters",
     "enter_new_name": "Enter a new name for the contact",
@@ -305,6 +311,7 @@
     "select_result": "Select Result",
     "select_contact_field": "Select a field",
     "select_contact_fields_to_update": "Select the contact fields to update",
+    "select_results_to_save": "Select the results to save for this flow",
     "select_what_to_update": "Select what to update",
     "select_who_to_start": "Select who should be started in the flow",
     "send_msg_facebook_topic_placeholder": "Select a topic to use over Facebook",

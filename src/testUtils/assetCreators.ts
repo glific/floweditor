@@ -42,7 +42,9 @@ import {
   SetContactLanguage,
   SetContactStatus,
   SetContactProperty,
+  RunResultEntry,
   SetRunResult,
+  SetRunResults,
   StartFlow,
   StartFlowArgs,
   StartFlowExitNames,
@@ -396,6 +398,21 @@ export const createSetRunResultAction = ({
   value,
   category,
   type: Types.set_run_result
+});
+
+export const createSetRunResultsAction = ({
+  uuid = utils.createUUID(),
+  results = [
+    { name: 'Name', value: 'Grace', category: '' },
+    { name: 'Age', value: '25', category: 'Young Adult' }
+  ]
+}: {
+  uuid?: string;
+  results?: RunResultEntry[];
+} = {}): SetRunResults => ({
+  uuid,
+  results,
+  type: Types.set_run_results
 });
 
 export const createWebhookNode = (

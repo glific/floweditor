@@ -220,6 +220,14 @@ Array [
   },
   Object {
     "component": [Function],
+    "description": "Save multiple results",
+    "filter": "bulk_flow_results",
+    "form": [Function],
+    "name": "Save Flow Results",
+    "type": "set_run_results",
+  },
+  Object {
+    "component": [Function],
     "description": "Manage profile",
     "filter": "profile",
     "form": [Function],
@@ -857,6 +865,14 @@ Object {
     "form": [Function],
     "name": "Save Flow Result",
     "type": "set_run_result",
+  },
+  "set_run_results": Object {
+    "component": [Function],
+    "description": "Save multiple results",
+    "filter": "bulk_flow_results",
+    "form": [Function],
+    "name": "Save Flow Results",
+    "type": "set_run_results",
   },
   "set_wa_group_field": Object {
     "component": [Function],
