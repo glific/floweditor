@@ -119,6 +119,12 @@
   background: $teal;
 }
 
+div.set_contact_fields {
+  width: 0;
+  min-width: 100%;
+  box-sizing: border-box;
+}
+
 .set_wa_group_field {
   background: $deep_amethyst;
 }
