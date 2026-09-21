@@ -370,11 +370,8 @@ export const typeConfigList: Type[] = [
   },
   {
     type: Types.set_contact_fields,
-    name: i18n.t('actions.set_contact_fields.name', 'Update Multiple Contact Fields'),
-    description: i18n.t(
-      'actions.set_contact_fields.description',
-      'Update several contact fields at once'
-    ),
+    name: i18n.t('actions.set_contact_fields.name', 'Update Contact Fields'),
+    description: i18n.t('actions.set_contact_fields.description', 'Bulk update contact fields'),
     form: UpdateContactFieldsForm,
     filter: FeatureFilter.HAS_BULK_CONTACT_FIELDS,
     component: UpdateContactFieldsComp
