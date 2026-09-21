@@ -62,7 +62,7 @@
       "name": "Update Contact"
     },
     "set_contact_fields": {
-      "description": "Update multiple contact fields",
+      "description": "Update several contact fields at once",
       "name": "Update Multiple Contact Fields"
     },
     "set_run_result": {

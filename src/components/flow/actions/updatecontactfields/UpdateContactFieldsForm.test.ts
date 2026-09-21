@@ -160,7 +160,7 @@ describe(UpdateContactFieldsForm.name, () => {
       expect(consentRow.value.value).toEqual('optout');
     });
 
-    it('should save a blank value, which clears the field', () => {
+    it('should not save a row whose value is blank', () => {
       const firstRow = form.instance.state.rows[0];
       form.instance.handleValueChanged(firstRow.uuid, '');
 
@@ -168,25 +168,11 @@ describe(UpdateContactFieldsForm.name, () => {
       form.props.onClose.mockClear();
       form.instance.handleSave();
 
-      // a blank value clears that field, exactly as the single field node does
-      expect(form.props.updateAction).toBeCalled();
-      expect(form.props.updateAction.mock.calls[0][0].fields[0].value).toEqual('');
-      expect(form.props.onClose).toBeCalled();
-    });
-
-    it('should save when every filled row has a blank value', () => {
-      form.instance.state.rows
-        .filter((row: any) => row.field.value)
-        .forEach((row: any) => form.instance.handleValueChanged(row.uuid, ''));
-
-      form.props.updateAction.mockClear();
-      form.instance.handleSave();
-
-      expect(form.instance.state.valid).toBeTruthy();
-      expect(form.props.updateAction).toBeCalled();
-      expect(
-        form.props.updateAction.mock.calls[0][0].fields.every((entry: any) => entry.value === '')
-      ).toBeTruthy();
+      // the blank row is flagged rather than silently written as an empty value
+      const flagged = form.instance.state.rows[0];
+      expect(flagged.value.validationFailures.length).toBeGreaterThan(0);
+      expect(form.props.updateAction).not.toBeCalled();
+      expect(form.props.onClose).not.toBeCalled();
     });
 
     it('should keep a value typed into the trailing row when another row changes', () => {

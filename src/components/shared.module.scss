@@ -100,7 +100,10 @@
   background: $pink;
 }
 
-.set_run_result,
+.set_run_result {
+  background: $dark_teal;
+}
+
 .set_run_results {
   background: $dark_teal;
 }

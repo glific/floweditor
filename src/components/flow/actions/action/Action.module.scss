@@ -62,7 +62,13 @@
     padding: $action_padding;
   }
 
-  &.set_contact_fields,
+  &.set_contact_fields {
+    width: 0;
+    min-width: 100%;
+    box-sizing: border-box;
+    padding: $action_padding;
+  }
+
   &.set_run_results {
     width: 0;
     min-width: 100%;
