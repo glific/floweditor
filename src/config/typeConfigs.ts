@@ -395,10 +395,10 @@ export const typeConfigList: Type[] = [
   },
   {
     type: Types.set_run_results,
-    name: i18n.t('actions.set_run_results.name', 'Save Multiple Flow Results'),
+    name: i18n.t('actions.set_run_results.name', 'Save Flow Results'),
     description: i18n.t('actions.set_run_results.description', 'Save multiple results'),
     form: SetRunResultsForm,
-    filter: FeatureFilter.HAS_BULK_CONTACT_FIELDS,
+    filter: FeatureFilter.HAS_BULK_FLOW_RESULTS,
     component: SetRunResultsComp
   },
 

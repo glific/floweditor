@@ -1,4 +1,4 @@
-import { getActionUUID } from 'components/flow/actions/helpers';
+import { getActionUUID, hasErrors } from 'components/flow/actions/helpers';
 import { Types } from 'config/interfaces';
 import { RunResultEntry, SetRunResults } from 'flowTypes';
 import { Asset, AssetType } from 'store/flowContext';
@@ -33,6 +33,17 @@ export const resultAsset = (name: string): Asset => ({
   type: AssetType.Result
 });
 
+/**
+ * Whether the rows make up a form worth saving: a result named on at least one row and no
+ * row carrying a validation failure - the same thing valid means on the single result
+ * node, where mergeForm sets it from the entries alone. Every place that sets valid asks
+ * this, so the flag does not mean one thing after a row is edited and another after a
+ * save is attempted. Empty rows are not validated, so they are not held against it.
+ */
+export const isValidForm = (rows: ResultRow[]): boolean =>
+  rows.some((row: ResultRow) => !isEmptyRow(row)) &&
+  rows.every((row: ResultRow) => isEmptyRow(row) || !hasErrors(row.name));
+
 export const initializeForm = (settings: NodeEditorSettings): SetRunResultsFormState => {
   const rows: ResultRow[] = [];
 
@@ -51,7 +62,7 @@ export const initializeForm = (settings: NodeEditorSettings): SetRunResultsFormS
 
   rows.push(createEmptyRow());
 
-  return { rows, valid: rows.some(row => !isEmptyRow(row)) };
+  return { rows, valid: isValidForm(rows) };
 };
 
 export const stateToAction = (

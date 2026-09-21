@@ -5,6 +5,15 @@
   padding-top: 4px;
 }
 
+/* shares the column classes with .row so the labels line up with the widgets below */
+.header {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 12px;
+  color: var(--color-text);
+  font-size: var(--label-size);
+}
+
 .row {
   display: flex;
   align-items: flex-start;
@@ -35,6 +44,16 @@
   width: 1em;
   margin-left: 4px;
   padding-top: 8px;
+}
+
+.hints {
+  margin-top: 8px;
+}
+
+.hint {
+  color: var(--color-text-help);
+  font-size: var(--help-text-size);
+  margin-top: 2px;
 }
 
 .duplicate_warning {

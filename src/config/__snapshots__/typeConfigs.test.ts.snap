@@ -221,9 +221,9 @@ Array [
   Object {
     "component": [Function],
     "description": "Save multiple results",
-    "filter": "bulk_contact_fields",
+    "filter": "bulk_flow_results",
     "form": [Function],
-    "name": "Save Multiple Flow Results",
+    "name": "Save Flow Results",
     "type": "set_run_results",
   },
   Object {
@@ -869,9 +869,9 @@ Object {
   "set_run_results": Object {
     "component": [Function],
     "description": "Save multiple results",
-    "filter": "bulk_contact_fields",
+    "filter": "bulk_flow_results",
     "form": [Function],
-    "name": "Save Multiple Flow Results",
+    "name": "Save Flow Results",
     "type": "set_run_results",
   },
   "set_wa_group_field": Object {

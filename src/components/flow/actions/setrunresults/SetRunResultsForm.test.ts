@@ -1,3 +1,4 @@
+import { hasErrors } from 'components/flow/actions/helpers';
 import { resultAsset } from 'components/flow/actions/setrunresults/helpers';
 import SetRunResultsForm from 'components/flow/actions/setrunresults/SetRunResultsForm';
 import { ActionFormProps } from 'components/flow/props';
@@ -62,6 +63,50 @@ describe(SetRunResultsForm.name, () => {
     });
   });
 
+  describe('result options', () => {
+    const options = [
+      { name: 'Name', value: 'name' },
+      { name: 'Age', value: 'age' },
+      { name: 'Gender', value: 'gender' }
+    ];
+
+    it('should leave out results the other rows already name', () => {
+      const { instance } = setup(true);
+      instance.options = options;
+
+      const trailing = instance.state.rows[instance.state.rows.length - 1];
+
+      expect(instance.optionsFor(trailing).map((option: any) => option.name)).toEqual(['Gender']);
+    });
+
+    it('should keep the result the row itself names', () => {
+      const { instance } = setup(true);
+      instance.options = options;
+
+      const [first] = instance.state.rows;
+
+      expect(instance.optionsFor(first).map((option: any) => option.name)).toEqual([
+        'Name',
+        'Gender'
+      ]);
+    });
+
+    it('should offer a result again once the row naming it is removed', () => {
+      const { instance } = setup(true);
+      instance.options = options;
+
+      const [first] = instance.state.rows;
+      instance.handleRemoveRow(first.uuid);
+
+      const trailing = instance.state.rows[instance.state.rows.length - 1];
+
+      expect(instance.optionsFor(trailing).map((option: any) => option.name)).toEqual([
+        'Name',
+        'Gender'
+      ]);
+    });
+  });
+
   describe('updates', () => {
     let form: any;
 
@@ -120,6 +165,37 @@ describe(SetRunResultsForm.name, () => {
       expect(form.instance.state.valid).toBeFalsy();
       expect(form.props.updateAction).not.toBeCalled();
       expect(form.props.onClose).not.toBeCalled();
+    });
+
+    it('should flag a bad name as soon as it is picked', () => {
+      const trailing = form.instance.state.rows[form.instance.state.rows.length - 1];
+      form.instance.handleNameChanged(trailing.uuid, resultAsset('1st place'));
+
+      const flagged = form.instance.state.rows.find(
+        (row: any) => row.name.value && row.name.value.name === '1st place'
+      );
+
+      expect(flagged.name.validationFailures.length).toBeGreaterThan(0);
+      expect(form.instance.state.valid).toBeFalsy();
+    });
+
+    it('should clear the failure once a good name replaces it', () => {
+      const trailing = form.instance.state.rows[form.instance.state.rows.length - 1];
+      form.instance.handleNameChanged(trailing.uuid, resultAsset('1st place'));
+      form.instance.handleNameChanged(trailing.uuid, resultAsset('First place'));
+
+      const fixed = form.instance.state.rows.find((row: any) => row.uuid === trailing.uuid);
+
+      expect(hasErrors(fixed.name)).toBeFalsy();
+      expect(form.instance.state.valid).toBeTruthy();
+    });
+
+    it('should not report a missing name when a row is cleared', () => {
+      const [first] = form.instance.state.rows;
+      form.instance.handleNameChanged(first.uuid, null);
+
+      expect(form.instance.state.rows.every((row: any) => !hasErrors(row.name))).toBeTruthy();
+      expect(form.instance.state.valid).toBeTruthy();
     });
 
     it('should not save a result name that starts with a number', () => {

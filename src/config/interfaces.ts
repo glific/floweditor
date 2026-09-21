@@ -126,7 +126,8 @@ export enum FeatureFilter {
   HAS_GROUPS = 'groups',
   HAS_LLM = 'llm',
   HAS_START_SESSION = 'start_session',
-  HAS_BULK_CONTACT_FIELDS = 'bulk_contact_fields'
+  HAS_BULK_CONTACT_FIELDS = 'bulk_contact_fields',
+  HAS_BULK_FLOW_RESULTS = 'bulk_flow_results'
 }
 
 export interface FlowTypeVisibility {

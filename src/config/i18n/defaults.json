@@ -71,7 +71,7 @@
     },
     "set_run_results": {
       "description": "Save multiple results",
-      "name": "Save Multiple Flow Results"
+      "name": "Save Flow Results"
     },
     "split_by_contact_field": {
       "description": "Split by a contact field",

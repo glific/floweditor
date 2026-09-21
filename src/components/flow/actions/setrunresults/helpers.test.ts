@@ -3,6 +3,7 @@ import {
   duplicateNames,
   initializeForm,
   isEmptyRow,
+  isValidForm,
   resultAsset,
   stateToAction
 } from 'components/flow/actions/setrunresults/helpers';
@@ -93,5 +94,32 @@ describe('setrunresults helpers', () => {
     ];
 
     expect(duplicateNames(rows as any)).toEqual([]);
+  });
+});
+
+describe('isValidForm', () => {
+  const filled = (name: string, failures: any[] = []) => ({
+    ...createEmptyRow(),
+    name: { value: resultAsset(name), validationFailures: failures }
+  });
+
+  it('is false with nothing but the trailing empty row', () => {
+    expect(isValidForm([createEmptyRow()] as any)).toBeFalsy();
+  });
+
+  it('is true once a row names a result', () => {
+    expect(isValidForm([filled('Age'), createEmptyRow()] as any)).toBeTruthy();
+  });
+
+  it('is false while any filled row has a failure', () => {
+    const rows = [filled('Age'), filled('1st place', [{ message: 'bad name' }]), createEmptyRow()];
+
+    expect(isValidForm(rows as any)).toBeFalsy();
+  });
+
+  it('is true again once the failing row is dropped', () => {
+    const rows = [filled('Age'), createEmptyRow()];
+
+    expect(isValidForm(rows as any)).toBeTruthy();
   });
 });

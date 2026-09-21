@@ -15,7 +15,7 @@ exports[`SetRunResultsForm render should render existing rows plus a trailing em
     }
   }
   headerClass="set_run_results"
-  title="Save Multiple Flow Results"
+  title="Save Flow Results"
 >
   <TypeList
     __className=""
@@ -23,9 +23,9 @@ exports[`SetRunResultsForm render should render existing rows plus a trailing em
       Object {
         "component": [Function],
         "description": "Save multiple results",
-        "filter": "bulk_contact_fields",
+        "filter": "bulk_flow_results",
         "form": [Function],
-        "name": "Save Multiple Flow Results",
+        "name": "Save Flow Results",
         "type": "set_run_results",
       }
     }
@@ -34,6 +34,29 @@ exports[`SetRunResultsForm render should render existing rows plus a trailing em
   <p>
     Select the results to save for this flow
   </p>
+  <div
+    className="header"
+    data-testid="result-header"
+  >
+    <div
+      className="result_select"
+    >
+      Result
+    </div>
+    <div
+      className="result_value"
+    >
+      Value
+    </div>
+    <div
+      className="result_category"
+    >
+      Category
+    </div>
+    <div
+      className="remove_icon"
+    />
+  </div>
   <div
     className="rows"
   >
@@ -239,6 +262,37 @@ exports[`SetRunResultsForm render should render existing rows plus a trailing em
       <div
         className="remove_icon"
       />
+    </div>
+  </div>
+  <div
+    className="hints"
+  >
+    <div
+      className="hint"
+      data-testid="result-hint"
+    >
+      <Trans
+        i18nKey="forms.result_name_help"
+        values={
+          Object {
+            "resultFormat": "@results.[name]",
+          }
+        }
+      >
+        By naming the result, you can reference it later using [[resultFormat]]
+      </Trans>
+    </div>
+    <div
+      className="hint"
+      data-testid="value-hint"
+    >
+      The value to save for this result or empty to clears it. You can use expressions, for example: @(title(input))
+    </div>
+    <div
+      className="hint"
+      data-testid="category-hint"
+    >
+      An optional category for your result. For age, the value might be 17, but the category might be 'Young Adult'
     </div>
   </div>
 </Dialog>
