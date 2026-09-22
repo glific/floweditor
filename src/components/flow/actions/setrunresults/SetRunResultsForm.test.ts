@@ -46,27 +46,6 @@ describe(SetRunResultsForm.name, () => {
     });
   });
 
-  describe('result options', () => {
-    // the select is given its options as it mounts, so they have to be ready by the first
-    // render - otherwise opening the dropdown shows nothing until something re-renders
-    it('should hand every select its options on the first render', () => {
-      const { wrapper } = setup(true, {
-        assetStore: {
-          results: {
-            items: { $set: { gender: { id: 'gender', name: 'Gender', type: AssetType.Result } } }
-          }
-        }
-      });
-
-      const selects = wrapper.find('TembaSelectElement');
-
-      expect(selects.length).toEqual(3);
-      selects.forEach((select: any) =>
-        expect(select.prop('options')).toEqual([{ name: 'Gender', value: 'gender' }])
-      );
-    });
-  });
-
   describe('remove icon', () => {
     it('should not render on the trailing empty row', () => {
       const { wrapper, instance } = setup(true);
@@ -86,15 +65,35 @@ describe(SetRunResultsForm.name, () => {
   });
 
   describe('result options', () => {
-    const options = [
-      { name: 'Name', value: 'name' },
-      { name: 'Age', value: 'age' },
-      { name: 'Gender', value: 'gender' }
-    ];
+    const result = (name: string) => ({ id: utils.snakify(name), name, type: AssetType.Result });
+
+    const setupWithResults = (...names: string[]) =>
+      setup(true, {
+        assetStore: {
+          results: {
+            items: {
+              $set: names.reduce(
+                (items: any, name: string) => ({ ...items, [utils.snakify(name)]: result(name) }),
+                {}
+              )
+            }
+          }
+        }
+      });
+
+    it('should hand every select its options on the first render', () => {
+      const { wrapper } = setupWithResults('Gender');
+
+      const selects = wrapper.find('TembaSelectElement');
+
+      expect(selects.length).toEqual(3);
+      selects.forEach((select: any) =>
+        expect(select.prop('options')).toEqual([{ name: 'Gender', value: 'gender' }])
+      );
+    });
 
     it('should leave out results the other rows already name', () => {
-      const { instance } = setup(true);
-      instance.options = options;
+      const { instance } = setupWithResults('Name', 'Age', 'Gender');
 
       const trailing = instance.state.rows[instance.state.rows.length - 1];
 
@@ -102,8 +101,7 @@ describe(SetRunResultsForm.name, () => {
     });
 
     it('should keep the result the row itself names', () => {
-      const { instance } = setup(true);
-      instance.options = options;
+      const { instance } = setupWithResults('Name', 'Age', 'Gender');
 
       const [first] = instance.state.rows;
 
@@ -114,8 +112,7 @@ describe(SetRunResultsForm.name, () => {
     });
 
     it('should offer a result again once the row naming it is removed', () => {
-      const { instance } = setup(true);
-      instance.options = options;
+      const { instance } = setupWithResults('Name', 'Age', 'Gender');
 
       const [first] = instance.state.rows;
       instance.handleRemoveRow(first.uuid);

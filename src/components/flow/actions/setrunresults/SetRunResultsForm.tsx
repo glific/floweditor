@@ -31,21 +31,24 @@ export default class SetRunResultsForm extends React.Component<
   ActionFormProps,
   SetRunResultsFormState
 > {
-  options: SelectOption[] = [];
-
   constructor(props: ActionFormProps) {
     super(props);
 
     this.state = initializeForm(this.props.nodeSettings);
 
-    const items = this.props.assetStore.results.items;
-    this.options = Object.keys(items).map((key: string) => {
-      return { name: items[key].name, value: key };
-    });
-
     bindCallbacks(this, {
       include: [/^get/, /^on/, /^handle/]
     });
+  }
+
+  /**
+   * Derived rather than stored so the list is never stale and is ready for the first
+   * render - temba-select is handed its options as TembaSelect mounts, which happens
+   * before this component's componentDidMount would have run.
+   */
+  private get resultOptions(): SelectOption[] {
+    const items = this.props.assetStore?.results?.items || {};
+    return Object.keys(items).map((key: string) => ({ name: items[key].name, value: key }));
   }
 
   /**
@@ -160,7 +163,7 @@ export default class SetRunResultsForm extends React.Component<
       .filter((other: ResultRow) => other.uuid !== row.uuid && !isEmptyRow(other))
       .map((other: ResultRow) => snakify(other.name.value.name));
 
-    return this.options.filter(
+    return this.resultOptions.filter(
       (option: SelectOption) => taken.indexOf(snakify(option.name)) === -1
     );
   }
