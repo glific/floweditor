@@ -33,16 +33,13 @@ export default class SetRunResultForm extends React.PureComponent<
     super(props);
 
     this.state = initializeForm(this.props.nodeSettings);
-
-    bindCallbacks(this, {
-      include: [/^handle/, /^on/]
-    });
-  }
-
-  public componentDidMount(): void {
     const items = this.props.assetStore.results.items;
     this.options = Object.keys(items).map((key: string) => {
       return { name: items[key].name, value: key };
+    });
+
+    bindCallbacks(this, {
+      include: [/^handle/, /^on/]
     });
   }
 

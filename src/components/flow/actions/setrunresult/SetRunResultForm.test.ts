@@ -26,6 +26,20 @@ describe(SetRunResultForm.name, () => {
     });
   });
 
+  describe('result options', () => {
+    it('should hand the select its options on the first render', () => {
+      const { wrapper } = setup(true, {
+        assetStore: {
+          results: { items: { $set: { age: { id: 'age', name: 'Age', type: AssetType.Result } } } }
+        }
+      });
+
+      expect(wrapper.find('TembaSelectElement').prop('options')).toEqual([
+        { name: 'Age', value: 'age' }
+      ]);
+    });
+  });
+
   describe('updates', () => {
     it('should save changes', () => {
       const { instance, props } = setup(true);

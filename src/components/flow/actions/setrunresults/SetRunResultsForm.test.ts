@@ -2,6 +2,7 @@ import { hasErrors } from 'components/flow/actions/helpers';
 import { resultAsset } from 'components/flow/actions/setrunresults/helpers';
 import SetRunResultsForm from 'components/flow/actions/setrunresults/SetRunResultsForm';
 import { ActionFormProps } from 'components/flow/props';
+import { AssetType } from 'store/flowContext';
 import { composeComponentTestUtils, mock } from 'testUtils';
 import {
   createAddGroupsAction,
@@ -42,6 +43,27 @@ describe(SetRunResultsForm.name, () => {
       });
       expect(instance.state.rows.length).toEqual(1);
       expect(instance.state.valid).toBeFalsy();
+    });
+  });
+
+  describe('result options', () => {
+    // the select is given its options as it mounts, so they have to be ready by the first
+    // render - otherwise opening the dropdown shows nothing until something re-renders
+    it('should hand every select its options on the first render', () => {
+      const { wrapper } = setup(true, {
+        assetStore: {
+          results: {
+            items: { $set: { gender: { id: 'gender', name: 'Gender', type: AssetType.Result } } }
+          }
+        }
+      });
+
+      const selects = wrapper.find('TembaSelectElement');
+
+      expect(selects.length).toEqual(3);
+      selects.forEach((select: any) =>
+        expect(select.prop('options')).toEqual([{ name: 'Gender', value: 'gender' }])
+      );
     });
   });
 

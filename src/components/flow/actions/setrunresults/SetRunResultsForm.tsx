@@ -38,15 +38,13 @@ export default class SetRunResultsForm extends React.Component<
 
     this.state = initializeForm(this.props.nodeSettings);
 
-    bindCallbacks(this, {
-      include: [/^get/, /^on/, /^handle/]
-    });
-  }
-
-  public componentDidMount(): void {
     const items = this.props.assetStore.results.items;
     this.options = Object.keys(items).map((key: string) => {
       return { name: items[key].name, value: key };
+    });
+
+    bindCallbacks(this, {
+      include: [/^get/, /^on/, /^handle/]
     });
   }
 
