@@ -27,8 +27,6 @@ export default class SetRunResultForm extends React.PureComponent<
   ActionFormProps,
   SetRunResultFormState
 > {
-  options: SelectOption[] = [];
-
   constructor(props: ActionFormProps) {
     super(props);
 
@@ -39,11 +37,14 @@ export default class SetRunResultForm extends React.PureComponent<
     });
   }
 
-  public componentDidMount(): void {
-    const items = this.props.assetStore.results.items;
-    this.options = Object.keys(items).map((key: string) => {
-      return { name: items[key].name, value: key };
-    });
+  /**
+   * Derived rather than stored so the list is never stale and is ready for the first
+   * render - temba-select is handed its options as TembaSelect mounts, which happens
+   * before this component's componentDidMount would have run.
+   */
+  private get resultOptions(): SelectOption[] {
+    const items = this.props.assetStore?.results?.items || {};
+    return Object.keys(items).map((key: string) => ({ name: items[key].name, value: key }));
   }
 
   private handleNameUpdate(selected: Asset): void {
@@ -144,7 +145,7 @@ export default class SetRunResultForm extends React.PureComponent<
             showLabel={true}
             valueKey="value"
             nameKey="name"
-            options={this.options}
+            options={this.resultOptions}
             helpText={
               <Trans
                 i18nKey="forms.result_name_help"
