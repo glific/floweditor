@@ -4,7 +4,7 @@ import { DEFAULT_BODY } from 'components/nodeeditor/constants';
 import { Operators, Types } from 'config/interfaces';
 import { CallWebhook, SwitchRouter } from 'flowTypes';
 import { RenderNode } from 'store/flowContext';
-import { NodeEditorSettings, StringEntry } from 'store/nodeEditor';
+import { NodeEditorSettings, StringEntry, ValidationFailure } from 'store/nodeEditor';
 import { ValidatorFunc } from 'store/validators';
 import { createUUID } from 'utils';
 import axios from 'axios';
@@ -203,6 +203,56 @@ export const fetchWebhookOptions = async (
   }
 
   return stateUpdate;
+};
+
+// Async webhook nodes park the flow until their callback arrives. Glific caps that park at
+// 5 minutes (Glific.Flows.Action), reading `wait_time` straight out of this body, so catch an
+// over-cap value here rather than letting the backend silently clamp it on publish.
+export const WAIT_TIME_CAP_SECONDS = 300;
+
+export const isWaitTimeWithinCap = (): ValidatorFunc => (name, body: any) => {
+  const pass = { failures: [] as ValidationFailure[], value: body };
+
+  let parsed: any;
+  try {
+    parsed = JSON.parse(body);
+  } catch (e) {
+    // isValidJson already reports an undecodable body; don't double up on it.
+    return pass;
+  }
+
+  if (!parsed || typeof parsed !== 'object' || !('wait_time' in parsed)) {
+    return pass;
+  }
+
+  const waitTime = parsed.wait_time;
+  const trimmed = typeof waitTime === 'string' ? waitTime.trim() : waitTime;
+
+  // The webhook body template ships wait_time blank; that means "use the default".
+  if (trimmed === '' || trimmed === null || trimmed === undefined) {
+    return pass;
+  }
+
+  const fail = (message: string) => ({
+    failures: [{ message }] as ValidationFailure[],
+    value: body
+  });
+
+  if (typeof trimmed !== 'number' && typeof trimmed !== 'string') {
+    return fail('wait_time must be a number of seconds');
+  }
+
+  const seconds = Number(trimmed);
+
+  if (!Number.isInteger(seconds) || seconds <= 0) {
+    return fail('wait_time must be a whole number of seconds greater than 0');
+  }
+
+  if (seconds > WAIT_TIME_CAP_SECONDS) {
+    return fail(`wait_time cannot be more than ${WAIT_TIME_CAP_SECONDS} seconds (5 minutes)`);
+  }
+
+  return pass;
 };
 
 export const isValidJson = (): ValidatorFunc => (name, body: any) => {
