@@ -14,6 +14,8 @@ export interface FieldRow {
 
 export interface UpdateContactFieldsFormState extends FormState {
   rows: FieldRow[];
+  // set once Ok is pressed, so a row without a field is only flagged after that
+  submitted?: boolean;
 }
 
 export const createEmptyRow = (): FieldRow => ({
@@ -22,7 +24,7 @@ export const createEmptyRow = (): FieldRow => ({
   value: { value: '' }
 });
 
-/** A row the author has not picked a field for - the trailing row is always one of these */
+/** A row the author has not picked a field for yet */
 export const isEmptyRow = (row: FieldRow): boolean => !row.field.value;
 
 export const getFieldName = (asset: any): string => asset.label || asset.name || asset.key;
@@ -42,9 +44,12 @@ export const initializeForm = (settings: NodeEditorSettings): UpdateContactField
     });
   }
 
-  rows.push(createEmptyRow());
+  // a new node opens with a single row to fill in
+  if (!rows.length) {
+    rows.push(createEmptyRow());
+  }
 
-  return { rows, valid: rows.some(row => !isEmptyRow(row)) };
+  return { rows, valid: rows.every(row => !isEmptyRow(row)) };
 };
 
 const assetForEntry = (entry: ContactFieldEntry): any =>
@@ -95,10 +100,13 @@ export const isLanguageRow = (row: FieldRow): boolean =>
 export const isConsentRow = (row: FieldRow): boolean =>
   !isEmptyRow(row) && row.field.value.key === CONSENT_FIELD_KEY;
 
-/** Field keys used more than once - the backend keeps only the last of them */
-export const duplicateKeys = (rows: FieldRow[]): string[] => {
+/**
+ * The name of the field a later row repeats, keyed by that row's uuid. The first row to
+ * pick a field owns it; the backend would keep only the last value, so repeats are errors.
+ */
+export const duplicateRows = (rows: FieldRow[]): { [uuid: string]: string } => {
   const seen: string[] = [];
-  const dupes: string[] = [];
+  const dupes: { [uuid: string]: string } = {};
 
   rows
     .filter(row => !isEmptyRow(row))
@@ -106,9 +114,7 @@ export const duplicateKeys = (rows: FieldRow[]): string[] => {
       const key = row.field.value.key;
 
       if (seen.indexOf(key) > -1) {
-        if (dupes.indexOf(key) === -1) {
-          dupes.push(key);
-        }
+        dupes[row.uuid] = getFieldName(row.field.value);
       } else {
         seen.push(key);
       }

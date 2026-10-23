@@ -3,7 +3,7 @@ import Dialog, { ButtonSet } from 'components/dialog/Dialog';
 import {
   BULK_CONTACT_PROPERTIES,
   createEmptyRow,
-  duplicateKeys,
+  duplicateRows,
   FieldRow,
   initializeForm,
   isConsentRow,
@@ -50,20 +50,59 @@ export default class UpdateContactFieldsForm extends React.Component<
     });
   }
 
-  /**
-   * Keeps exactly one trailing empty row so there is always somewhere to add a field.
-   * Only the row already at the end is reused, so its React key is stable and a value
-   * typed there survives; taking the first empty row instead would move an emptied
-   * middle row to the bottom and discard whatever was in the real trailing row.
-   */
-  private setRows(rows: FieldRow[]): void {
-    const filled = rows.filter(row => !isEmptyRow(row));
-    const last = rows[rows.length - 1];
-    const trailing = last && isEmptyRow(last) ? last : createEmptyRow();
+  private rowsRef: HTMLDivElement;
 
-    this.setState({
-      rows: [...filled, trailing],
-      valid: filled.length > 0
+  private setRows(rows: FieldRow[]): void {
+    this.setState({ rows, valid: this.rowsValid(rows) });
+  }
+
+  /** The error to show under a row, if any */
+  private rowError(row: FieldRow, duplicates: { [uuid: string]: string }): string {
+    if (isEmptyRow(row)) {
+      return this.state.submitted
+        ? i18n.t('forms.choose_field_or_remove_row', 'Choose a field or remove this row.')
+        : null;
+    }
+
+    if (duplicates[row.uuid]) {
+      return i18n.t('forms.contact_field_already_selected', {
+        defaultValue: '{{field}} is already selected above',
+        field: duplicates[row.uuid]
+      });
+    }
+
+    return null;
+  }
+
+  /** Every row needs a field, and no field can be picked twice */
+  private rowsValid(rows: FieldRow[]): boolean {
+    return (
+      rows.every((row: FieldRow) => !isEmptyRow(row)) &&
+      Object.keys(duplicateRows(rows)).length === 0
+    );
+  }
+
+  /** Only one row can be waiting for a field at a time */
+  private canAddRow(): boolean {
+    return this.state.rows.every((row: FieldRow) => !isEmptyRow(row));
+  }
+
+  private handleAddRow(): void {
+    if (!this.canAddRow()) {
+      return;
+    }
+
+    this.setState({ rows: [...this.state.rows, createEmptyRow()], valid: false }, () => {
+      if (!this.rowsRef) {
+        return;
+      }
+
+      const selects = this.rowsRef.querySelectorAll('temba-select');
+      const select = selects[selects.length - 1] as HTMLElement;
+      if (select) {
+        select.scrollIntoView({ block: 'nearest' });
+        select.focus();
+      }
     });
   }
 
@@ -100,7 +139,13 @@ export default class UpdateContactFieldsForm extends React.Component<
     });
   }
 
+  /** The last row is cleared rather than removed so there is always one to edit */
   private handleRemoveRow(uuid: string): void {
+    if (this.state.rows.length === 1) {
+      this.setRows([createEmptyRow()]);
+      return;
+    }
+
     this.setRows(this.state.rows.filter(row => row.uuid !== uuid));
   }
 
@@ -110,7 +155,8 @@ export default class UpdateContactFieldsForm extends React.Component<
 
   /**
    * Re-runs the rows through the validators with submitting set, the same way the single
-   * field form checks its language entry on save. Only language and consent need a value:
+   * field form checks its language entry on save. Every row needs a field and no field
+   * can be picked twice. Only language and consent need a value:
    * leaving an ordinary field empty clears it, as it does on the single field node.
    *
    * Neither of those can be cleared. An empty language is ignored by the backend, and an
@@ -136,11 +182,9 @@ export default class UpdateContactFieldsForm extends React.Component<
       };
     });
 
-    const valid =
-      rows.some((row: FieldRow) => !isEmptyRow(row)) &&
-      rows.every((row: FieldRow) => !hasErrors(row.value));
+    const valid = this.rowsValid(rows) && rows.every((row: FieldRow) => !hasErrors(row.value));
 
-    this.setState({ rows, valid });
+    this.setState({ rows, valid, submitted: true });
 
     return valid;
   }
@@ -164,36 +208,55 @@ export default class UpdateContactFieldsForm extends React.Component<
     };
   }
 
-  private renderRow(row: FieldRow, index: number): JSX.Element {
+  private renderRow(
+    row: FieldRow,
+    index: number,
+    duplicates: { [uuid: string]: string }
+  ): JSX.Element {
+    const error = this.rowError(row, duplicates);
+    const onlyRow = this.state.rows.length === 1;
+
     return (
-      <div className={styles.row} key={row.uuid} data-testid={'field-row-' + index}>
-        <div className={styles.field_select}>
-          <TembaSelectElement
-            key={'field_select_' + row.uuid}
-            name={i18n.t('forms.contact_field', 'Contact Field')}
-            placeholder={i18n.t('forms.select_contact_field', 'Select a field')}
-            endpoint={this.context.config.endpoints.fields}
-            entry={row.field}
-            valueKey="key"
-            searchable={true}
-            onChange={(selection: Asset) => this.handleFieldChanged(row.uuid, selection)}
-            sortFunction={sortFieldsAndProperties}
-            options={BULK_CONTACT_PROPERTIES}
-            allowCreate={true}
-            createPrefix={i18n.t('create_field', 'Create Field') + ': '}
-            createArbitraryOption={this.handleCreateAssetFromInput}
-          />
-        </div>
-        <div className={styles.field_value}>{this.renderValueWidget(row)}</div>
-        <div className={styles.remove_icon}>
-          {isEmptyRow(row) ? null : (
+      <div key={row.uuid}>
+        <div className={styles.row} data-testid={'field-row-' + index}>
+          <div className={styles.field_select}>
+            <TembaSelectElement
+              key={'field_select_' + row.uuid}
+              name={i18n.t('forms.contact_field', 'Contact Field')}
+              placeholder={i18n.t('forms.select_contact_field', 'Select a field')}
+              endpoint={this.context.config.endpoints.fields}
+              entry={row.field}
+              valueKey="key"
+              searchable={true}
+              onChange={(selection: Asset) => this.handleFieldChanged(row.uuid, selection)}
+              sortFunction={sortFieldsAndProperties}
+              options={BULK_CONTACT_PROPERTIES}
+              allowCreate={true}
+              createPrefix={i18n.t('create_field', 'Create Field') + ': '}
+              createArbitraryOption={this.handleCreateAssetFromInput}
+            />
+          </div>
+          <div className={styles.field_value}>{this.renderValueWidget(row)}</div>
+          <div
+            className={styles.remove_icon}
+            title={
+              onlyRow
+                ? i18n.t('forms.clear_row', 'Clear this row')
+                : i18n.t('forms.remove_row', 'Remove this row')
+            }
+          >
             <temba-icon
               data-testid={'remove-field-' + index}
               name="delete_small"
               onClick={() => this.handleRemoveRow(row.uuid)}
             ></temba-icon>
-          )}
+          </div>
         </div>
+        {error ? (
+          <div className={styles.row_error} data-testid={'row-error-' + index}>
+            {error}
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -260,25 +323,34 @@ export default class UpdateContactFieldsForm extends React.Component<
     );
   }
 
-  private renderDuplicateWarning(): JSX.Element {
-    const dupes = duplicateKeys(this.state.rows);
-
-    if (!dupes.length) {
-      return null;
-    }
+  private renderAddButton(): JSX.Element {
+    const enabled = this.canAddRow();
 
     return (
-      <div className={styles.duplicate_warning} data-testid="duplicate-warning">
-        {i18n.t('forms.duplicate_contact_fields', {
-          defaultValue: 'Only the last value will be saved for: {{fields}}',
-          fields: dupes.join(', ')
-        })}
-      </div>
+      <span
+        className={styles.add_row_wrapper}
+        title={
+          enabled
+            ? null
+            : i18n.t('forms.choose_field_above_first', 'Choose a field in the row above first')
+        }
+      >
+        <button
+          type="button"
+          className={styles.add_row}
+          data-testid="add-field-row"
+          disabled={!enabled}
+          onClick={this.handleAddRow}
+        >
+          ＋ {i18n.t('forms.update_another_contact_field', 'Update another contact field')}
+        </button>
+      </span>
     );
   }
 
   public render(): JSX.Element {
     const typeConfig = this.props.typeConfig;
+    const duplicates = duplicateRows(this.state.rows);
 
     return (
       <Dialog title={typeConfig.name} headerClass={typeConfig.type} buttons={this.getButtons()}>
@@ -288,15 +360,18 @@ export default class UpdateContactFieldsForm extends React.Component<
           {i18n.t('forms.select_contact_fields_to_update', 'Select the contact fields to update')}
         </p>
 
-        <div className={styles.rows}>
-          {this.state.rows.map((row: FieldRow, index: number) => this.renderRow(row, index))}
+        <div className={styles.rows} ref={(ele: HTMLDivElement) => (this.rowsRef = ele)}>
+          {this.state.rows.map((row: FieldRow, index: number) =>
+            this.renderRow(row, index, duplicates)
+          )}
         </div>
+
+        {this.renderAddButton()}
 
         <div className={styles.hint} data-testid="clear-hint">
           {i18n.t('forms.clear_contact_field_hint', 'Leave a value empty to clear that field')}
         </div>
 
-        {this.renderDuplicateWarning()}
         {renderIssues(this.props)}
       </Dialog>
     );
