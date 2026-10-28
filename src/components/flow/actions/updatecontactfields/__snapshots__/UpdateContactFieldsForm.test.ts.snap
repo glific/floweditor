@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`UpdateContactFieldsForm render should render existing rows plus a trailing empty one 1`] = `
+exports[`UpdateContactFieldsForm render should render only the existing rows 1`] = `
 <Dialog
   buttons={
     Object {
@@ -22,7 +22,7 @@ exports[`UpdateContactFieldsForm render should render existing rows plus a trail
     initialType={
       Object {
         "component": [Function],
-        "description": "Bulk update contact fields",
+        "description": "Update contact fields",
         "filter": "bulk_contact_fields",
         "form": [Function],
         "name": "Update Contact Fields",
@@ -38,189 +38,157 @@ exports[`UpdateContactFieldsForm render should render existing rows plus a trail
     className="rows"
   >
     <div
-      className="row"
-      data-testid="field-row-0"
       key="763e4844-3e1b-407a-a1b5-5fdfcd308b41"
     >
       <div
-        className="field_select"
+        className="row"
+        data-testid="field-row-0"
       >
-        <TembaSelectElement
-          allowCreate={true}
-          createArbitraryOption={[Function]}
-          createPrefix="Create Field: "
-          endpoint="/assets/fields.json"
-          entry={
-            Object {
-              "value": Object {
-                "key": "age",
-                "label": "Age",
-              },
-            }
-          }
-          key="field_select_763e4844-3e1b-407a-a1b5-5fdfcd308b41"
-          name="Contact Field"
-          onChange={[Function]}
-          options={
-            Array [
+        <div
+          className="field_select"
+        >
+          <TembaSelectElement
+            allowCreate={true}
+            createArbitraryOption={[Function]}
+            createPrefix="Create Field: "
+            endpoint="/assets/fields.json"
+            entry={
               Object {
-                "id": "language",
-                "name": "Language",
-                "type": "property",
-              },
-            ]
-          }
-          placeholder="Select a field"
-          searchable={true}
-          sortFunction={[Function]}
-          valueKey="key"
-        />
-      </div>
-      <div
-        className="field_value"
-      >
-        <TextInputElement
-          autocomplete={true}
-          entry={
-            Object {
-              "value": "25",
+                "value": Object {
+                  "key": "age",
+                  "label": "Age",
+                },
+              }
             }
-          }
-          name="Field Value"
-          onChange={[Function]}
-          placeholder="Value"
-        />
-      </div>
-      <div
-        className="remove_icon"
-      >
-        <temba-icon
-          data-testid="remove-field-0"
-          name="delete_small"
-          onClick={[Function]}
-        />
+            key="field_select_763e4844-3e1b-407a-a1b5-5fdfcd308b41"
+            name="Contact Field"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "id": "language",
+                  "name": "Language",
+                  "type": "property",
+                },
+              ]
+            }
+            placeholder="Select a field"
+            searchable={true}
+            sortFunction={[Function]}
+            valueKey="key"
+          />
+        </div>
+        <div
+          className="field_value"
+        >
+          <TextInputElement
+            autocomplete={true}
+            entry={
+              Object {
+                "value": "25",
+              }
+            }
+            name="Field Value"
+            onChange={[Function]}
+            placeholder="Value"
+          />
+        </div>
+        <div
+          className="remove_icon"
+          title="Remove this row"
+        >
+          <temba-icon
+            data-testid="remove-field-0"
+            name="delete_small"
+            onClick={[Function]}
+          />
+        </div>
       </div>
     </div>
     <div
-      className="row"
-      data-testid="field-row-1"
       key="477ac8b4-25e2-483a-8686-2d1332c4da1c"
     >
       <div
-        className="field_select"
+        className="row"
+        data-testid="field-row-1"
       >
-        <TembaSelectElement
-          allowCreate={true}
-          createArbitraryOption={[Function]}
-          createPrefix="Create Field: "
-          endpoint="/assets/fields.json"
-          entry={
-            Object {
-              "value": Object {
-                "key": "district",
-                "label": "District",
-              },
-            }
-          }
-          key="field_select_477ac8b4-25e2-483a-8686-2d1332c4da1c"
-          name="Contact Field"
-          onChange={[Function]}
-          options={
-            Array [
+        <div
+          className="field_select"
+        >
+          <TembaSelectElement
+            allowCreate={true}
+            createArbitraryOption={[Function]}
+            createPrefix="Create Field: "
+            endpoint="/assets/fields.json"
+            entry={
               Object {
-                "id": "language",
-                "name": "Language",
-                "type": "property",
-              },
-            ]
-          }
-          placeholder="Select a field"
-          searchable={true}
-          sortFunction={[Function]}
-          valueKey="key"
-        />
-      </div>
-      <div
-        className="field_value"
-      >
-        <TextInputElement
-          autocomplete={true}
-          entry={
-            Object {
-              "value": "Pune",
+                "value": Object {
+                  "key": "district",
+                  "label": "District",
+                },
+              }
             }
-          }
-          name="Field Value"
-          onChange={[Function]}
-          placeholder="Value"
-        />
-      </div>
-      <div
-        className="remove_icon"
-      >
-        <temba-icon
-          data-testid="remove-field-1"
-          name="delete_small"
-          onClick={[Function]}
-        />
-      </div>
-    </div>
-    <div
-      className="row"
-      data-testid="field-row-2"
-      key="1e47a1e1-3c67-4df5-adf1-da542c789adb"
-    >
-      <div
-        className="field_select"
-      >
-        <TembaSelectElement
-          allowCreate={true}
-          createArbitraryOption={[Function]}
-          createPrefix="Create Field: "
-          endpoint="/assets/fields.json"
-          entry={
-            Object {
-              "value": null,
+            key="field_select_477ac8b4-25e2-483a-8686-2d1332c4da1c"
+            name="Contact Field"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "id": "language",
+                  "name": "Language",
+                  "type": "property",
+                },
+              ]
             }
-          }
-          key="field_select_1e47a1e1-3c67-4df5-adf1-da542c789adb"
-          name="Contact Field"
-          onChange={[Function]}
-          options={
-            Array [
+            placeholder="Select a field"
+            searchable={true}
+            sortFunction={[Function]}
+            valueKey="key"
+          />
+        </div>
+        <div
+          className="field_value"
+        >
+          <TextInputElement
+            autocomplete={true}
+            entry={
               Object {
-                "id": "language",
-                "name": "Language",
-                "type": "property",
-              },
-            ]
-          }
-          placeholder="Select a field"
-          searchable={true}
-          sortFunction={[Function]}
-          valueKey="key"
-        />
-      </div>
-      <div
-        className="field_value"
-      >
-        <TextInputElement
-          autocomplete={true}
-          entry={
-            Object {
-              "value": "",
+                "value": "Pune",
+              }
             }
-          }
-          name="Field Value"
-          onChange={[Function]}
-          placeholder="Value"
-        />
+            name="Field Value"
+            onChange={[Function]}
+            placeholder="Value"
+          />
+        </div>
+        <div
+          className="remove_icon"
+          title="Remove this row"
+        >
+          <temba-icon
+            data-testid="remove-field-1"
+            name="delete_small"
+            onClick={[Function]}
+          />
+        </div>
       </div>
-      <div
-        className="remove_icon"
-      />
     </div>
   </div>
+  <span
+    className="add_row_wrapper"
+    title={null}
+  >
+    <button
+      className="add_row"
+      data-testid="add-field-row"
+      disabled={false}
+      onClick={[Function]}
+      type="button"
+    >
+      ＋ 
+      Update another contact field
+    </button>
+  </span>
   <div
     className="hint"
     data-testid="clear-hint"

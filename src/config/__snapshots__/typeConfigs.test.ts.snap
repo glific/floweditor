@@ -188,7 +188,7 @@ Array [
   },
   Object {
     "component": [Function],
-    "description": "Bulk update contact fields",
+    "description": "Update contact fields",
     "filter": "bulk_contact_fields",
     "form": [Function],
     "name": "Update Contact Fields",
@@ -806,7 +806,7 @@ Object {
   },
   "set_contact_fields": Object {
     "component": [Function],
-    "description": "Bulk update contact fields",
+    "description": "Update contact fields",
     "filter": "bulk_contact_fields",
     "form": [Function],
     "name": "Update Contact Fields",

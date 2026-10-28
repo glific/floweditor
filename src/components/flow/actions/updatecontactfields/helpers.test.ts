@@ -1,6 +1,6 @@
 import {
   createEmptyRow,
-  duplicateKeys,
+  duplicateRows,
   initializeForm,
   isEmptyRow,
   stateToAction
@@ -14,18 +14,26 @@ import * as utils from 'utils';
 mock(utils, 'createUUID', utils.seededUUIDs());
 
 describe('updatecontactfields helpers', () => {
-  it('initializes a row per existing entry, plus an empty one', () => {
+  it('initializes a row per existing entry', () => {
     const action = createSetContactFieldsAction();
     const state = initializeForm({
       originalNode: null,
       originalAction: action
     } as NodeEditorSettings);
 
-    expect(state.rows.length).toEqual(3);
+    expect(state.rows.length).toEqual(2);
     expect(state.rows[0].field.value.key).toEqual('age');
     expect(state.rows[0].value.value).toEqual('25');
-    expect(isEmptyRow(state.rows[2])).toBeTruthy();
     expect(state.valid).toBeTruthy();
+  });
+
+  it('initializes a single empty row for a new node', () => {
+    const settings: NodeEditorSettings = { originalNode: null };
+    const state = initializeForm(settings);
+
+    expect(state.rows.length).toEqual(1);
+    expect(isEmptyRow(state.rows[0])).toBeTruthy();
+    expect(state.valid).toBeFalsy();
   });
 
   it('round trips through stateToAction, dropping empty rows', () => {
@@ -42,15 +50,15 @@ describe('updatecontactfields helpers', () => {
     ]);
   });
 
-  it('reports repeated field keys', () => {
+  it('reports the later rows that repeat a field', () => {
     const rows = [
       { ...createEmptyRow(), field: { value: { key: 'age', label: 'Age' } } },
-      { ...createEmptyRow(), field: { value: { key: 'age', label: 'Age' } } },
+      { ...createEmptyRow(), uuid: 'repeat', field: { value: { key: 'age', label: 'Age' } } },
       { ...createEmptyRow(), field: { value: { key: 'district', label: 'District' } } },
       createEmptyRow()
     ];
 
-    expect(duplicateKeys(rows as any)).toEqual(['age']);
+    expect(duplicateRows(rows as any)).toEqual({ repeat: 'Age' });
   });
 
   it('reports no duplicates for distinct keys', () => {
@@ -60,6 +68,6 @@ describe('updatecontactfields helpers', () => {
       createEmptyRow()
     ];
 
-    expect(duplicateKeys(rows as any)).toEqual([]);
+    expect(duplicateRows(rows as any)).toEqual({});
   });
 });

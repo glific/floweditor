@@ -62,7 +62,7 @@
       "name": "Update Contact"
     },
     "set_contact_fields": {
-      "description": "Bulk update contact fields",
+      "description": "Update contact fields",
       "name": "Update Contact Fields"
     },
     "set_run_result": {
@@ -218,8 +218,12 @@
     "classifier": "Classifier",
     "clear": "Clear",
     "clear_contact_field_hint": "Leave a value empty to clear that field",
+    "clear_row": "Clear this row",
+    "choose_field_above_first": "Choose a field in the row above first",
+    "choose_field_or_remove_row": "Choose a field or remove this row.",
     "confidence": "confidence",
     "contact_field": "Contact Field",
+    "contact_field_already_selected": "[[field]] is already selected above",
     "wa_group_field": "WhatsApp Group Field",
     "contact_query": "Contact Query",
     "continue_when_no_response": "Continue when there is no response",
@@ -240,7 +244,6 @@
 
     "enter_a_subject": "Enter a subject",
     "enter_a_url": "Enter a URL",
-    "duplicate_contact_fields": "Only the last value will be saved for: [[fields]]",
     "duplicate_results": "Only the last value will be saved for: [[results]]",
     "enter_field_value": "Enter a new value for [[field]]",
     "enter_field_value_short": "Value",
@@ -311,6 +314,8 @@
     "select_result": "Select Result",
     "select_contact_field": "Select a field",
     "select_contact_fields_to_update": "Select the contact fields to update",
+    "remove_row": "Remove this row",
+    "update_another_contact_field": "Update another contact field",
     "select_results_to_save": "Select the results to save for this flow",
     "select_what_to_update": "Select what to update",
     "select_who_to_start": "Select who should be started in the flow",

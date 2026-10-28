@@ -48,8 +48,28 @@
   margin-top: 4px;
 }
 
-.duplicate_warning {
-  color: #e6a000;
+.row_error {
+  color: var(--color-error);
   font-size: 12px;
-  margin-top: 4px;
+  margin: -4px 0 8px;
+}
+
+.add_row_wrapper {
+  display: inline-block;
+}
+
+.add_row {
+  background: none;
+  border: none;
+  color: var(--color-link-primary);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 0;
+
+  &:disabled {
+    color: #bbb;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
 }
