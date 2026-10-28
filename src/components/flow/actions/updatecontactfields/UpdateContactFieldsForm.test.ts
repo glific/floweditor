@@ -166,6 +166,17 @@ describe(UpdateContactFieldsForm.name, () => {
       expect(form.props.updateAction).toBeCalled();
     });
 
+    it('should not flag a row added after a failed save', () => {
+      const row = addRow(form.instance);
+
+      form.instance.handleSave();
+      form.instance.handleFieldChanged(row.uuid, { key: 'gender', label: 'Gender' });
+      addRow(form.instance);
+      form.wrapper.update();
+
+      expect(form.wrapper.find('[data-testid="row-error-3"]').length).toEqual(0);
+    });
+
     it('should flag a repeated field on the later row and not save', () => {
       const row = addRow(form.instance);
 

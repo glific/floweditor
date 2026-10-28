@@ -92,16 +92,33 @@ export default class UpdateContactFieldsForm extends React.Component<
       return;
     }
 
-    this.setState({ rows: [...this.state.rows, createEmptyRow()], valid: false }, () => {
+    // a fresh row shouldn't inherit the errors from a previous failed save
+    const rows = [...this.state.rows, createEmptyRow()];
+    this.setState({ rows, valid: false, submitted: false }, () => {
       if (!this.rowsRef) {
         return;
       }
 
       const selects = this.rowsRef.querySelectorAll('temba-select');
-      const select = selects[selects.length - 1] as HTMLElement;
+      const select = selects[selects.length - 1] as any;
       if (select) {
         select.scrollIntoView({ block: 'nearest' });
-        select.focus();
+
+        // temba-select isn't focusable itself, so focus its search box once it has rendered
+        const focusSearch = () => {
+          const target =
+            select.shadowRoot?.querySelector('input.searchbox') ||
+            select.shadowRoot?.querySelector('.select-container');
+          if (target) {
+            target.focus();
+          }
+        };
+
+        if (select.updateComplete) {
+          select.updateComplete.then(focusSearch);
+        } else {
+          focusSearch();
+        }
       }
     });
   }
