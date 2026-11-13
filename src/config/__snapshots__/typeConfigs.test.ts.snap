@@ -185,6 +185,9 @@ Array [
     "form": [Function],
     "name": "Update Contact",
     "type": "set_contact_field",
+    "visibility": Array [
+      "-",
+    ],
   },
   Object {
     "component": [Function],
@@ -790,6 +793,9 @@ Object {
     "form": [Function],
     "name": "Update Contact",
     "type": "set_contact_field",
+    "visibility": Array [
+      "-",
+    ],
   },
   "set_contact_field": Object {
     "aliases": Array [
@@ -803,6 +809,9 @@ Object {
     "form": [Function],
     "name": "Update Contact",
     "type": "set_contact_field",
+    "visibility": Array [
+      "-",
+    ],
   },
   "set_contact_fields": Object {
     "component": [Function],
@@ -824,6 +833,9 @@ Object {
     "form": [Function],
     "name": "Update Contact",
     "type": "set_contact_field",
+    "visibility": Array [
+      "-",
+    ],
   },
   "set_contact_name": Object {
     "aliases": Array [
@@ -837,6 +849,9 @@ Object {
     "form": [Function],
     "name": "Update Contact",
     "type": "set_contact_field",
+    "visibility": Array [
+      "-",
+    ],
   },
   "set_contact_profile": Object {
     "component": [Function],
@@ -858,6 +873,9 @@ Object {
     "form": [Function],
     "name": "Update Contact",
     "type": "set_contact_field",
+    "visibility": Array [
+      "-",
+    ],
   },
   "set_run_result": Object {
     "component": [Function],

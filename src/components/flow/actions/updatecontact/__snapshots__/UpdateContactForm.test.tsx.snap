@@ -48,7 +48,7 @@ exports[`UpdateContactForm should render channel 1`] = `
                 namekey="description"
                 searchable="true"
                 valuekey="type"
-                values="[{\\"type\\":\\"set_contact_field\\",\\"aliases\\":[\\"set_contact_name\\",\\"set_contact_language\\",\\"set_contact_channel\\",\\"set_contact_status\\"],\\"name\\":\\"Update Contact\\",\\"description\\":\\"Update the contact\\"}]"
+                values="[{\\"type\\":\\"set_contact_field\\",\\"aliases\\":[\\"set_contact_name\\",\\"set_contact_language\\",\\"set_contact_channel\\",\\"set_contact_status\\"],\\"name\\":\\"Update Contact\\",\\"description\\":\\"Update the contact\\",\\"visibility\\":[\\"-\\"]}]"
               />
             </div>
           </div>
@@ -188,7 +188,7 @@ exports[`UpdateContactForm should render field 1`] = `
                 namekey="description"
                 searchable="true"
                 valuekey="type"
-                values="[{\\"type\\":\\"set_contact_field\\",\\"aliases\\":[\\"set_contact_name\\",\\"set_contact_language\\",\\"set_contact_channel\\",\\"set_contact_status\\"],\\"name\\":\\"Update Contact\\",\\"description\\":\\"Update the contact\\"}]"
+                values="[{\\"type\\":\\"set_contact_field\\",\\"aliases\\":[\\"set_contact_name\\",\\"set_contact_language\\",\\"set_contact_channel\\",\\"set_contact_status\\"],\\"name\\":\\"Update Contact\\",\\"description\\":\\"Update the contact\\",\\"visibility\\":[\\"-\\"]}]"
               />
             </div>
           </div>
@@ -324,7 +324,7 @@ exports[`UpdateContactForm should render language 1`] = `
                 namekey="description"
                 searchable="true"
                 valuekey="type"
-                values="[{\\"type\\":\\"set_contact_field\\",\\"aliases\\":[\\"set_contact_name\\",\\"set_contact_language\\",\\"set_contact_channel\\",\\"set_contact_status\\"],\\"name\\":\\"Update Contact\\",\\"description\\":\\"Update the contact\\"}]"
+                values="[{\\"type\\":\\"set_contact_field\\",\\"aliases\\":[\\"set_contact_name\\",\\"set_contact_language\\",\\"set_contact_channel\\",\\"set_contact_status\\"],\\"name\\":\\"Update Contact\\",\\"description\\":\\"Update the contact\\",\\"visibility\\":[\\"-\\"]}]"
               />
             </div>
           </div>
@@ -465,7 +465,7 @@ exports[`UpdateContactForm should render name 1`] = `
                 namekey="description"
                 searchable="true"
                 valuekey="type"
-                values="[{\\"type\\":\\"set_contact_field\\",\\"aliases\\":[\\"set_contact_name\\",\\"set_contact_language\\",\\"set_contact_channel\\",\\"set_contact_status\\"],\\"name\\":\\"Update Contact\\",\\"description\\":\\"Update the contact\\"}]"
+                values="[{\\"type\\":\\"set_contact_field\\",\\"aliases\\":[\\"set_contact_name\\",\\"set_contact_language\\",\\"set_contact_channel\\",\\"set_contact_status\\"],\\"name\\":\\"Update Contact\\",\\"description\\":\\"Update the contact\\",\\"visibility\\":[\\"-\\"]}]"
               />
             </div>
           </div>
