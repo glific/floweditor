@@ -32,6 +32,9 @@ exports[`UpdateContactForm render should render an empty form with different act
         "form": [Function],
         "name": "Update Contact",
         "type": "set_contact_field",
+        "visibility": Array [
+          "-",
+        ],
       }
     }
     onChange={[MockFunction]}
@@ -122,6 +125,9 @@ exports[`UpdateContactForm render should render an empty form with no action 1`]
         "form": [Function],
         "name": "Update Contact",
         "type": "set_contact_field",
+        "visibility": Array [
+          "-",
+        ],
       }
     }
     onChange={[MockFunction]}

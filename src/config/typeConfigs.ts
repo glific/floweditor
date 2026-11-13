@@ -366,7 +366,9 @@ export const typeConfigList: Type[] = [
     name: i18n.t('actions.set_contact_field.name', 'Update Contact'),
     description: i18n.t('actions.set_contact_field.description', 'Update the contact'),
     form: UpdateContactForm,
-    component: UpdateContactComp
+    component: UpdateContactComp,
+    // replaced by set_contact_fields, kept so existing nodes still render and edit
+    visibility: VISIBILITY_HIDDEN
   },
   {
     type: Types.set_contact_fields,
