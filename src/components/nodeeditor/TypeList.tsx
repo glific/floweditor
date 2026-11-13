@@ -36,12 +36,23 @@ export default class TypeList extends React.PureComponent<TypeListProps, TypeLis
   };
 
   private handleChangeType(config: Type): void {
+    if (!config) {
+      return;
+    }
+
     this.setState({ config }, () => this.props.onChange(config));
   }
 
   private getTypeConfigs(): Type[] {
     if (this.typeConfigs === undefined) {
-      this.typeConfigs = filterTypeConfigs(configsToDisplay, this.context.config);
+      const available = filterTypeConfigs(configsToDisplay, this.context.config);
+      const { initialType } = this.props;
+
+      // a node whose type is hidden from new nodes must still be able to show and keep its type
+      this.typeConfigs =
+        initialType && !available.some((config: Type) => config.type === initialType.type)
+          ? [...available, initialType]
+          : available;
     }
     return this.typeConfigs;
   }
